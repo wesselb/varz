@@ -56,6 +56,8 @@ class Vars(Referentiable):
         """Get latent variables.
 
         If no arguments are supplied, then all latent variables are retrieved.
+        Furthermore, the same collection of variables is guaranteed to be
+        returned in the same order.
 
         Args:
             *names (hashable): Get variables by name.

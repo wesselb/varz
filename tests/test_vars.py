@@ -16,6 +16,9 @@ def test_get_vars():
     B.backend_to_np()
     vs = Vars(np.int)
 
+    # This test also tests that `Vars.get_vars` always returns the collection
+    # of variables in the right order. This is important for optimisation.
+
     # Initialise some variables.
     vs.get(1, name='a')
     vs.get(2, name='b', group=1)
