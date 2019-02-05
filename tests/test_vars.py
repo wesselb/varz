@@ -133,10 +133,10 @@ def test_detach_torch():
     vs2 = vs.detach()
 
     # Do a backward pass.
-    (vs['a'] ** 2).backward()
+    (vs2['a'] ** 2).backward()
 
     # Check that values are equal, but gradients only computed for one.
     yield eq, vs['a'], 1
-    yield eq, vs.get_vars('a')[0].grad, 2
+    yield eq, vs.get_vars('a')[0].grad, None
     yield eq, vs2['a'], 1
-    yield eq, vs2.get_vars('a')[0].grad, None
+    yield eq, vs2.get_vars('a')[0].grad, 2
