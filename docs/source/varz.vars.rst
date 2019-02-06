@@ -1,7 +1,7 @@
-varz.core module
+varz.vars module
 ================
 
-.. automodule:: varz.core
+.. automodule:: varz.vars
     :members:
     :undoc-members:
     :show-inheritance:
