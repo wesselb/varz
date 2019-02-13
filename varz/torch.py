@@ -27,7 +27,7 @@ def minimise_l_bfgs_b(f,
         f_calls (int, optional): Maximum number of function calls. Defaults to
             `1000`.
         iters (int, optional): Maximum number of iterations. Defaults to
-            `10_000`.
+            `10000`.
         trace (bool, optional): Show trace of optimisation. Defaults to `False`.
         names (list, optional): List of names of variables to optimise.
         groups (list, optional): List of groups of variables to optimise.
@@ -38,14 +38,25 @@ def minimise_l_bfgs_b(f,
     names = [] if names is None else names
     zero = B.cast(0, dtype=vs.dtype)
 
+    # Run function once to ensure that all variables are initialised and
+    # available.
+    val_init = f(vs)
+
+    # Only require gradients for the variables to optimise.
+    vs.requires_grad(False)
+    vs.requires_grad(True, *names, groups=groups)
+
     def f_wrapped(x):
         # Update variable manager.
         vs.set_vector(B.cast(x, dtype=vs.dtype), *names, groups=groups)
 
+        # Detach variables from the current computation graph.
+        vs.detach_vars()
+
         # Compute objective function value, detach, and convert to NumPy.
         obj_value = f(vs)
         obj_value.backward()
-        obj_value = obj_value.detach().numpy()
+        obj_value = obj_value.detach_().numpy()
 
         # Loop over variable manager to extract gradients and zero them.
         grads = []
@@ -58,13 +69,9 @@ def minimise_l_bfgs_b(f,
                 var.grad.data.zero_()  # Clear gradient.
 
         # Stack, detach, and convert to NumPy.
-        grad = vs.vector_packer.pack(*grads).detach().numpy()
+        grad = vs.vector_packer.pack(*grads).detach_().numpy()
 
         return obj_value, grad
-
-    # Run function once to ensure that all variables are initialised and
-    # available.
-    val_init = f(vs)
 
     # Extract initial value.
     x0 = vs.get_vector(*names, groups=groups).detach().numpy()
@@ -78,6 +85,9 @@ def minimise_l_bfgs_b(f,
                                          disp=1 if trace else 0)
 
     # TODO: Print some report if `trace` is `True`.
+
+    # Revert to default: require gradients for all variables again.
+    vs.requires_grad(True)
 
     # Return optimal value.
     return val_opt
