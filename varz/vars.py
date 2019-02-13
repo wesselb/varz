@@ -49,8 +49,16 @@ class Vars(Referentiable):
         vs.names = self.names
         vs.groups = self.groups
         for var in self.vars:
-            vs.vars.append(B.Variable(var.detach()))
+            vs.vars.append(B.Variable(var.clone().detach_()))
         return vs
+
+    def detach_vars(self):
+        """Detached the variables held."""
+        self.vars = [B.Variable(var.detach_()) for var in self.vars]
+
+    def requires_grad(self, value, *names, **kw_args):
+        for var in self.get_vars(*names, **kw_args):
+            var.requires_grad_(value)
 
     def get_vars(self, *names, **kw_args):
         """Get latent variables.
