@@ -52,7 +52,7 @@ class Vars(Referentiable):
             vs.vars.append(B.Variable(var.detach()))
         return vs
 
-    def get_vars(self, *names, groups=None):
+    def get_vars(self, *names, **kw_args):
         """Get latent variables.
 
         If no arguments are supplied, then all latent variables are retrieved.
@@ -66,6 +66,8 @@ class Vars(Referentiable):
         Returns:
             list[tensor]: Matched latent variables.
         """
+        groups = kw_args['groups'] if 'groups' in kw_args else None
+
         # If nothing is specified, return all latent variables.
         if len(names) == 0 and not groups:
             return self.vars
@@ -85,7 +87,7 @@ class Vars(Referentiable):
         # Collect variables and return.
         return [self.vars[i] for i in sorted(indices)]
 
-    def get_vector(self, *names, groups=None):
+    def get_vector(self, *names, **kw_args):
         """Get all the latent variables stacked in a vector.
 
         If no arguments are supplied, then all latent variables are retrieved.
@@ -97,11 +99,11 @@ class Vars(Referentiable):
         Returns:
             tensor: Vector consisting of all latent values
         """
-        vars = self.get_vars(*names, groups=groups)
+        vars = self.get_vars(*names, **kw_args)
         self.vector_packer = Packer(*vars)
         return self.vector_packer.pack(*vars)
 
-    def set_vector(self, values, *names, groups=None):
+    def set_vector(self, values, *names, **kw_args):
         """Set all the latent variables by values from a vector.
 
         If no arguments are supplied, then all latent variables are retrieved.
@@ -114,7 +116,7 @@ class Vars(Referentiable):
         Returns:
             list: Assignment results.
         """
-        vars = self.get_vars(*names, groups=groups)
+        vars = self.get_vars(*names, **kw_args)
         values = self.vector_packer.unpack(values)
         assignments = []
         for var, value in zip(vars, values):

@@ -15,7 +15,7 @@ log = logging.getLogger(__name__)
 def minimise_l_bfgs_b(f,
                       vs,
                       f_calls=1000,
-                      iters=10_000,
+                      iters=10000,
                       trace=True,
                       names=None,
                       groups=None):
