@@ -5,25 +5,15 @@
 
 Painless variables in PyTorch and TensorFlow
 
-TensorFlow
-----------
+Basic Usage
+-----------
 
-Constrained Variables
-~~~~~~~~~~~~~~~~~~~~~
+Like so:
 
-Blah
+.. code:: python
 
-Grid Search
-~~~~~~~~~~~
-
-PyTorch
--------
-
-Constrained Variables
-~~~~~~~~~~~~~~~~~~~~~
-
-Grid Search
-~~~~~~~~~~~
+    >>> print('Hello, world!')
+    Hello, world!
 
 .. |Build| image:: https://travis-ci.org/wesselb/varz.svg?branch=master
    :target: https://travis-ci.org/wesselb/varz
