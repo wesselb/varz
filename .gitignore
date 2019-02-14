@@ -11,7 +11,7 @@ venv
 docs/_build
 docs/_static
 docs/source
-docs/index.rst
+docs/readme.rst
 cover
 
 # Other
