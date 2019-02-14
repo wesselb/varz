@@ -201,8 +201,8 @@ class Vars(Referentiable):
 
     def bounded(self,
                 init=None,
-                lower=1e-4,
-                upper=1e4,
+                lower=1e-3,
+                upper=1e3,
                 shape=(),
                 dtype=None,
                 name=None,
@@ -211,8 +211,8 @@ class Vars(Referentiable):
 
         Args:
             init (tensor, optional): Initialisation of the variable.
-            lower (tensor, optional): Lower bound. Defaults to `1e-4`.
-            upper (tensor, optional): Upper bound. Defaults to `1e4`.
+            lower (tensor, optional): Lower bound. Defaults to `1e-3`.
+            upper (tensor, optional): Upper bound. Defaults to `1e3`.
             shape (tuple[int], optional): Shape of the variable. Defaults to
                 scalar.
             dtype (data type, optional): Data type of the variable. Defaults to

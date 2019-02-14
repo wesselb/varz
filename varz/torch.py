@@ -14,8 +14,8 @@ log = logging.getLogger(__name__)
 
 def minimise_l_bfgs_b(f,
                       vs,
-                      f_calls=1000,
-                      iters=10000,
+                      f_calls=10000,
+                      iters=1000,
                       trace=True,
                       names=None,
                       groups=None):
@@ -25,9 +25,9 @@ def minimise_l_bfgs_b(f,
         f (function): Function to optimise.
         vs (:class:`.vars.Vars`): Variable manager.
         f_calls (int, optional): Maximum number of function calls. Defaults to
-            `1000`.
-        iters (int, optional): Maximum number of iterations. Defaults to
             `10000`.
+        iters (int, optional): Maximum number of iterations. Defaults to
+            `1000`.
         trace (bool, optional): Show trace of optimisation. Defaults to `False`.
         names (list, optional): List of names of variables to optimise.
         groups (list, optional): List of groups of variables to optimise.
