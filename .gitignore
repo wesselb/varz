@@ -9,6 +9,9 @@ venv
 
 # Documentation and coverage
 docs/_build
+docs/_static
+docs/source
+docs/index.rst
 cover
 
 # Other
