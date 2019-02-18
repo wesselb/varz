@@ -4,6 +4,7 @@ from __future__ import absolute_import, division, print_function
 
 import logging
 
+import numpy as np
 from lab import B
 from scipy.optimize import fmin_l_bfgs_b
 
@@ -54,9 +55,14 @@ def minimise_l_bfgs_b(f,
         vs.detach_vars()
 
         # Compute objective function value, detach, and convert to NumPy.
-        obj_value = f(vs)
-        obj_value.backward()
-        obj_value = obj_value.detach_().numpy()
+        try:
+            obj_value = f(vs)
+            obj_value.backward()
+            obj_value = obj_value.detach_().numpy()
+        except RuntimeError as e:
+            log.warning('Caught exception during function evaluation: '
+                        '"{}". Returning NaN.'.format(e))
+            obj_value = np.nan
 
         # Loop over variable manager to extract gradients and zero them.
         grads = []
@@ -85,6 +91,7 @@ def minimise_l_bfgs_b(f,
                                          disp=1 if trace else 0)
 
     # TODO: Print some report if `trace` is `True`.
+    pass
 
     # Revert to default: require gradients for all variables again.
     vs.requires_grad(True)
