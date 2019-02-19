@@ -280,11 +280,11 @@ class Vars(Referentiable):
         index = len(self.vars) - 1
 
         # Store name if given.
-        if name:
+        if name is not None:
             self.names[name] = index
 
         # Store group if given.
-        if group:
+        if group is not None:
             try:
                 self.groups[group].append(index)
             except KeyError:
