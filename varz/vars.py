@@ -49,12 +49,13 @@ class Vars(Referentiable):
         vs.names = self.names
         vs.groups = self.groups
         for var in self.vars:
-            vs.vars.append(B.Variable(var.clone().detach_()))
+            vs.vars.append(var.detach())
         return vs
 
     def detach_vars(self):
-        """Detached the variables held."""
-        self.vars = [B.Variable(var.detach_()) for var in self.vars]
+        """Detach the variables held."""
+        for var in self.vars:
+            var.detach_()
 
     def requires_grad(self, value, *names, **kw_args):
         for var in self.get_vars(*names, **kw_args):
