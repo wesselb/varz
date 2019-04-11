@@ -135,6 +135,10 @@ def test_detach_torch():
     vs.pos(1, name='a')
     vs2 = vs.detach()
 
+    # Require gradients for both.
+    vs.requires_grad(True)
+    vs2.requires_grad(True)
+
     # Do a backward pass.
     (vs2['a'] ** 2).backward()
 
