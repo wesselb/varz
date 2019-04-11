@@ -43,16 +43,16 @@ def minimise_l_bfgs_b(f,
     # available.
     val_init = f(vs)
 
-    # Only require gradients for the variables to optimise.
+    # Detach variables from the current computation graph.
+    vs.detach_vars()
+
+    # Turn on gradient computation.
     vs.requires_grad(False)
     vs.requires_grad(True, *names, groups=groups)
 
     def f_wrapped(x):
         # Update variable manager.
         vs.set_vector(B.cast(x, dtype=vs.dtype), *names, groups=groups)
-
-        # Detach variables from the current computation graph.
-        vs.detach_vars()
 
         # Compute objective function value, detach, and convert to NumPy.
         try:
@@ -93,8 +93,8 @@ def minimise_l_bfgs_b(f,
     # TODO: Print some report if `trace` is `True`.
     pass
 
-    # Revert to default: require gradients for all variables again.
-    vs.requires_grad(True)
+    # Turn off gradient computation again.
+    vs.requires_grad(False)
 
     # Return optimal value.
     return val_opt
