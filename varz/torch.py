@@ -17,7 +17,7 @@ def minimise_l_bfgs_b(f,
                       vs,
                       f_calls=10000,
                       iters=1000,
-                      trace=True,
+                      trace=False,
                       names=None,
                       groups=None):
     """Minimise a function with L-BFGS-B.
@@ -42,6 +42,10 @@ def minimise_l_bfgs_b(f,
     # Run function once to ensure that all variables are initialised and
     # available.
     val_init = f(vs)
+
+    # SciPy doesn't perform zero iterations, so handle that edge case manually.
+    if iters == 0 or f_calls == 0:
+        return val_init
 
     # Detach variables from the current computation graph.
     vs.detach_vars()
