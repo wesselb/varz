@@ -5,7 +5,7 @@ from __future__ import absolute_import, division, print_function
 import logging
 from itertools import product
 
-from lab import B
+import lab as B
 from plum import Referentiable, Dispatcher, Self
 
 __all__ = ['Initialiser', 'Packer']
@@ -76,7 +76,7 @@ class Packer(Referentiable):
         Returns:
             tensor: Vector representation of the objects.
         """
-        return B.concat([B.reshape(obj, [-1]) for obj in objs], axis=0)
+        return B.concat([B.reshape(obj, shape=[-1]) for obj in objs], axis=0)
 
     @_dispatch({tuple, list})
     def pack(self, objs):
@@ -93,6 +93,6 @@ class Packer(Referentiable):
         """
         i, outs = 0, []
         for shape, length in zip(self._shapes, self._lengths):
-            outs.append(B.reshape(package[i:i + length], shape))
+            outs.append(B.reshape(package[i:i + length], shape=shape))
             i += length
         return outs

@@ -4,8 +4,9 @@ from __future__ import absolute_import, division, print_function
 
 import logging
 
+import tensorflow as tf
 import numpy as np
-from lab import B
+import lab as B
 from plum import Dispatcher, Self, Referentiable
 
 from varz.util import Packer
@@ -15,6 +16,23 @@ __all__ = ['Vars', 'vars64', 'vars32']
 log = logging.getLogger(__name__)
 
 _dispatch = Dispatcher()
+
+
+@_dispatch(B.NPNumeric, B.Numeric)
+def _assign(x, value):
+    np.copyto(x, value)
+    return x
+
+
+@_dispatch(B.TFNumeric, B.Numeric)
+def _assign(x, value):
+    return tf.assign(x, value)
+
+
+@_dispatch(B.TorchNumeric, B.Numeric)
+def _assign(x, value):
+    x.data.copy_(value)
+    return x
 
 
 class Vars(Referentiable):
@@ -129,7 +147,7 @@ class Vars(Referentiable):
         values = self.vector_packer.unpack(values)
         assignments = []
         for var, value in zip(vars, values):
-            assignments.append(B.assign(var, value))
+            assignments.append(_assign(var, value))
         return assignments
 
     def init(self, session):
@@ -138,7 +156,7 @@ class Vars(Referentiable):
         Args:
             session (:class:`B.Session`): TensorFlow session.
         """
-        session.run(B.variables_initializer(self.vars))
+        session.run(tf.variables_initializer(self.vars))
 
     def get(self, init=None, shape=(), dtype=None, name=None, group=None):
         """Get an unbounded variable.
@@ -157,7 +175,7 @@ class Vars(Referentiable):
         """
 
         def generate_init(shape, dtype):
-            return B.randn(shape, dtype=dtype)
+            return B.randn(shape, dtype)
 
         return self._get_var(transform=lambda x: x,
                              inverse_transform=lambda x: x,
@@ -185,7 +203,7 @@ class Vars(Referentiable):
         """
 
         def generate_init(shape, dtype):
-            return B.rand(shape, dtype=dtype)
+            return B.rand(shape, dtype)
 
         return self._get_var(transform=lambda x: B.exp(x),
                              inverse_transform=lambda x: B.log(x),
@@ -232,7 +250,7 @@ class Vars(Referentiable):
             return B.log(upper - x) - B.log(x - lower)
 
         def generate_init(shape, dtype):
-            return lower + B.rand(shape, dtype=dtype) * (upper - lower)
+            return lower + B.rand(shape, dtype) * (upper - lower)
 
         return self._get_var(transform=transform,
                              inverse_transform=inverse_transform,
@@ -269,10 +287,19 @@ class Vars(Referentiable):
         if init is None:
             init = generate_init(shape=shape, dtype=dtype)
         else:
-            init = B.array(init, dtype=dtype)
+            init = B.cast(init, dtype)
 
-        # Construct latent variable and store transforms.
-        latent = B.Variable(inverse_transform(init))
+        # Construct optimisable variable.
+        latent = inverse_transform(init)
+        if isinstance(self.dtype, B.TFDType):
+            latent = tf.Variable(latent)
+        elif isinstance(self.dtype, B.TorchDType):
+            pass  # All is good in this case.
+        else:
+            # Must be a NumPy data type.
+            latent = np.array(latent)
+
+        # Store transforms.
         self.vars.append(latent)
         self.transforms.append(transform)
         self.inverse_transforms.append(inverse_transform)
@@ -305,7 +332,7 @@ class Vars(Referentiable):
             tensor: TensorFlow tensor that can be run to perform the assignment.
         """
         index = self.names[name]
-        return B.assign(self.vars[index], self.inverse_transforms[index](value))
+        return _assign(self.vars[index], self.inverse_transforms[index](value))
 
     def __getitem__(self, name):
         """Get a variable by name.

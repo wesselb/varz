@@ -4,15 +4,14 @@ from __future__ import absolute_import, division, print_function
 
 from itertools import product
 
-from lab import B
+import lab as B
 
 from . import Vars, Initialiser, Packer
 # noinspection PyUnresolvedReferences
-from . import eq, neq, lt, le, ge, gt, raises, call, ok, lam, allclose
+from . import eq, neq, lt, le, ge, gt, raises, call, ok, allclose
 
 
 def test_initialiser():
-    B.backend_to_np()
     vs, init = Vars(), Initialiser()
 
     # Initialise two variables.
@@ -32,7 +31,6 @@ def test_initialiser():
 
 
 def test_packer():
-    B.backend_to_np()
     a, b, c = B.randn((5, 10)), B.randn((20,)), B.randn((5, 1, 15))
 
     for packer, args in zip([Packer(a, b, c), Packer([a, b, c])],

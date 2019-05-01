@@ -5,7 +5,7 @@ from __future__ import absolute_import, division, print_function
 import logging
 
 import numpy as np
-from lab import B
+import lab as B
 from scipy.optimize import fmin_l_bfgs_b
 
 __all__ = ['minimise_l_bfgs_b']
@@ -37,7 +37,7 @@ def minimise_l_bfgs_b(f,
         float: Final objective function value.
     """
     names = [] if names is None else names
-    zero = B.cast(0, dtype=vs.dtype)
+    zero = B.cast(0, vs.dtype)
 
     # Run function once to ensure that all variables are initialised and
     # available.
@@ -56,7 +56,7 @@ def minimise_l_bfgs_b(f,
 
     def f_wrapped(x):
         # Update variable manager.
-        vs.set_vector(B.cast(x, dtype=vs.dtype), *names, groups=groups)
+        vs.set_vector(B.cast(x, vs.dtype), *names, groups=groups)
 
         # Compute objective function value, detach, and convert to NumPy.
         try:

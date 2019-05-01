@@ -4,16 +4,14 @@ from __future__ import absolute_import, division, print_function
 
 import numpy as np
 import tensorflow as tf
-from lab import B
 import torch
 
 from . import Vars
 # noinspection PyUnresolvedReferences
-from . import eq, neq, lt, le, ge, gt, raises, call, ok, lam, allclose, approx
+from . import eq, neq, lt, le, ge, gt, raises, call, ok, allclose, approx
 
 
 def test_get_vars():
-    B.backend_to_np()
     vs = Vars(np.int)
 
     # This test also tests that `Vars.get_vars` always returns the collection
@@ -47,26 +45,24 @@ def test_get_vars():
 
 
 def test_get_set_vector():
-    B.backend_to_np()
     vs = Vars()
 
     # Test stacking a matrix and a vector.
-    vs.get(shape=(2,), name='a', init=[1, 2])
+    vs.get(shape=(2,), name='a', init=np.array([1, 2]))
     vs.get(shape=(2, 2), name='b', init=np.array([[3, 4], [5, 6]]))
     yield allclose, vs.get_vector('a', 'b'), [1, 2, 3, 4, 5, 6]
 
     # Test setting elements.
-    vs.set_vector([6, 5, 4, 3, 2, 1], 'a', 'b')
+    vs.set_vector(np.array([6, 5, 4, 3, 2, 1]), 'a', 'b')
     yield allclose, vs['a'], [6, 5]
     yield allclose, vs['b'], np.array([[4, 3], [2, 1]])
 
 
 def test_get_and_init_tf():
-    B.backend_to_tf()
     s = tf.Session()
 
     # Test `float32`.
-    vs = Vars(np.float32)
+    vs = Vars(tf.float32)
     a = vs.get(1., name='a')
     b = vs.get()
     yield eq, len(vs.vars), 2
@@ -76,7 +72,7 @@ def test_get_and_init_tf():
     yield eq, s.run(vs['a']), 1.
 
     # Test `float64`.
-    vs = Vars(np.float64)
+    vs = Vars(tf.float64)
     a = vs.get(1., name='a')
     b = vs.get()
     yield eq, len(vs.vars), 2
@@ -87,14 +83,12 @@ def test_get_and_init_tf():
 
 
 def test_positive():
-    B.backend_to_np()
     vs = Vars()
     for _ in range(10):
         yield ge, vs.pos(), 0
 
 
 def test_bounded():
-    B.backend_to_np()
     vs = Vars()
     for _ in range(10):
         v = vs.bnd(lower=10, upper=11)
@@ -103,7 +97,6 @@ def test_bounded():
 
 
 def test_assignment():
-    B.backend_to_np()
     vs = Vars()
 
     # Generate some variables.
@@ -128,7 +121,6 @@ def test_assignment():
 
 
 def test_detach_torch():
-    B.backend_to_torch()
     vs = Vars(torch.float64)
 
     # Create a variable and copy variable storage.
