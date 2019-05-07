@@ -29,7 +29,8 @@ def minimise_l_bfgs_b(f,
         iters (int, optional): Maximum number of iterations. Defaults to
             `1000`.
         trace (bool, optional): Show trace of optimisation. Defaults to `False`.
-        names (list, optional): List of names of variables to optimise.
+        names (list, optional): List of names of variables to optimise. Defaults
+            to all variables.
 
     Returns:
         float: Final objective function value.
