@@ -19,33 +19,33 @@ def test_get_vars():
 
     # Initialise some variables.
     vs.get(1, name='a')
-    vs.get(2, name='b', group=1)
-    vs.get(3, name='c', group=2)
-    vs.get(4, name='d', group=2)
+    vs.get(2, name='1/b')
+    vs.get(3, name='2/c')
+    vs.get(4, name='2/d')
 
     # Test getting all.
     yield eq, vs.get_vars(), [1, 2, 3, 4]
 
     # Test names.
     yield eq, vs.get_vars('a'), [1]
-    yield eq, vs.get_vars('a', 'b'), [1, 2]
-    yield eq, vs.get_vars('c', 'a'), [1, 3]
-    yield eq, vs.get_vars('c', 'b', 'a'), [1, 2, 3]
+    yield eq, vs.get_vars('a', '*/b'), [1, 2]
+    yield eq, vs.get_vars('*/c', 'a'), [1, 3]
+    yield eq, vs.get_vars('*/c', '*/b', 'a'), [1, 2, 3]
 
     # Test groups.
-    yield eq, vs.get_vars(groups=[1]), [2]
-    yield eq, vs.get_vars(groups=[2]), [3, 4]
-    yield eq, vs.get_vars(groups=[1, 2]), [2, 3, 4]
+    yield eq, vs.get_vars('1/*'), [2]
+    yield eq, vs.get_vars('2/*'), [3, 4]
+    yield eq, vs.get_vars('1/*', '2/*'), [2, 3, 4]
 
     # Test names and groups.
-    yield eq, vs.get_vars('b', groups=[1]), [2]
-    yield eq, vs.get_vars('a', groups=[2]), [1, 3, 4]
-    yield eq, vs.get_vars('a', 'd', groups=[2]), [1, 3, 4]
-    yield eq, vs.get_vars('d', 'c', 'a', groups=[1]), [1, 2, 3, 4]
+    yield eq, vs.get_vars('*/b', '1/*'), [2]
+    yield eq, vs.get_vars('a', '2/*'), [1, 3, 4]
+    yield eq, vs.get_vars('a', '2/d', '2/*'), [1, 3, 4]
+    yield eq, vs.get_vars('2/d', '2/c', 'a', '1/*'), [1, 2, 3, 4]
 
 
 def test_get_set_vector():
-    vs = Vars()
+    vs = Vars(np.float64)
 
     # Test stacking a matrix and a vector.
     vs.get(shape=(2,), name='a', init=np.array([1, 2]))
@@ -83,13 +83,13 @@ def test_get_and_init_tf():
 
 
 def test_positive():
-    vs = Vars()
+    vs = Vars(np.float64)
     for _ in range(10):
         yield ge, vs.pos(), 0
 
 
 def test_bounded():
-    vs = Vars()
+    vs = Vars(np.float64)
     for _ in range(10):
         v = vs.bnd(lower=10, upper=11)
         yield ge, v, 10
@@ -97,7 +97,7 @@ def test_bounded():
 
 
 def test_assignment():
-    vs = Vars()
+    vs = Vars(np.float64)
 
     # Generate some variables.
     vs.get(1., name='unbounded')

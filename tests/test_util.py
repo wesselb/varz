@@ -4,6 +4,7 @@ from __future__ import absolute_import, division, print_function
 
 from itertools import product
 
+import numpy as np
 import lab as B
 
 from . import Vars, Initialiser, Packer
@@ -12,7 +13,7 @@ from . import eq, neq, lt, le, ge, gt, raises, call, ok, allclose
 
 
 def test_initialiser():
-    vs, init = Vars(), Initialiser()
+    vs, init = Vars(np.float64), Initialiser()
 
     # Initialise two variables.
     vs.get(1., name='a')

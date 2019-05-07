@@ -4,8 +4,8 @@ from __future__ import absolute_import, division, print_function
 
 import logging
 
-import numpy as np
 import lab as B
+import numpy as np
 from scipy.optimize import fmin_l_bfgs_b
 
 __all__ = ['minimise_l_bfgs_b']
@@ -18,8 +18,7 @@ def minimise_l_bfgs_b(f,
                       f_calls=10000,
                       iters=1000,
                       trace=False,
-                      names=None,
-                      groups=None):
+                      names=None):
     """Minimise a function with L-BFGS-B.
 
     Args:
@@ -31,7 +30,6 @@ def minimise_l_bfgs_b(f,
             `1000`.
         trace (bool, optional): Show trace of optimisation. Defaults to `False`.
         names (list, optional): List of names of variables to optimise.
-        groups (list, optional): List of groups of variables to optimise.
 
     Returns:
         float: Final objective function value.
@@ -52,11 +50,11 @@ def minimise_l_bfgs_b(f,
 
     # Turn on gradient computation.
     vs.requires_grad(False)
-    vs.requires_grad(True, *names, groups=groups)
+    vs.requires_grad(True, *names)
 
     def f_wrapped(x):
         # Update variable manager.
-        vs.set_vector(B.cast(x, vs.dtype), *names, groups=groups)
+        vs.set_vector(B.cast(x, vs.dtype), *names)
 
         # Compute objective function value, detach, and convert to NumPy.
         try:
@@ -70,7 +68,7 @@ def minimise_l_bfgs_b(f,
 
         # Loop over variable manager to extract gradients and zero them.
         grads = []
-        for var in vs.get_vars(*names, groups=groups):
+        for var in vs.get_vars(*names):
             # Save gradient if there is one.
             if var.grad is None:
                 grads.append(zero)
@@ -84,7 +82,7 @@ def minimise_l_bfgs_b(f,
         return obj_value, grad
 
     # Extract initial value.
-    x0 = vs.get_vector(*names, groups=groups).detach().numpy()
+    x0 = vs.get_vector(*names).detach().numpy()
 
     # Perform optimisation routine.
     x_opt, val_opt, info = fmin_l_bfgs_b(func=f_wrapped,

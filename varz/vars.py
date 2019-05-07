@@ -4,14 +4,14 @@ from __future__ import absolute_import, division, print_function
 
 import logging
 
-import tensorflow as tf
-import numpy as np
 import lab as B
+import numpy as np
+import tensorflow as tf
 from plum import Dispatcher, Self, Referentiable
 
-from varz.util import Packer
+from .util import Packer, match
 
-__all__ = ['Vars', 'vars64', 'vars32']
+__all__ = ['Vars']
 
 log = logging.getLogger(__name__)
 
@@ -39,12 +39,11 @@ class Vars(Referentiable):
     """Variable storage manager.
 
     Args:
-        dtype (data type, optional): Data type of the variables. Defaults to
-            `np.float32`.
+        dtype (data type): Data type of the variables.
     """
     _dispatch = Dispatcher(in_class=Self)
 
-    def __init__(self, dtype=np.float64):
+    def __init__(self, dtype):
         self.dtype = dtype
 
         # Storage:
@@ -53,33 +52,41 @@ class Vars(Referentiable):
         self.inverse_transforms = []
 
         # Lookup:
-        self.names = {}
-        self.groups = {}
+        self.index_by_name = {}
 
         # Packing:
         self.vector_packer = None
 
     def detach(self):
-        """Create a detached copy of the variable manager."""
+        """Create a detached copy of the variable manager in PyTorch.
+
+        Returns:
+            :class:`.vars.Vars`: Detached copy.
+        """
         vs = Vars(dtype=self.dtype)
         vs.transforms = self.transforms
         vs.inverse_transforms = self.inverse_transforms
-        vs.names = self.names
-        vs.groups = self.groups
+        vs.index_by_name = self.index_by_name
         for var in self.vars:
             vs.vars.append(var.detach())
         return vs
 
     def detach_vars(self):
-        """Detach the variables held."""
+        """Detach all variables held in PyTorch."""
         for var in self.vars:
             var.detach_()
 
-    def requires_grad(self, value, *names, **kw_args):
-        for var in self.get_vars(*names, **kw_args):
+    def requires_grad(self, value, *names):
+        """Set which variables require a gradient in PyTorch.
+
+        Args:
+            value (bool): Require a gradient.
+            *names (hashable): Specify variables by name.
+        """
+        for var in self.get_vars(*names):
             var.requires_grad_(value)
 
-    def get_vars(self, *names, **kw_args):
+    def get_vars(self, *names):
         """Get latent variables.
 
         If no arguments are supplied, then all latent variables are retrieved.
@@ -88,49 +95,46 @@ class Vars(Referentiable):
 
         Args:
             *names (hashable): Get variables by name.
-            groups (list[hashable]): Get variables by group.
 
         Returns:
             list[tensor]: Matched latent variables.
         """
-        groups = kw_args['groups'] if 'groups' in kw_args else None
-
         # If nothing is specified, return all latent variables.
-        if len(names) == 0 and not groups:
+        if len(names) == 0:
             return self.vars
 
         # Collect indices of matches.
         indices = set()
+        for name in names:
+            a_match = False
+            for k, v in self.index_by_name.items():
+                if match(name, k):
+                    indices |= {v}
+                    a_match = True
 
-        # Collect by name.
-        if names:
-            indices |= {self.names[name] for name in names}
-
-        # Collect by group.
-        if groups:
-            for group in groups:
-                indices |= set(self.groups[group])
+            # Check that there was a match.
+            if not a_match:
+                raise ValueError('No variable matching "{}".'.format(name))
 
         # Collect variables and return.
         return [self.vars[i] for i in sorted(indices)]
 
-    def get_vector(self, *names, **kw_args):
+    def get_vector(self, *names):
         """Get all the latent variables stacked in a vector.
 
         If no arguments are supplied, then all latent variables are retrieved.
 
         Args:
             *names (hashable): Get variables by name.
-            groups (list[hashable]): Get variables by group.
 
         Returns:
             tensor: Vector consisting of all latent values
         """
-        vars = self.get_vars(*names, **kw_args)
+        vars = self.get_vars(*names)
         self.vector_packer = Packer(*vars)
         return self.vector_packer.pack(*vars)
 
-    def set_vector(self, values, *names, **kw_args):
+    def set_vector(self, values, *names):
         """Set all the latent variables by values from a vector.
 
         If no arguments are supplied, then all latent variables are retrieved.
@@ -138,12 +142,11 @@ class Vars(Referentiable):
         Args:
             values (tensor): Vector to set the variables to.
             *names (hashable): Set variables by name.
-            groups (list[hashable]): Set variables by group.
 
         Returns:
             list: Assignment results.
         """
-        vars = self.get_vars(*names, **kw_args)
+        vars = self.get_vars(*names)
         values = self.vector_packer.unpack(values)
         assignments = []
         for var, value in zip(vars, values):
@@ -158,7 +161,7 @@ class Vars(Referentiable):
         """
         session.run(tf.variables_initializer(self.vars))
 
-    def get(self, init=None, shape=(), dtype=None, name=None, group=None):
+    def get(self, init=None, shape=(), dtype=None, name=None):
         """Get an unbounded variable.
 
         Args:
@@ -167,8 +170,7 @@ class Vars(Referentiable):
                 scalar.
             dtype (data type, optional): Data type of the variable. Defaults to
                 that of the storage.
-            name (hashable, optional): Name of the variable.
-            group (hashable, optional): Group of the variable.
+            name (str, optional): Name of the variable.
 
         Returns:
             tensor: Variable.
@@ -183,10 +185,9 @@ class Vars(Referentiable):
                              generate_init=generate_init,
                              shape=shape,
                              dtype=dtype,
-                             name=name,
-                             group=group)
+                             name=name)
 
-    def positive(self, init=None, shape=(), dtype=None, name=None, group=None):
+    def positive(self, init=None, shape=(), dtype=None, name=None):
         """Get a positive variable.
 
         Args:
@@ -195,8 +196,7 @@ class Vars(Referentiable):
                 scalar.
             dtype (data type, optional): Data type of the variable. Defaults to
                 that of the storage.
-            name (hashable, optional): Name of the variable.
-            group (hashable, optional): Group of the variable.
+            name (str, optional): Name of the variable.
 
         Returns:
             tensor: Variable.
@@ -211,8 +211,7 @@ class Vars(Referentiable):
                              generate_init=generate_init,
                              shape=shape,
                              dtype=dtype,
-                             name=name,
-                             group=group)
+                             name=name)
 
     def pos(self, *args, **kw_args):
         """Alias for :meth:`.vars.Vars.positive`."""
@@ -224,8 +223,7 @@ class Vars(Referentiable):
                 upper=1e4,
                 shape=(),
                 dtype=None,
-                name=None,
-                group=None):
+                name=None):
         """Get a bounded variable.
 
         Args:
@@ -237,7 +235,6 @@ class Vars(Referentiable):
             dtype (data type, optional): Data type of the variable. Defaults to
                 that of the storage.
             name (hashable, optional): Name of the variable.
-            group (hashable, optional): Group of the variable.
 
         Returns:
             tensor: Variable.
@@ -258,8 +255,7 @@ class Vars(Referentiable):
                              generate_init=generate_init,
                              shape=shape,
                              dtype=dtype,
-                             name=name,
-                             group=group)
+                             name=name)
 
     def bnd(self, *args, **kw_args):
         """Alias for :meth:`.vars.Vars.bounded`."""
@@ -272,8 +268,7 @@ class Vars(Referentiable):
                  generate_init,
                  shape,
                  dtype,
-                 name,
-                 group):
+                 name):
         # If the name already exists, return that variable.
         try:
             return self[name]
@@ -309,14 +304,7 @@ class Vars(Referentiable):
 
         # Store name if given.
         if name is not None:
-            self.names[name] = index
-
-        # Store group if given.
-        if group is not None:
-            try:
-                self.groups[group].append(index)
-            except KeyError:
-                self.groups[group] = [index]
+            self.index_by_name[name] = index
 
         # Generate the variable and return.
         return transform(latent)
@@ -331,7 +319,7 @@ class Vars(Referentiable):
         Returns:
             tensor: TensorFlow tensor that can be run to perform the assignment.
         """
-        index = self.names[name]
+        index = self.index_by_name[name]
         return _assign(self.vars[index], self.inverse_transforms[index](value))
 
     def __getitem__(self, name):
@@ -343,9 +331,5 @@ class Vars(Referentiable):
         Returns:
             tensor: Variable.
         """
-        index = self.names[name]
+        index = self.index_by_name[name]
         return self.transforms[index](self.vars[index])
-
-
-vars32 = Vars(np.float32)
-vars64 = Vars(np.float64)

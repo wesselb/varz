@@ -2,6 +2,8 @@
 
 from __future__ import absolute_import, division, print_function
 
+import re
+import inspect
 import logging
 from itertools import product
 
@@ -96,3 +98,17 @@ class Packer(Referentiable):
             outs.append(B.reshape(package[i:i + length], shape=shape))
             i += length
         return outs
+
+
+def match(pattern, target):
+    """Match a string exactly against a pattern, where the pattern is a regex
+    with '*' as the only active character.
+
+    Args:
+        pattern (str): Pattern.
+        target (str): Target.
+
+    bool: `True` if `pattern` matches `target`.
+    """
+    pattern = ''.join('.*' if c == '*' else re.escape(c) for c in pattern)
+    return bool(re.match('^' + pattern + '$', target))
