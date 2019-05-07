@@ -159,48 +159,34 @@ array([1., 1., 1., 1., 1., 1.])
 
 ### AutoGrad
 
-Example of optimising variables:
-
-```python
-blah
-```
-
-### PyTorch
-
-All the variables held by a container can be detached from the current 
-computation graph with `Vars.detach_vars`.
-To make a copy of the container with detached versions of the variables, use
-`Vars.detach` instead.
-Whether variables require gradients can be configured with `Vars.requires_grad`.
-By default, no variable requires a gradient.
-
-The function `minimise_l_bfgs_b` can be used to perform minimisation using the
-L-BFGS-B algorithm.
+The function `varz.numpy.minimise_l_bfgs_b` can be used to perform minimisation 
+using the L-BFGS-B algorithm.
 
 Example of optimising variables:
 
 ```python
-import torch
-from varz import Vars, minimise_l_bfgs_b
+import autograd.numpy as np
+from varz import Vars
+from varz.numpy import minimise_l_bfgs_b
 
-target = torch.tensor(5., dtype=torch.float64)
+target = 5.
 
 
 def objective(x):  # `x` must be positive!
-    return (x ** .5 - target) ** 2
+    return (x ** .5 - target) ** 2  
 ```
 
 ```python
->>> vs = Vars(torch.float64)
+>>> vs = Vars(np.float64)
 
 >>> vs.pos(10., name='x')
-tensor(10.0000, dtype=torch.float64)
+10.000000000000002
 
->>> minimise_l_bfgs_b(lambda v: objective(v['x']), vs)
-array(1.36449515e-13)  # Final objective function value.
+>>> minimise_l_bfgs_b(lambda v: objective(v['x']), vs, names=['x'])
+3.17785950743424e-19  # Final objective function value.
 
 >>> vs['x'] - target ** 2
-tensor(1.6378e-07, dtype=torch.float64)
+-5.637250666268301e-09
 ```
 
 ### TensorFlow
@@ -215,10 +201,9 @@ import tensorflow as tf
 from tensorflow.contrib.opt import ScipyOptimizerInterface as SOI
 from varz import Vars
 
-vs = Vars(tf.float64)
-
 target = tf.constant(5., dtype=tf.float64)
 
+vs = Vars(tf.float64)
 x = vs.pos(10., name='x')
 objective = (x ** .5 - target) ** 2  # `x` must be positive!
 ```
@@ -234,4 +219,43 @@ objective = (x ** .5 - target) ** 2  # `x` must be positive!
 
 >>> sess.run(vs['x'] - target ** 2)
 -5.637250666268301e-09
+```
+
+### PyTorch
+
+All the variables held by a container can be detached from the current 
+computation graph with `Vars.detach_vars`.
+To make a copy of the container with detached versions of the variables, use
+`Vars.detach` instead.
+Whether variables require gradients can be configured with `Vars.requires_grad`.
+By default, no variable requires a gradient.
+
+The function `varz.torch.minimise_l_bfgs_b` can be used to perform minimisation 
+using the L-BFGS-B algorithm.
+
+Example of optimising variables:
+
+```python
+import torch
+from varz import Vars
+from varz.torch import minimise_l_bfgs_b
+
+target = torch.tensor(5., dtype=torch.float64)
+
+
+def objective(x):  # `x` must be positive!
+    return (x ** .5 - target) ** 2
+```
+
+```python
+>>> vs = Vars(torch.float64)
+
+>>> vs.pos(10., name='x')
+tensor(10.0000, dtype=torch.float64)
+
+>>> minimise_l_bfgs_b(lambda v: objective(v['x']), vs, names=['x'])
+array(1.36449515e-13)  # Final objective function value.
+
+>>> vs['x'] - target ** 2
+tensor(1.6378e-07, dtype=torch.float64)
 ```
