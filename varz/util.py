@@ -9,7 +9,7 @@ from itertools import product
 import lab as B
 from plum import Referentiable, Dispatcher, Self
 
-__all__ = ['Initialiser', 'Packer']
+__all__ = ['Initialiser', 'Packer', 'match']
 
 log = logging.getLogger(__name__)
 

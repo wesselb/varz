@@ -3,5 +3,4 @@
 from __future__ import absolute_import, division, print_function
 
 from .vars import *
-from .util import *
 from .torch import *
