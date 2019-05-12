@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import, division, print_function
 
+import numpy as np
 from nose.tools import assert_raises, assert_equal, assert_less, \
     assert_less_equal, assert_not_equal, assert_greater, \
     assert_greater_equal, ok_
@@ -21,3 +22,7 @@ approx = assert_array_almost_equal
 
 def call(f, method, args=(), res=True):
     assert_equal(getattr(f, method)(*args), res)
+
+
+def all_eq(x, y):
+    assert np.all(x == y)
