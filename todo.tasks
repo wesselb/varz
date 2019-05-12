@@ -1,15 +1,8 @@
-TODO:
-    ☐ README and docs
-    ☐ Exclusion mechanism for variables
-
-Tests:
-    ☐ Vars.detach_vars()
-    ☐ Vars.requires_grad()
-
-Bugs:
-    ☐ Group name clash bug
-
 Features:
-     ☐ AutoGrad support
-     ☐ Add minimise_l_bfgs_b report
-     ☐ Support other optimisers
+    ☐ Exclusion mechanism for variables by prefixing with "-".
+    ☐ Add minimise_l_bfgs_b reports.
+    ☐ Support other optimisers.
+    ☐ Centralise warning messages.
+
+Refactor:
+    ☐ Unify PyTorch optimiser with NumPy one?
