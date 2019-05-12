@@ -2,13 +2,16 @@
 
 from __future__ import absolute_import, division, print_function
 
+import lab as B
 import numpy as np
 import tensorflow as tf
 import torch
+from plum import Dispatcher
 
 from . import Vars
 # noinspection PyUnresolvedReferences
-from . import eq, neq, lt, le, ge, gt, raises, call, ok, allclose, approx
+from . import eq, neq, lt, le, ge, gt, raises, call, ok, allclose, approx, \
+    all_eq
 
 
 def test_get_vars():
@@ -25,23 +28,44 @@ def test_get_vars():
 
     # Test getting all.
     yield eq, vs.get_vars(), [1, 2, 3, 4]
+    yield eq, vs.get_vars(indices=True), [0, 1, 2, 3]
 
-    # Test names.
+    # Test some queries.
     yield eq, vs.get_vars('a'), [1]
     yield eq, vs.get_vars('a', '*/b'), [1, 2]
     yield eq, vs.get_vars('*/c', 'a'), [1, 3]
     yield eq, vs.get_vars('*/c', '*/b', 'a'), [1, 2, 3]
 
-    # Test groups.
+    yield eq, vs.get_vars('a', indices=True), [0]
+    yield eq, vs.get_vars('a', '*/b', indices=True), [0, 1]
+    yield eq, vs.get_vars('*/c', 'a', indices=True), [0, 2]
+    yield eq, vs.get_vars('*/c', '*/b', 'a', indices=True), [0, 1, 2]
+
+    # Test some more queries.
     yield eq, vs.get_vars('1/*'), [2]
     yield eq, vs.get_vars('2/*'), [3, 4]
     yield eq, vs.get_vars('1/*', '2/*'), [2, 3, 4]
 
-    # Test names and groups.
+    yield eq, vs.get_vars('1/*', indices=True), [1]
+    yield eq, vs.get_vars('2/*', indices=True), [2, 3]
+    yield eq, vs.get_vars('1/*', '2/*', indices=True), [1, 2, 3]
+
+    # Test even more queries.
     yield eq, vs.get_vars('*/b', '1/*'), [2]
     yield eq, vs.get_vars('a', '2/*'), [1, 3, 4]
     yield eq, vs.get_vars('a', '2/d', '2/*'), [1, 3, 4]
     yield eq, vs.get_vars('2/d', '2/c', 'a', '1/*'), [1, 2, 3, 4]
+    yield eq, vs.get_vars('1/*'), [2]
+    yield eq, vs.get_vars('2/*'), [3, 4]
+    yield eq, vs.get_vars('1/*', '2/*'), [2, 3, 4]
+
+    yield eq, vs.get_vars('*/b', '1/*', indices=True), [1]
+    yield eq, vs.get_vars('a', '2/*', indices=True), [0, 2, 3]
+    yield eq, vs.get_vars('a', '2/d', '2/*', indices=True), [0, 2, 3]
+    yield eq, vs.get_vars('2/d', '2/c', 'a', '1/*', indices=True), [0, 1, 2, 3]
+    yield eq, vs.get_vars('1/*', indices=True), [1]
+    yield eq, vs.get_vars('2/*', indices=True), [2, 3]
+    yield eq, vs.get_vars('1/*', '2/*', indices=True), [1, 2, 3]
 
 
 def test_get_set_vector():
@@ -56,6 +80,13 @@ def test_get_set_vector():
     vs.set_vector(np.array([6, 5, 4, 3, 2, 1]), 'a', 'b')
     yield allclose, vs['a'], [6, 5]
     yield allclose, vs['b'], np.array([[4, 3], [2, 1]])
+
+    # Test setting elements in a differentiable way. This should allow for
+    # any values.
+    vs.set_vector(np.array(['1', '2', '3', '4', '5', '6']), 'a', 'b',
+                  differentiable=True)
+    yield all_eq, vs['a'], ['1', '2']
+    yield all_eq, vs['b'], np.array([['3', '4'], ['5', '6']])
 
 
 def test_get_and_init_tf():
@@ -97,34 +128,62 @@ def test_bounded():
 
 
 def test_assignment():
-    vs = Vars(np.float64)
+    s = tf.Session()
+    dispatch = Dispatcher()
 
-    # Generate some variables.
-    vs.get(1., name='unbounded')
-    vs.pos(2., name='positive')
-    vs.bnd(3., lower=0, upper=10, name='bounded')
+    @dispatch(object)
+    def convert(x):
+        return x
 
-    # Check that they have the right values.
-    yield eq, 1., vs['unbounded']
-    yield allclose, 2., vs['positive']
-    yield allclose, 3., vs['bounded']
+    @dispatch(B.Torch)
+    def convert(x):
+        return x.numpy()
 
-    # Assign some new values.
-    vs.assign('unbounded', 4.)
-    vs.assign('positive', 5.)
-    vs.assign('bounded', 6.)
+    @dispatch(B.TF)
+    def convert(x):
+        return s.run(x)
 
-    # Again check that they have the right values.
-    yield eq, 4., vs['unbounded']
-    yield allclose, 5., vs['positive']
-    yield allclose, 6., vs['bounded']
+    for vs in [Vars(np.float64), Vars(tf.float64), Vars(torch.float64)]:
+        # Generate some variables.
+        vs.get(1., name='unbounded')
+        vs.pos(2., name='positive')
+        vs.bnd(3., lower=0, upper=10, name='bounded')
+
+        if isinstance(vs.dtype, B.TFDType):
+            vs.init(s)
+
+        # Check that they have the right values.
+        yield eq, 1., convert(vs['unbounded'])
+        yield allclose, 2., convert(vs['positive'])
+        yield allclose, 3., convert(vs['bounded'])
+
+        # Assign some new values.
+        convert(vs.assign('unbounded', 4.))
+        convert(vs.assign('positive', 5.))
+        convert(vs.assign('bounded', 6.))
+
+        # Again check that they have the right values.
+        yield eq, 4., convert(vs['unbounded'])
+        yield allclose, 5., convert(vs['positive'])
+        yield allclose, 6., convert(vs['bounded'])
+
+        # Differentiably assign new values. This should allow for anything.
+        vs.assign('unbounded', 'value', differentiable=True)
+        yield eq, vs['unbounded'], 'value'
+
+    s.close()
 
 
 def test_detach_torch():
     vs = Vars(torch.float64)
 
-    # Create a variable and copy variable storage.
+    # Create a variable.
     vs.pos(1, name='a')
+
+    # Initialise vector packer.
+    vs.get_vector()
+
+    # Make a detached copy.
     vs2 = vs.detach()
 
     # Require gradients for both.
@@ -139,3 +198,33 @@ def test_detach_torch():
     yield eq, vs.get_vars('a')[0].grad, None
     yield eq, vs2['a'], 1
     yield eq, vs2.get_vars('a')[0].grad, 2
+
+    # Check that copied fields are, in fact, copies.
+    vs.transforms.clear()
+    vs.inverse_transforms.clear()
+    vs.index_by_name.clear()
+    yield gt, len(vs2.transforms), 0
+    yield gt, len(vs2.inverse_transforms), 0
+    yield gt, len(vs2.index_by_name), 0
+
+    # Check that vector packer is copied.
+    yield neq, vs2.vector_packer, None
+
+
+def test_requires_grad_detach_vars_torch():
+    vs = Vars(torch.float64)
+    vs.pos(1, name='a')
+
+    # Test the gradients need to first be required.
+    yield raises, RuntimeError, lambda: (2 * vs['a']).backward()
+
+    # Test that gradients can be required and are then computed.
+    vs.requires_grad(True)
+    (2 * vs['a']).backward()
+    yield neq, type(vs.vars[0].grad), type(None)
+
+    # Test that variables can be detached.
+    vs.pos(1, name='b')
+    result = 2 * vs['b']
+    vs.detach_vars()
+    yield raises, RuntimeError, lambda: result.backward()
