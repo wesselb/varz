@@ -17,32 +17,34 @@
   
 
   
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
-
-  
-  <script src="../../_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -152,29 +154,47 @@
 
 <span class="kn">import</span> <span class="nn">logging</span>
 
+<span class="kn">import</span> <span class="nn">lab</span> <span class="k">as</span> <span class="nn">B</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">lab</span> <span class="k">import</span> <span class="n">B</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">from</span> <span class="nn">plum</span> <span class="k">import</span> <span class="n">Dispatcher</span><span class="p">,</span> <span class="n">Self</span><span class="p">,</span> <span class="n">Referentiable</span>
 
-<span class="kn">from</span> <span class="nn">varz.util</span> <span class="k">import</span> <span class="n">Packer</span>
+<span class="kn">from</span> <span class="nn">.util</span> <span class="k">import</span> <span class="n">Packer</span><span class="p">,</span> <span class="n">match</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Vars&#39;</span><span class="p">,</span> <span class="s1">&#39;vars64&#39;</span><span class="p">,</span> <span class="s1">&#39;vars32&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Vars&#39;</span><span class="p">]</span>
 
 <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 <span class="n">_dispatch</span> <span class="o">=</span> <span class="n">Dispatcher</span><span class="p">()</span>
 
 
+<span class="nd">@_dispatch</span><span class="p">(</span><span class="n">B</span><span class="o">.</span><span class="n">NPNumeric</span><span class="p">,</span> <span class="n">B</span><span class="o">.</span><span class="n">Numeric</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_assign</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">copyto</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">x</span>
+
+
+<span class="nd">@_dispatch</span><span class="p">(</span><span class="n">B</span><span class="o">.</span><span class="n">TFNumeric</span><span class="p">,</span> <span class="n">B</span><span class="o">.</span><span class="n">Numeric</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_assign</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+
+<span class="nd">@_dispatch</span><span class="p">(</span><span class="n">B</span><span class="o">.</span><span class="n">TorchNumeric</span><span class="p">,</span> <span class="n">B</span><span class="o">.</span><span class="n">Numeric</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_assign</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="n">x</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">copy_</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">x</span>
+
+
 <div class="viewcode-block" id="Vars"><a class="viewcode-back" href="../../source/varz.vars.html#varz.vars.Vars">[docs]</a><span class="k">class</span> <span class="nc">Vars</span><span class="p">(</span><span class="n">Referentiable</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Variable storage manager.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        dtype (data type, optional): Data type of the variables. Defaults to</span>
-<span class="sd">            `np.float32`.</span>
+<span class="sd">        dtype (data type): Data type of the variables.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">_dispatch</span> <span class="o">=</span> <span class="n">Dispatcher</span><span class="p">(</span><span class="n">in_class</span><span class="o">=</span><span class="n">Self</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dtype</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">dtype</span>
 
         <span class="c1"># Storage:</span>
@@ -183,29 +203,39 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">inverse_transforms</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="c1"># Lookup:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">names</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">groups</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index_by_name</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="c1"># Packing:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vector_packer</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="Vars.detach"><a class="viewcode-back" href="../../source/varz.vars.html#varz.vars.Vars.detach">[docs]</a>    <span class="k">def</span> <span class="nf">detach</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Create a detached copy of the variable manager.&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Create a detached copy of the variable manager in PyTorch.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :class:`.vars.Vars`: Detached copy.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">vs</span> <span class="o">=</span> <span class="n">Vars</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
-        <span class="n">vs</span><span class="o">.</span><span class="n">transforms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transforms</span>
-        <span class="n">vs</span><span class="o">.</span><span class="n">inverse_transforms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverse_transforms</span>
-        <span class="n">vs</span><span class="o">.</span><span class="n">names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">names</span>
-        <span class="n">vs</span><span class="o">.</span><span class="n">groups</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span>
+        <span class="n">vs</span><span class="o">.</span><span class="n">transforms</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transforms</span><span class="p">)</span>
+        <span class="n">vs</span><span class="o">.</span><span class="n">inverse_transforms</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inverse_transforms</span><span class="p">)</span>
+        <span class="n">vs</span><span class="o">.</span><span class="n">index_by_name</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">index_by_name</span><span class="p">)</span>
+        <span class="n">vs</span><span class="o">.</span><span class="n">vector_packer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vector_packer</span>
         <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">:</span>
-            <span class="n">vs</span><span class="o">.</span><span class="n">vars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">B</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span><span class="o">.</span><span class="n">detach_</span><span class="p">()))</span>
+            <span class="n">vs</span><span class="o">.</span><span class="n">vars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">detach</span><span class="p">())</span>
         <span class="k">return</span> <span class="n">vs</span></div>
 
 <div class="viewcode-block" id="Vars.detach_vars"><a class="viewcode-back" href="../../source/varz.vars.html#varz.vars.Vars.detach_vars">[docs]</a>    <span class="k">def</span> <span class="nf">detach_vars</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Detached the variables held.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">vars</span> <span class="o">=</span> <span class="p">[</span><span class="n">B</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">detach_</span><span class="p">())</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">]</span></div>
+        <span class="sd">&quot;&quot;&quot;Detach all variables held in PyTorch.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">:</span>
+            <span class="n">var</span><span class="o">.</span><span class="n">detach_</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="Vars.requires_grad"><a class="viewcode-back" href="../../source/varz.vars.html#varz.vars.Vars.requires_grad">[docs]</a>    <span class="k">def</span> <span class="nf">requires_grad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="o">*</span><span class="n">names</span><span class="p">,</span> <span class="o">**</span><span class="n">kw_args</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_vars</span><span class="p">(</span><span class="o">*</span><span class="n">names</span><span class="p">,</span> <span class="o">**</span><span class="n">kw_args</span><span class="p">):</span>
+<div class="viewcode-block" id="Vars.requires_grad"><a class="viewcode-back" href="../../source/varz.vars.html#varz.vars.Vars.requires_grad">[docs]</a>    <span class="k">def</span> <span class="nf">requires_grad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="o">*</span><span class="n">names</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set which variables require a gradient in PyTorch.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value (bool): Require a gradient.</span>
+<span class="sd">            *names (hashable): Specify variables by name.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_vars</span><span class="p">(</span><span class="o">*</span><span class="n">names</span><span class="p">):</span>
             <span class="n">var</span><span class="o">.</span><span class="n">requires_grad_</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Vars.get_vars"><a class="viewcode-back" href="../../source/varz.vars.html#varz.vars.Vars.get_vars">[docs]</a>    <span class="k">def</span> <span class="nf">get_vars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">names</span><span class="p">,</span> <span class="o">**</span><span class="n">kw_args</span><span class="p">):</span>
@@ -217,45 +247,51 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            *names (hashable): Get variables by name.</span>
-<span class="sd">            groups (list[hashable]): Get variables by group.</span>
+<span class="sd">            indices (bool, optional): Get the indices of the variables instead.</span>
+<span class="sd">                Defaults to `False`.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            list[tensor]: Matched latent variables.</span>
+<span class="sd">            list: Matched latent variables or their indices, depending on the</span>
+<span class="sd">                value of `indices`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">groups</span> <span class="o">=</span> <span class="n">kw_args</span><span class="p">[</span><span class="s1">&#39;groups&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;groups&#39;</span> <span class="ow">in</span> <span class="n">kw_args</span> <span class="k">else</span> <span class="kc">None</span>
-
         <span class="c1"># If nothing is specified, return all latent variables.</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">groups</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vars</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">kw_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;indices&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+                <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">)))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vars</span>
 
         <span class="c1"># Collect indices of matches.</span>
         <span class="n">indices</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+            <span class="n">a_match</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">index_by_name</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">match</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
+                    <span class="n">indices</span> <span class="o">|=</span> <span class="p">{</span><span class="n">v</span><span class="p">}</span>
+                    <span class="n">a_match</span> <span class="o">=</span> <span class="kc">True</span>
 
-        <span class="c1"># Collect by name.</span>
-        <span class="k">if</span> <span class="n">names</span><span class="p">:</span>
-            <span class="n">indices</span> <span class="o">|=</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">}</span>
+            <span class="c1"># Check that there was a match.</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">a_match</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No variable matching &quot;</span><span class="si">{}</span><span class="s1">&quot;.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
 
-        <span class="c1"># Collect by group.</span>
-        <span class="k">if</span> <span class="n">groups</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">groups</span><span class="p">:</span>
-                <span class="n">indices</span> <span class="o">|=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">[</span><span class="n">group</span><span class="p">])</span>
+        <span class="c1"># Return indices if asked for. Otherwise, return variables.</span>
+        <span class="k">if</span> <span class="n">kw_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;indices&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">indices</span><span class="p">)]</span></div>
 
-        <span class="c1"># Collect variables and return.</span>
-        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">indices</span><span class="p">)]</span></div>
-
-<div class="viewcode-block" id="Vars.get_vector"><a class="viewcode-back" href="../../source/varz.vars.html#varz.vars.Vars.get_vector">[docs]</a>    <span class="k">def</span> <span class="nf">get_vector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">names</span><span class="p">,</span> <span class="o">**</span><span class="n">kw_args</span><span class="p">):</span>
+<div class="viewcode-block" id="Vars.get_vector"><a class="viewcode-back" href="../../source/varz.vars.html#varz.vars.Vars.get_vector">[docs]</a>    <span class="k">def</span> <span class="nf">get_vector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">names</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get all the latent variables stacked in a vector.</span>
 
 <span class="sd">        If no arguments are supplied, then all latent variables are retrieved.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            *names (hashable): Get variables by name.</span>
-<span class="sd">            groups (list[hashable]): Get variables by group.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            tensor: Vector consisting of all latent values</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">vars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_vars</span><span class="p">(</span><span class="o">*</span><span class="n">names</span><span class="p">,</span> <span class="o">**</span><span class="n">kw_args</span><span class="p">)</span>
+        <span class="nb">vars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_vars</span><span class="p">(</span><span class="o">*</span><span class="n">names</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vector_packer</span> <span class="o">=</span> <span class="n">Packer</span><span class="p">(</span><span class="o">*</span><span class="nb">vars</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vector_packer</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="o">*</span><span class="nb">vars</span><span class="p">)</span></div>
 
@@ -267,17 +303,26 @@
 <span class="sd">        Args:</span>
 <span class="sd">            values (tensor): Vector to set the variables to.</span>
 <span class="sd">            *names (hashable): Set variables by name.</span>
-<span class="sd">            groups (list[hashable]): Set variables by group.</span>
+<span class="sd">            differentiable (bool, optional): Differentiable assignment. Defaults</span>
+<span class="sd">                to `False`.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            list: Assignment results.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">vars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_vars</span><span class="p">(</span><span class="o">*</span><span class="n">names</span><span class="p">,</span> <span class="o">**</span><span class="n">kw_args</span><span class="p">)</span>
         <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vector_packer</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
-        <span class="n">assignments</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="nb">vars</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
-            <span class="n">assignments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">B</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">assignments</span></div>
+
+        <span class="k">if</span> <span class="n">kw_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;differentiable&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+            <span class="c1"># Do a differentiable assignment.</span>
+            <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_vars</span><span class="p">(</span><span class="o">*</span><span class="n">names</span><span class="p">,</span> <span class="n">indices</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+                                    <span class="n">values</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="k">return</span> <span class="n">values</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Overwrite data.</span>
+            <span class="n">assignments</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_vars</span><span class="p">(</span><span class="o">*</span><span class="n">names</span><span class="p">),</span> <span class="n">values</span><span class="p">):</span>
+                <span class="n">assignments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_assign</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">assignments</span></div>
 
 <div class="viewcode-block" id="Vars.init"><a class="viewcode-back" href="../../source/varz.vars.html#varz.vars.Vars.init">[docs]</a>    <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialise the variables.</span>
@@ -285,9 +330,9 @@
 <span class="sd">        Args:</span>
 <span class="sd">            session (:class:`B.Session`): TensorFlow session.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">session</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">B</span><span class="o">.</span><span class="n">variables_initializer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">))</span></div>
+        <span class="n">session</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">variables_initializer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Vars.get"><a class="viewcode-back" href="../../source/varz.vars.html#varz.vars.Vars.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(),</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Vars.get"><a class="viewcode-back" href="../../source/varz.vars.html#varz.vars.Vars.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(),</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get an unbounded variable.</span>
 
 <span class="sd">        Args:</span>
@@ -296,15 +341,14 @@
 <span class="sd">                scalar.</span>
 <span class="sd">            dtype (data type, optional): Data type of the variable. Defaults to</span>
 <span class="sd">                that of the storage.</span>
-<span class="sd">            name (hashable, optional): Name of the variable.</span>
-<span class="sd">            group (hashable, optional): Group of the variable.</span>
+<span class="sd">            name (str, optional): Name of the variable.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            tensor: Variable.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">def</span> <span class="nf">generate_init</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">B</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">B</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_var</span><span class="p">(</span><span class="n">transform</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span>
                              <span class="n">inverse_transform</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span>
@@ -312,10 +356,9 @@
                              <span class="n">generate_init</span><span class="o">=</span><span class="n">generate_init</span><span class="p">,</span>
                              <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span>
                              <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
-                             <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-                             <span class="n">group</span><span class="o">=</span><span class="n">group</span><span class="p">)</span></div>
+                             <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Vars.positive"><a class="viewcode-back" href="../../source/varz.vars.html#varz.vars.Vars.positive">[docs]</a>    <span class="k">def</span> <span class="nf">positive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(),</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Vars.positive"><a class="viewcode-back" href="../../source/varz.vars.html#varz.vars.Vars.positive">[docs]</a>    <span class="k">def</span> <span class="nf">positive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(),</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get a positive variable.</span>
 
 <span class="sd">        Args:</span>
@@ -324,15 +367,14 @@
 <span class="sd">                scalar.</span>
 <span class="sd">            dtype (data type, optional): Data type of the variable. Defaults to</span>
 <span class="sd">                that of the storage.</span>
-<span class="sd">            name (hashable, optional): Name of the variable.</span>
-<span class="sd">            group (hashable, optional): Group of the variable.</span>
+<span class="sd">            name (str, optional): Name of the variable.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            tensor: Variable.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">def</span> <span class="nf">generate_init</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">B</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">B</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_var</span><span class="p">(</span><span class="n">transform</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">B</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
                              <span class="n">inverse_transform</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">B</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
@@ -340,8 +382,7 @@
                              <span class="n">generate_init</span><span class="o">=</span><span class="n">generate_init</span><span class="p">,</span>
                              <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span>
                              <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
-                             <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-                             <span class="n">group</span><span class="o">=</span><span class="n">group</span><span class="p">)</span></div>
+                             <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Vars.pos"><a class="viewcode-back" href="../../source/varz.vars.html#varz.vars.Vars.pos">[docs]</a>    <span class="k">def</span> <span class="nf">pos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw_args</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Alias for :meth:`.vars.Vars.positive`.&quot;&quot;&quot;</span>
@@ -349,24 +390,22 @@
 
 <div class="viewcode-block" id="Vars.bounded"><a class="viewcode-back" href="../../source/varz.vars.html#varz.vars.Vars.bounded">[docs]</a>    <span class="k">def</span> <span class="nf">bounded</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                 <span class="n">init</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                <span class="n">lower</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span>
-                <span class="n">upper</span><span class="o">=</span><span class="mf">1e3</span><span class="p">,</span>
+                <span class="n">lower</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">,</span>
+                <span class="n">upper</span><span class="o">=</span><span class="mf">1e4</span><span class="p">,</span>
                 <span class="n">shape</span><span class="o">=</span><span class="p">(),</span>
                 <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                <span class="n">group</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get a bounded variable.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            init (tensor, optional): Initialisation of the variable.</span>
-<span class="sd">            lower (tensor, optional): Lower bound. Defaults to `1e-3`.</span>
-<span class="sd">            upper (tensor, optional): Upper bound. Defaults to `1e3`.</span>
+<span class="sd">            lower (tensor, optional): Lower bound. Defaults to `1e-4`.</span>
+<span class="sd">            upper (tensor, optional): Upper bound. Defaults to `1e4`.</span>
 <span class="sd">            shape (tuple[int], optional): Shape of the variable. Defaults to</span>
 <span class="sd">                scalar.</span>
 <span class="sd">            dtype (data type, optional): Data type of the variable. Defaults to</span>
 <span class="sd">                that of the storage.</span>
 <span class="sd">            name (hashable, optional): Name of the variable.</span>
-<span class="sd">            group (hashable, optional): Group of the variable.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            tensor: Variable.</span>
@@ -379,7 +418,7 @@
             <span class="k">return</span> <span class="n">B</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">upper</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">B</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">lower</span><span class="p">)</span>
 
         <span class="k">def</span> <span class="nf">generate_init</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">lower</span> <span class="o">+</span> <span class="n">B</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">upper</span> <span class="o">-</span> <span class="n">lower</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">lower</span> <span class="o">+</span> <span class="n">B</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">upper</span> <span class="o">-</span> <span class="n">lower</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_var</span><span class="p">(</span><span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span>
                              <span class="n">inverse_transform</span><span class="o">=</span><span class="n">inverse_transform</span><span class="p">,</span>
@@ -387,8 +426,7 @@
                              <span class="n">generate_init</span><span class="o">=</span><span class="n">generate_init</span><span class="p">,</span>
                              <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span>
                              <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
-                             <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-                             <span class="n">group</span><span class="o">=</span><span class="n">group</span><span class="p">)</span></div>
+                             <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Vars.bnd"><a class="viewcode-back" href="../../source/varz.vars.html#varz.vars.Vars.bnd">[docs]</a>    <span class="k">def</span> <span class="nf">bnd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw_args</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Alias for :meth:`.vars.Vars.bounded`.&quot;&quot;&quot;</span>
@@ -401,8 +439,7 @@
                  <span class="n">generate_init</span><span class="p">,</span>
                  <span class="n">shape</span><span class="p">,</span>
                  <span class="n">dtype</span><span class="p">,</span>
-                 <span class="n">name</span><span class="p">,</span>
-                 <span class="n">group</span><span class="p">):</span>
+                 <span class="n">name</span><span class="p">):</span>
         <span class="c1"># If the name already exists, return that variable.</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
@@ -416,10 +453,19 @@
         <span class="k">if</span> <span class="n">init</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">init</span> <span class="o">=</span> <span class="n">generate_init</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">init</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">init</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+            <span class="n">init</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">init</span><span class="p">,</span> <span class="n">dtype</span><span class="p">)</span>
 
-        <span class="c1"># Construct latent variable and store transforms.</span>
-        <span class="n">latent</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">inverse_transform</span><span class="p">(</span><span class="n">init</span><span class="p">))</span>
+        <span class="c1"># Construct optimisable variable.</span>
+        <span class="n">latent</span> <span class="o">=</span> <span class="n">inverse_transform</span><span class="p">(</span><span class="n">init</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">B</span><span class="o">.</span><span class="n">TFDType</span><span class="p">):</span>
+            <span class="n">latent</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">latent</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">B</span><span class="o">.</span><span class="n">TorchDType</span><span class="p">):</span>
+            <span class="k">pass</span>  <span class="c1"># All is good in this case.</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Must be a NumPy data type.</span>
+            <span class="n">latent</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">latent</span><span class="p">)</span>
+
+        <span class="c1"># Store transforms.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">latent</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">transforms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">transform</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">inverse_transforms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inverse_transform</span><span class="p">)</span>
@@ -428,31 +474,32 @@
         <span class="n">index</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
 
         <span class="c1"># Store name if given.</span>
-        <span class="k">if</span> <span class="n">name</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">index</span>
-
-        <span class="c1"># Store group if given.</span>
-        <span class="k">if</span> <span class="n">group</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">[</span><span class="n">group</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">[</span><span class="n">group</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">index</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">index_by_name</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">index</span>
 
         <span class="c1"># Generate the variable and return.</span>
         <span class="k">return</span> <span class="n">transform</span><span class="p">(</span><span class="n">latent</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Vars.assign"><a class="viewcode-back" href="../../source/varz.vars.html#varz.vars.Vars.assign">[docs]</a>    <span class="k">def</span> <span class="nf">assign</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<div class="viewcode-block" id="Vars.assign"><a class="viewcode-back" href="../../source/varz.vars.html#varz.vars.Vars.assign">[docs]</a>    <span class="k">def</span> <span class="nf">assign</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">differentiable</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Assign a value to a variable.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            name (hashable): Name of variable to assign value to.</span>
 <span class="sd">            value (tensor): Value to assign.</span>
+<span class="sd">            differentiable (bool, optional): Do a differentiable assignment.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            tensor: TensorFlow tensor that can be run to perform the assignment.</span>
+<span class="sd">            tensor: Assignment result.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">B</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverse_transforms</span><span class="p">[</span><span class="n">index</span><span class="p">](</span><span class="n">value</span><span class="p">))</span></div>
+        <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">index_by_name</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">differentiable</span><span class="p">:</span>
+            <span class="c1"># Do a differentiable assignment.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="k">return</span> <span class="n">value</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Overwrite data.</span>
+            <span class="k">return</span> <span class="n">_assign</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">[</span><span class="n">index</span><span class="p">],</span>
+                           <span class="bp">self</span><span class="o">.</span><span class="n">inverse_transforms</span><span class="p">[</span><span class="n">index</span><span class="p">](</span><span class="n">value</span><span class="p">))</span></div>
 
     <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get a variable by name.</span>
@@ -463,12 +510,8 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            tensor: Variable.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">index_by_name</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">transforms</span><span class="p">[</span><span class="n">index</span><span class="p">](</span><span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">[</span><span class="n">index</span><span class="p">])</span></div>
-
-
-<span class="n">vars32</span> <span class="o">=</span> <span class="n">Vars</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-<span class="n">vars64</span> <span class="o">=</span> <span class="n">Vars</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
 </pre></div>
 
            </div>
@@ -481,7 +524,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Wessel Bruinsma.
+        &copy; Copyright 2017, Wessel Bruinsma
 
     </p>
   </div>
@@ -498,33 +541,16 @@
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../',
-            VERSION:'0.1.0',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  <script type="text/javascript" src="../../_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

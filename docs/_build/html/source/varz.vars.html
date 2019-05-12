@@ -17,33 +17,35 @@
   
 
   
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="prev" title="varz.util module" href="varz.util.html" /> 
-
-  
-  <script src="../_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -84,6 +86,7 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../readme.html">Varz</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">Application Programming Interface</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="varz.numpy.html">varz.numpy module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="varz.torch.html">varz.torch module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="varz.util.html">varz.util module</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">varz.vars module</a></li>
@@ -159,40 +162,33 @@
 <span id="varz-vars-module"></span><h1>varz.vars module<a class="headerlink" href="#module-varz.vars" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="varz.vars.Vars">
-<em class="property">class </em><code class="descclassname">varz.vars.</code><code class="descname">Vars</code><span class="sig-paren">(</span><em>dtype=&lt;class 'numpy.float64'&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/vars.html#Vars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.vars.Vars" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">varz.vars.</code><code class="descname">Vars</code><span class="sig-paren">(</span><em>dtype</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/vars.html#Vars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.vars.Vars" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">plum.resolvable.Referentiable</span></code></p>
 <p>Variable storage manager.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dtype</strong> (<em>data type</em><em>, </em><em>optional</em>) – Data type of the variables. Defaults to
-<cite>np.float32</cite>.</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>dtype</strong> (<em>data type</em>) – Data type of the variables.</p>
+</dd>
+</dl>
 <dl class="method">
 <dt id="varz.vars.Vars.assign">
-<code class="descname">assign</code><span class="sig-paren">(</span><em>name</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/vars.html#Vars.assign"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.vars.Vars.assign" title="Permalink to this definition">¶</a></dt>
+<code class="descname">assign</code><span class="sig-paren">(</span><em>name</em>, <em>value</em>, <em>differentiable=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/vars.html#Vars.assign"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.vars.Vars.assign" title="Permalink to this definition">¶</a></dt>
 <dd><p>Assign a value to a variable.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>name</strong> (<em>hashable</em>) – Name of variable to assign value to.</li>
-<li><strong>value</strong> (<em>tensor</em>) – Value to assign.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>hashable</em>) – Name of variable to assign value to.</p></li>
+<li><p><strong>value</strong> (<em>tensor</em>) – Value to assign.</p></li>
+<li><p><strong>differentiable</strong> (<em>bool</em><em>, </em><em>optional</em>) – Do a differentiable assignment.</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">TensorFlow tensor that can be run to perform the assignment.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tensor</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Assignment result.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tensor</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
@@ -203,74 +199,72 @@
 
 <dl class="method">
 <dt id="varz.vars.Vars.bounded">
-<code class="descname">bounded</code><span class="sig-paren">(</span><em>init=None</em>, <em>lower=0.001</em>, <em>upper=1000.0</em>, <em>shape=()</em>, <em>dtype=None</em>, <em>name=None</em>, <em>group=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/vars.html#Vars.bounded"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.vars.Vars.bounded" title="Permalink to this definition">¶</a></dt>
+<code class="descname">bounded</code><span class="sig-paren">(</span><em>init=None</em>, <em>lower=0.0001</em>, <em>upper=10000.0</em>, <em>shape=()</em>, <em>dtype=None</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/vars.html#Vars.bounded"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.vars.Vars.bounded" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get a bounded variable.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>init</strong> (<em>tensor</em><em>, </em><em>optional</em>) – Initialisation of the variable.</li>
-<li><strong>lower</strong> (<em>tensor</em><em>, </em><em>optional</em>) – Lower bound. Defaults to <cite>1e-3</cite>.</li>
-<li><strong>upper</strong> (<em>tensor</em><em>, </em><em>optional</em>) – Upper bound. Defaults to <cite>1e3</cite>.</li>
-<li><strong>shape</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Shape of the variable. Defaults to
-scalar.</li>
-<li><strong>dtype</strong> (<em>data type</em><em>, </em><em>optional</em>) – Data type of the variable. Defaults to
-that of the storage.</li>
-<li><strong>name</strong> (<em>hashable</em><em>, </em><em>optional</em>) – Name of the variable.</li>
-<li><strong>group</strong> (<em>hashable</em><em>, </em><em>optional</em>) – Group of the variable.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>init</strong> (<em>tensor</em><em>, </em><em>optional</em>) – Initialisation of the variable.</p></li>
+<li><p><strong>lower</strong> (<em>tensor</em><em>, </em><em>optional</em>) – Lower bound. Defaults to <cite>1e-4</cite>.</p></li>
+<li><p><strong>upper</strong> (<em>tensor</em><em>, </em><em>optional</em>) – Upper bound. Defaults to <cite>1e4</cite>.</p></li>
+<li><p><strong>shape</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Shape of the variable. Defaults to
+scalar.</p></li>
+<li><p><strong>dtype</strong> (<em>data type</em><em>, </em><em>optional</em>) – Data type of the variable. Defaults to
+that of the storage.</p></li>
+<li><p><strong>name</strong> (<em>hashable</em><em>, </em><em>optional</em>) – Name of the variable.</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Variable.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tensor</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Variable.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tensor</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="varz.vars.Vars.detach">
 <code class="descname">detach</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/vars.html#Vars.detach"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.vars.Vars.detach" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a detached copy of the variable manager.</p>
+<dd><p>Create a detached copy of the variable manager in PyTorch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Detached copy.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#varz.vars.Vars" title="varz.vars.Vars"><code class="xref py py-class docutils literal notranslate"><span class="pre">vars.Vars</span></code></a></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="varz.vars.Vars.detach_vars">
 <code class="descname">detach_vars</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/vars.html#Vars.detach_vars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.vars.Vars.detach_vars" title="Permalink to this definition">¶</a></dt>
-<dd><p>Detached the variables held.</p>
+<dd><p>Detach all variables held in PyTorch.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="varz.vars.Vars.get">
-<code class="descname">get</code><span class="sig-paren">(</span><em>init=None</em>, <em>shape=()</em>, <em>dtype=None</em>, <em>name=None</em>, <em>group=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/vars.html#Vars.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.vars.Vars.get" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get</code><span class="sig-paren">(</span><em>init=None</em>, <em>shape=()</em>, <em>dtype=None</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/vars.html#Vars.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.vars.Vars.get" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get an unbounded variable.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>init</strong> (<em>tensor</em><em>, </em><em>optional</em>) – Initialisation of the variable.</li>
-<li><strong>shape</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Shape of the variable. Defaults to
-scalar.</li>
-<li><strong>dtype</strong> (<em>data type</em><em>, </em><em>optional</em>) – Data type of the variable. Defaults to
-that of the storage.</li>
-<li><strong>name</strong> (<em>hashable</em><em>, </em><em>optional</em>) – Name of the variable.</li>
-<li><strong>group</strong> (<em>hashable</em><em>, </em><em>optional</em>) – Group of the variable.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>init</strong> (<em>tensor</em><em>, </em><em>optional</em>) – Initialisation of the variable.</p></li>
+<li><p><strong>shape</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Shape of the variable. Defaults to
+scalar.</p></li>
+<li><p><strong>dtype</strong> (<em>data type</em><em>, </em><em>optional</em>) – Data type of the variable. Defaults to
+that of the storage.</p></li>
+<li><p><strong>name</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the variable.</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Variable.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tensor</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Variable.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tensor</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
@@ -280,63 +274,54 @@ that of the storage.</li>
 <p>If no arguments are supplied, then all latent variables are retrieved.
 Furthermore, the same collection of variables is guaranteed to be
 returned in the same order.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>*names</strong> (<em>hashable</em>) – Get variables by name.</li>
-<li><strong>groups</strong> (<em>list</em><em>[</em><em>hashable</em><em>]</em>) – Get variables by group.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*names</strong> (<em>hashable</em>) – Get variables by name.</p></li>
+<li><p><strong>indices</strong> (<em>bool</em><em>, </em><em>optional</em>) – Get the indices of the variables instead.
+Defaults to <cite>False</cite>.</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Matched latent variables.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list[tensor]</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Matched latent variables or their indices, depending on the</dt><dd><p>value of <cite>indices</cite>.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="varz.vars.Vars.get_vector">
-<code class="descname">get_vector</code><span class="sig-paren">(</span><em>*names</em>, <em>**kw_args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/vars.html#Vars.get_vector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.vars.Vars.get_vector" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_vector</code><span class="sig-paren">(</span><em>*names</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/vars.html#Vars.get_vector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.vars.Vars.get_vector" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get all the latent variables stacked in a vector.</p>
 <p>If no arguments are supplied, then all latent variables are retrieved.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>*names</strong> (<em>hashable</em>) – Get variables by name.</li>
-<li><strong>groups</strong> (<em>list</em><em>[</em><em>hashable</em><em>]</em>) – Get variables by group.</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Vector consisting of all latent values</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tensor</p>
-</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>*names</strong> (<em>hashable</em>) – Get variables by name.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Vector consisting of all latent values</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tensor</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="varz.vars.Vars.init">
 <code class="descname">init</code><span class="sig-paren">(</span><em>session</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/vars.html#Vars.init"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.vars.Vars.init" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialise the variables.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>session</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">B.Session</span></code>) – TensorFlow session.</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>session</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">B.Session</span></code>) – TensorFlow session.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
@@ -347,62 +332,63 @@ returned in the same order.</p>
 
 <dl class="method">
 <dt id="varz.vars.Vars.positive">
-<code class="descname">positive</code><span class="sig-paren">(</span><em>init=None</em>, <em>shape=()</em>, <em>dtype=None</em>, <em>name=None</em>, <em>group=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/vars.html#Vars.positive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.vars.Vars.positive" title="Permalink to this definition">¶</a></dt>
+<code class="descname">positive</code><span class="sig-paren">(</span><em>init=None</em>, <em>shape=()</em>, <em>dtype=None</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/vars.html#Vars.positive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.vars.Vars.positive" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get a positive variable.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>init</strong> (<em>tensor</em><em>, </em><em>optional</em>) – Initialisation of the variable.</li>
-<li><strong>shape</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Shape of the variable. Defaults to
-scalar.</li>
-<li><strong>dtype</strong> (<em>data type</em><em>, </em><em>optional</em>) – Data type of the variable. Defaults to
-that of the storage.</li>
-<li><strong>name</strong> (<em>hashable</em><em>, </em><em>optional</em>) – Name of the variable.</li>
-<li><strong>group</strong> (<em>hashable</em><em>, </em><em>optional</em>) – Group of the variable.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>init</strong> (<em>tensor</em><em>, </em><em>optional</em>) – Initialisation of the variable.</p></li>
+<li><p><strong>shape</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Shape of the variable. Defaults to
+scalar.</p></li>
+<li><p><strong>dtype</strong> (<em>data type</em><em>, </em><em>optional</em>) – Data type of the variable. Defaults to
+that of the storage.</p></li>
+<li><p><strong>name</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the variable.</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Variable.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tensor</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Variable.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tensor</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="varz.vars.Vars.requires_grad">
-<code class="descname">requires_grad</code><span class="sig-paren">(</span><em>value</em>, <em>*names</em>, <em>**kw_args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/vars.html#Vars.requires_grad"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.vars.Vars.requires_grad" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="descname">requires_grad</code><span class="sig-paren">(</span><em>value</em>, <em>*names</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/vars.html#Vars.requires_grad"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.vars.Vars.requires_grad" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set which variables require a gradient in PyTorch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<em>bool</em>) – Require a gradient.</p></li>
+<li><p><strong>*names</strong> (<em>hashable</em>) – Specify variables by name.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="varz.vars.Vars.set_vector">
 <code class="descname">set_vector</code><span class="sig-paren">(</span><em>values</em>, <em>*names</em>, <em>**kw_args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/vars.html#Vars.set_vector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.vars.Vars.set_vector" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set all the latent variables by values from a vector.</p>
 <p>If no arguments are supplied, then all latent variables are retrieved.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>values</strong> (<em>tensor</em>) – Vector to set the variables to.</li>
-<li><strong>*names</strong> (<em>hashable</em>) – Set variables by name.</li>
-<li><strong>groups</strong> (<em>list</em><em>[</em><em>hashable</em><em>]</em>) – Set variables by group.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>values</strong> (<em>tensor</em>) – Vector to set the variables to.</p></li>
+<li><p><strong>*names</strong> (<em>hashable</em>) – Set variables by name.</p></li>
+<li><p><strong>differentiable</strong> (<em>bool</em><em>, </em><em>optional</em>) – Differentiable assignment. Defaults
+to <cite>False</cite>.</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Assignment results.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Assignment results.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -418,7 +404,7 @@ that of the storage.</li>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
       
-        <a href="varz.util.html" class="btn btn-neutral" title="varz.util module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="varz.util.html" class="btn btn-neutral float-left" title="varz.util module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -427,7 +413,7 @@ that of the storage.</li>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Wessel Bruinsma.
+        &copy; Copyright 2017, Wessel Bruinsma
 
     </p>
   </div>
@@ -444,33 +430,16 @@ that of the storage.</li>
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../',
-            VERSION:'0.1.0',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../_static/jquery.js"></script>
-      <script type="text/javascript" src="../_static/underscore.js"></script>
-      <script type="text/javascript" src="../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  <script type="text/javascript" src="../_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

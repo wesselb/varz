@@ -17,34 +17,36 @@
   
 
   
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="varz.vars module" href="varz.vars.html" />
     <link rel="prev" title="varz.torch module" href="varz.torch.html" /> 
-
-  
-  <script src="../_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -85,6 +87,7 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../readme.html">Varz</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">Application Programming Interface</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="varz.numpy.html">varz.numpy module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="varz.torch.html">varz.torch module</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">varz.util module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="varz.vars.html">varz.vars module</a></li>
@@ -167,89 +170,83 @@
 <dt id="varz.util.Initialiser.assign">
 <code class="descname">assign</code><span class="sig-paren">(</span><em>name</em>, <em>values</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/util.html#Initialiser.assign"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.util.Initialiser.assign" title="Permalink to this definition">¶</a></dt>
 <dd><p>Assign values to a particular variable.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>name</strong> (<em>str</em>) – Name of variables.</li>
-<li><strong>values</strong> (<em>list</em><em>[</em><em>tensor</em><em>]</em>) – List of values to assign.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – Name of variables.</p></li>
+<li><p><strong>values</strong> (<em>list</em><em>[</em><em>tensor</em><em>]</em>) – List of values to assign.</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="varz.util.Initialiser.generate">
 <code class="descname">generate</code><span class="sig-paren">(</span><em>vs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/util.html#Initialiser.generate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.util.Initialiser.generate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate initialisers.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>vs</strong> (<a class="reference internal" href="varz.vars.html#varz.vars.Vars" title="varz.vars.Vars"><code class="xref py py-class docutils literal notranslate"><span class="pre">vars.Vars</span></code></a>) – Variable storage.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">List of functions that perform the initialisations.</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list[function]</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>vs</strong> (<a class="reference internal" href="varz.vars.html#varz.vars.Vars" title="varz.vars.Vars"><code class="xref py py-class docutils literal notranslate"><span class="pre">vars.Vars</span></code></a>) – Variable storage.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of functions that perform the initialisations.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list[function]</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="varz.util.Packer">
-<em class="property">class </em><code class="descclassname">varz.util.</code><code class="descname">Packer</code><span class="sig-paren">(</span><em>*objs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/util.html#Packer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.util.Packer" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">varz.util.</code><code class="descname">Packer</code><a class="reference internal" href="../_modules/varz/util.html#Packer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.util.Packer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">plum.resolvable.Referentiable</span></code></p>
 <p>Pack objects into a vector.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>*objs</strong> (<em>tensor</em>) – Objects to pack.</td>
-</tr>
-</tbody>
-</table>
-<dl class="method">
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>*objs</strong> (<em>tensor</em>) – Objects to pack.</p>
+</dd>
+</dl>
+<dl class="attribute">
 <dt id="varz.util.Packer.pack">
-<code class="descname">pack</code><span class="sig-paren">(</span><em>*objs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/util.html#Packer.pack"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.util.Packer.pack" title="Permalink to this definition">¶</a></dt>
-<dd><p>Pack objects.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>*objs</strong> (<em>tensor</em>) – Objects to pack.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Vector representation of the objects.</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tensor</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
+<code class="descname">pack</code><em class="property"> = &lt;function &lt;function Packer.pack&gt; with 2 method(s)&gt;</em><a class="reference internal" href="../_modules/varz/util.html#Packer.pack"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.util.Packer.pack" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="varz.util.Packer.unpack">
 <code class="descname">unpack</code><span class="sig-paren">(</span><em>package</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/util.html#Packer.unpack"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.util.Packer.unpack" title="Permalink to this definition">¶</a></dt>
 <dd><p>Unpack vector.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>package</strong> (<em>tensor</em>) – Vector to unpack.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Original objects.</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list[tensor]</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>package</strong> (<em>tensor</em>) – Vector to unpack.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Original objects.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list[tensor]</p>
+</dd>
+</dl>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="function">
+<dt id="varz.util.match">
+<code class="descclassname">varz.util.</code><code class="descname">match</code><span class="sig-paren">(</span><em>pattern</em>, <em>target</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/util.html#match"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.util.match" title="Permalink to this definition">¶</a></dt>
+<dd><p>Match a string exactly against a pattern, where the pattern is a regex
+with ‘*’ as the only active character.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pattern</strong> (<em>str</em>) – Pattern.</p></li>
+<li><p><strong>target</strong> (<em>str</em>) – Target.</p></li>
+</ul>
+</dd>
+</dl>
+<p>bool: <cite>True</cite> if <cite>pattern</cite> matches <cite>target</cite>.</p>
 </dd></dl>
 
 </div>
@@ -265,7 +262,7 @@
         <a href="varz.vars.html" class="btn btn-neutral float-right" title="varz.vars module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="varz.torch.html" class="btn btn-neutral" title="varz.torch module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="varz.torch.html" class="btn btn-neutral float-left" title="varz.torch module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -274,7 +271,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, Wessel Bruinsma.
+        &copy; Copyright 2017, Wessel Bruinsma
 
     </p>
   </div>
@@ -291,33 +288,16 @@
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../',
-            VERSION:'0.1.0',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../_static/jquery.js"></script>
-      <script type="text/javascript" src="../_static/underscore.js"></script>
-      <script type="text/javascript" src="../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  <script type="text/javascript" src="../_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

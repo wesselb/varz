@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>varz.torch &mdash; varz 0.1.0 documentation</title>
+  <title>varz.numpy &mdash; varz 0.1.0 documentation</title>
   
 
   
@@ -132,7 +132,7 @@
         
           <li><a href="../index.html">Module code</a> &raquo;</li>
         
-      <li>varz.torch</li>
+      <li>varz.numpy</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -147,16 +147,15 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <h1>Source code for varz.torch</h1><div class="highlight"><pre>
+  <h1>Source code for varz.numpy</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span>
 
 <span class="kn">import</span> <span class="nn">logging</span>
 
-<span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">import</span> <span class="nn">lab</span> <span class="k">as</span> <span class="nn">B</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">autograd</span> <span class="k">import</span> <span class="n">value_and_grad</span>
 <span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="k">import</span> <span class="n">fmin_l_bfgs_b</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;minimise_l_bfgs_b&#39;</span><span class="p">]</span>
@@ -164,13 +163,13 @@
 <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="minimise_l_bfgs_b"><a class="viewcode-back" href="../../source/varz.torch.html#varz.torch.minimise_l_bfgs_b">[docs]</a><span class="k">def</span> <span class="nf">minimise_l_bfgs_b</span><span class="p">(</span><span class="n">f</span><span class="p">,</span>
+<div class="viewcode-block" id="minimise_l_bfgs_b"><a class="viewcode-back" href="../../source/varz.numpy.html#varz.numpy.minimise_l_bfgs_b">[docs]</a><span class="k">def</span> <span class="nf">minimise_l_bfgs_b</span><span class="p">(</span><span class="n">f</span><span class="p">,</span>
                       <span class="n">vs</span><span class="p">,</span>
                       <span class="n">f_calls</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>
                       <span class="n">iters</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
                       <span class="n">trace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                       <span class="n">names</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Minimise a function with L-BFGS-B in PyTorch.</span>
+    <span class="sd">&quot;&quot;&quot;Minimise a function with L-BFGS-B in NumPy and AutoGrad.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        f (function): Function to optimise.</span>
@@ -187,7 +186,6 @@
 <span class="sd">        float: Final objective function value.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">names</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">names</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">names</span>
-    <span class="n">zero</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">vs</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
 
     <span class="c1"># Run function once to ensure that all variables are initialised and</span>
     <span class="c1"># available.</span>
@@ -197,44 +195,24 @@
     <span class="k">if</span> <span class="n">iters</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">f_calls</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">val_init</span>
 
-    <span class="c1"># Detach variables from the current computation graph.</span>
-    <span class="n">vs</span><span class="o">.</span><span class="n">detach_vars</span><span class="p">()</span>
-
     <span class="c1"># Extract initial value.</span>
-    <span class="n">x0</span> <span class="o">=</span> <span class="n">vs</span><span class="o">.</span><span class="n">get_vector</span><span class="p">(</span><span class="o">*</span><span class="n">names</span><span class="p">)</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+    <span class="n">x0</span> <span class="o">=</span> <span class="n">vs</span><span class="o">.</span><span class="n">get_vector</span><span class="p">(</span><span class="o">*</span><span class="n">names</span><span class="p">)</span>
 
-    <span class="c1"># Turn on gradient computation.</span>
-    <span class="n">vs</span><span class="o">.</span><span class="n">requires_grad</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
-    <span class="n">vs</span><span class="o">.</span><span class="n">requires_grad</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="o">*</span><span class="n">names</span><span class="p">)</span>
+    <span class="c1"># Wrap `f` to have it take in vector, for compatibility with AutoGrad.</span>
+    <span class="k">def</span> <span class="nf">f_vectorised</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="n">vs</span><span class="o">.</span><span class="n">set_vector</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">names</span><span class="p">,</span> <span class="n">differentiable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="n">vs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">f_wrapped</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-        <span class="c1"># Update variable manager.</span>
-        <span class="n">vs</span><span class="o">.</span><span class="n">set_vector</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">vs</span><span class="o">.</span><span class="n">dtype</span><span class="p">),</span> <span class="o">*</span><span class="n">names</span><span class="p">)</span>
-
-        <span class="c1"># Compute objective function value, detach, and convert to NumPy.</span>
+        <span class="c1"># Compute objective function value.</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">obj_value</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">vs</span><span class="p">)</span>
-            <span class="n">obj_value</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
-            <span class="n">obj_value</span> <span class="o">=</span> <span class="n">obj_value</span><span class="o">.</span><span class="n">detach_</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">value_and_grad</span><span class="p">(</span><span class="n">f_vectorised</span><span class="p">)(</span><span class="n">x</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">RuntimeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Caught exception during function evaluation: &#39;</span>
                         <span class="s1">&#39;&quot;</span><span class="si">{}</span><span class="s1">&quot;. Returning NaN.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
-            <span class="n">obj_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
-
-        <span class="c1"># Loop over variable manager to extract gradients and zero them.</span>
-        <span class="n">grads</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">vs</span><span class="o">.</span><span class="n">get_vars</span><span class="p">(</span><span class="o">*</span><span class="n">names</span><span class="p">):</span>
-            <span class="c1"># Save gradient if there is one.</span>
-            <span class="k">if</span> <span class="n">var</span><span class="o">.</span><span class="n">grad</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">grads</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">zero</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">grads</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">grad</span><span class="o">.</span><span class="n">clone</span><span class="p">())</span>
-                <span class="n">var</span><span class="o">.</span><span class="n">grad</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">zero_</span><span class="p">()</span>  <span class="c1"># Clear gradient.</span>
-
-        <span class="c1"># Stack, detach, and convert to NumPy.</span>
-        <span class="n">grad</span> <span class="o">=</span> <span class="n">vs</span><span class="o">.</span><span class="n">vector_packer</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="o">*</span><span class="n">grads</span><span class="p">)</span><span class="o">.</span><span class="n">detach_</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
-
-        <span class="k">return</span> <span class="n">obj_value</span><span class="p">,</span> <span class="n">grad</span>
+            <span class="n">grad_nan</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="n">grad_nan</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">grad_nan</span>
 
     <span class="c1"># Perform optimisation routine.</span>
     <span class="n">x_opt</span><span class="p">,</span> <span class="n">val_opt</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">fmin_l_bfgs_b</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">f_wrapped</span><span class="p">,</span>
@@ -244,11 +222,13 @@
                                          <span class="n">callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                                          <span class="n">disp</span><span class="o">=</span><span class="mi">1</span> <span class="k">if</span> <span class="n">trace</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
 
+    <span class="c1"># Due to differentiable assignments, the variables are now AutoGrad</span>
+    <span class="c1"># objects. Convert them back.</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">vs</span><span class="o">.</span><span class="n">get_vars</span><span class="p">(</span><span class="o">*</span><span class="n">names</span><span class="p">,</span> <span class="n">indices</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">vs</span><span class="o">.</span><span class="n">vars</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">vs</span><span class="o">.</span><span class="n">vars</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">_value</span>
+
     <span class="c1"># TODO: Print some report if `trace` is `True`.</span>
     <span class="k">pass</span>
-
-    <span class="c1"># Turn off gradient computation again.</span>
-    <span class="n">vs</span><span class="o">.</span><span class="n">requires_grad</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 
     <span class="c1"># Return optimal value.</span>
     <span class="k">return</span> <span class="n">val_opt</span></div>
