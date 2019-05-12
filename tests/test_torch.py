@@ -5,7 +5,8 @@ from __future__ import absolute_import, division, print_function
 import torch
 import numpy as np
 
-from . import Vars, minimise_l_bfgs_b
+from . import Vars
+from varz.torch import minimise_l_bfgs_b
 # noinspection PyUnresolvedReferences
 from . import eq, neq, lt, le, ge, gt, raises, call, ok, allclose, approx
 
