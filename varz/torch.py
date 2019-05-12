@@ -4,6 +4,7 @@ from __future__ import absolute_import, division, print_function
 
 import logging
 
+import torch
 import lab as B
 import numpy as np
 from scipy.optimize import fmin_l_bfgs_b
@@ -19,7 +20,7 @@ def minimise_l_bfgs_b(f,
                       iters=1000,
                       trace=False,
                       names=None):
-    """Minimise a function with L-BFGS-B.
+    """Minimise a function with L-BFGS-B in PyTorch.
 
     Args:
         f (function): Function to optimise.
@@ -49,13 +50,16 @@ def minimise_l_bfgs_b(f,
     # Detach variables from the current computation graph.
     vs.detach_vars()
 
+    # Extract initial value.
+    x0 = vs.get_vector(*names).numpy()
+
     # Turn on gradient computation.
     vs.requires_grad(False)
     vs.requires_grad(True, *names)
 
     def f_wrapped(x):
         # Update variable manager.
-        vs.set_vector(B.cast(x, vs.dtype), *names)
+        vs.set_vector(torch.tensor(x, dtype=vs.dtype), *names)
 
         # Compute objective function value, detach, and convert to NumPy.
         try:
@@ -81,9 +85,6 @@ def minimise_l_bfgs_b(f,
         grad = vs.vector_packer.pack(*grads).detach_().numpy()
 
         return obj_value, grad
-
-    # Extract initial value.
-    x0 = vs.get_vector(*names).detach().numpy()
 
     # Perform optimisation routine.
     x_opt, val_opt, info = fmin_l_bfgs_b(func=f_wrapped,
