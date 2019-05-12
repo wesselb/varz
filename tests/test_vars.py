@@ -200,8 +200,8 @@ def test_detach_torch():
     yield eq, vs2.get_vars('a')[0].grad, 2
 
     # Check that copied fields are, in fact, copies.
-    vs.transforms.clear()
-    vs.inverse_transforms.clear()
+    del vs.transforms[:]
+    del vs.inverse_transforms[:]
     vs.index_by_name.clear()
     yield gt, len(vs2.transforms), 0
     yield gt, len(vs2.inverse_transforms), 0
