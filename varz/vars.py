@@ -32,7 +32,9 @@ def _assign(x, value):
 
 @_dispatch(B.TorchNumeric, B.Numeric)
 def _assign(x, value):
-    x.data.copy_(torch.tensor(value))
+    if not isinstance(value, B.TorchNumeric):
+        value = torch.tensor(value, dtype=x.dtype)
+    x.data.copy_(value)
     return x
 
 
