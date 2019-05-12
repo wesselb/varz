@@ -7,6 +7,7 @@ import logging
 import lab as B
 import numpy as np
 import tensorflow as tf
+import torch
 from plum import Dispatcher, Self, Referentiable
 
 from .util import Packer, match
@@ -31,7 +32,7 @@ def _assign(x, value):
 
 @_dispatch(B.TorchNumeric, B.Numeric)
 def _assign(x, value):
-    x.data.copy_(value)
+    x.data.copy_(torch.tensor(value))
     return x
 
 
@@ -64,9 +65,10 @@ class Vars(Referentiable):
             :class:`.vars.Vars`: Detached copy.
         """
         vs = Vars(dtype=self.dtype)
-        vs.transforms = self.transforms
-        vs.inverse_transforms = self.inverse_transforms
-        vs.index_by_name = self.index_by_name
+        vs.transforms = list(self.transforms)
+        vs.inverse_transforms = list(self.inverse_transforms)
+        vs.index_by_name = dict(self.index_by_name)
+        vs.vector_packer = self.vector_packer
         for var in self.vars:
             vs.vars.append(var.detach())
         return vs
@@ -86,7 +88,7 @@ class Vars(Referentiable):
         for var in self.get_vars(*names):
             var.requires_grad_(value)
 
-    def get_vars(self, *names):
+    def get_vars(self, *names, **kw_args):
         """Get latent variables.
 
         If no arguments are supplied, then all latent variables are retrieved.
@@ -95,13 +97,19 @@ class Vars(Referentiable):
 
         Args:
             *names (hashable): Get variables by name.
+            indices (bool, optional): Get the indices of the variables instead.
+                Defaults to `False`.
 
         Returns:
-            list[tensor]: Matched latent variables.
+            list: Matched latent variables or their indices, depending on the
+                value of `indices`.
         """
         # If nothing is specified, return all latent variables.
         if len(names) == 0:
-            return self.vars
+            if kw_args.get('indices', False):
+                return list(range(len(self.vars)))
+            else:
+                return self.vars
 
         # Collect indices of matches.
         indices = set()
@@ -116,8 +124,11 @@ class Vars(Referentiable):
             if not a_match:
                 raise ValueError('No variable matching "{}".'.format(name))
 
-        # Collect variables and return.
-        return [self.vars[i] for i in sorted(indices)]
+        # Return indices if asked for. Otherwise, return variables.
+        if kw_args.get('indices', False):
+            return sorted(indices)
+        else:
+            return [self.vars[i] for i in sorted(indices)]
 
     def get_vector(self, *names):
         """Get all the latent variables stacked in a vector.
@@ -134,7 +145,7 @@ class Vars(Referentiable):
         self.vector_packer = Packer(*vars)
         return self.vector_packer.pack(*vars)
 
-    def set_vector(self, values, *names):
+    def set_vector(self, values, *names, **kw_args):
         """Set all the latent variables by values from a vector.
 
         If no arguments are supplied, then all latent variables are retrieved.
@@ -142,16 +153,26 @@ class Vars(Referentiable):
         Args:
             values (tensor): Vector to set the variables to.
             *names (hashable): Set variables by name.
+            differentiable (bool, optional): Differentiable assignment. Defaults
+                to `False`.
 
         Returns:
             list: Assignment results.
         """
-        vars = self.get_vars(*names)
         values = self.vector_packer.unpack(values)
-        assignments = []
-        for var, value in zip(vars, values):
-            assignments.append(_assign(var, value))
-        return assignments
+
+        if kw_args.get('differentiable', False):
+            # Do a differentiable assignment.
+            for index, value in zip(self.get_vars(*names, indices=True),
+                                    values):
+                self.vars[index] = value
+            return values
+        else:
+            # Overwrite data.
+            assignments = []
+            for var, value in zip(self.get_vars(*names), values):
+                assignments.append(_assign(var, value))
+            return assignments
 
     def init(self, session):
         """Initialise the variables.
@@ -309,18 +330,26 @@ class Vars(Referentiable):
         # Generate the variable and return.
         return transform(latent)
 
-    def assign(self, name, value):
+    def assign(self, name, value, differentiable=False):
         """Assign a value to a variable.
 
         Args:
             name (hashable): Name of variable to assign value to.
             value (tensor): Value to assign.
+            differentiable (bool, optional): Do a differentiable assignment.
 
         Returns:
-            tensor: TensorFlow tensor that can be run to perform the assignment.
+            tensor: Assignment result.
         """
         index = self.index_by_name[name]
-        return _assign(self.vars[index], self.inverse_transforms[index](value))
+        if differentiable:
+            # Do a differentiable assignment.
+            self.vars[index] = value
+            return value
+        else:
+            # Overwrite data.
+            return _assign(self.vars[index],
+                           self.inverse_transforms[index](value))
 
     def __getitem__(self, name):
         """Get a variable by name.
