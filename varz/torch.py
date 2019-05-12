@@ -4,7 +4,6 @@ from __future__ import absolute_import, division, print_function
 
 import logging
 
-import torch
 import lab as B
 import numpy as np
 from scipy.optimize import fmin_l_bfgs_b
@@ -59,7 +58,7 @@ def minimise_l_bfgs_b(f,
 
     def f_wrapped(x):
         # Update variable manager.
-        vs.set_vector(torch.tensor(x, dtype=vs.dtype), *names)
+        vs.set_vector(B.cast(x, vs.dtype), *names)
 
         # Compute objective function value, detach, and convert to NumPy.
         try:
