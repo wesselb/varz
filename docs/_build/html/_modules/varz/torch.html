@@ -154,7 +154,6 @@
 
 <span class="kn">import</span> <span class="nn">logging</span>
 
-<span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">import</span> <span class="nn">lab</span> <span class="k">as</span> <span class="nn">B</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="k">import</span> <span class="n">fmin_l_bfgs_b</span>
@@ -209,7 +208,7 @@
 
     <span class="k">def</span> <span class="nf">f_wrapped</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
         <span class="c1"># Update variable manager.</span>
-        <span class="n">vs</span><span class="o">.</span><span class="n">set_vector</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">vs</span><span class="o">.</span><span class="n">dtype</span><span class="p">),</span> <span class="o">*</span><span class="n">names</span><span class="p">)</span>
+        <span class="n">vs</span><span class="o">.</span><span class="n">set_vector</span><span class="p">(</span><span class="n">B</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">vs</span><span class="o">.</span><span class="n">dtype</span><span class="p">),</span> <span class="o">*</span><span class="n">names</span><span class="p">)</span>
 
         <span class="c1"># Compute objective function value, detach, and convert to NumPy.</span>
         <span class="k">try</span><span class="p">:</span>
