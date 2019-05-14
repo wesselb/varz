@@ -77,7 +77,7 @@ class Packer(Referentiable):
         Returns:
             tensor: Vector representation of the objects.
         """
-        return B.concat([B.reshape(obj, shape=[-1]) for obj in objs], axis=0)
+        return B.concat(*[B.flatten(obj) for obj in objs], axis=0)
 
     @_dispatch({tuple, list})
     def pack(self, objs):
@@ -94,7 +94,7 @@ class Packer(Referentiable):
         """
         i, outs = 0, []
         for shape, length in zip(self._shapes, self._lengths):
-            outs.append(B.reshape(package[i:i + length], shape=shape))
+            outs.append(B.reshape(package[i:i + length], *shape))
             i += length
         return outs
 

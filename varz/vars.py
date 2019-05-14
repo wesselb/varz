@@ -200,7 +200,7 @@ class Vars(Referentiable):
         """
 
         def generate_init(shape, dtype):
-            return B.randn(shape, dtype)
+            return B.randn(dtype, *shape)
 
         return self._get_var(transform=lambda x: x,
                              inverse_transform=lambda x: x,
@@ -226,7 +226,7 @@ class Vars(Referentiable):
         """
 
         def generate_init(shape, dtype):
-            return B.rand(shape, dtype)
+            return B.rand(dtype, *shape)
 
         return self._get_var(transform=lambda x: B.exp(x),
                              inverse_transform=lambda x: B.log(x),
@@ -270,7 +270,7 @@ class Vars(Referentiable):
             return B.log(upper - x) - B.log(x - lower)
 
         def generate_init(shape, dtype):
-            return lower + B.rand(shape, dtype) * (upper - lower)
+            return lower + B.rand(dtype, *shape) * (upper - lower)
 
         return self._get_var(transform=transform,
                              inverse_transform=inverse_transform,

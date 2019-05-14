@@ -32,7 +32,7 @@ def test_initialiser():
 
 
 def test_packer():
-    a, b, c = B.randn((5, 10)), B.randn((20,)), B.randn((5, 1, 15))
+    a, b, c = B.randn(5, 10), B.randn(20), B.randn(5, 1, 15)
 
     for packer, args in zip([Packer(a, b, c), Packer([a, b, c])],
                             [(a, b, c), ((a, b, c),)]):
