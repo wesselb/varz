@@ -6,8 +6,8 @@ import logging
 
 import lab as B
 import numpy as np
-import tensorflow as tf
 import torch
+import tensorflow as tf
 from plum import Dispatcher, Self, Referentiable
 
 from .util import Packer, match
