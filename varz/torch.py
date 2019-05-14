@@ -36,7 +36,7 @@ def minimise_l_bfgs_b(f,
         float: Final objective function value.
     """
     names = [] if names is None else names
-    zero = B.cast(0, vs.dtype)
+    zero = B.cast(vs.dtype, 0)
 
     # Run function once to ensure that all variables are initialised and
     # available.
@@ -58,7 +58,7 @@ def minimise_l_bfgs_b(f,
 
     def f_wrapped(x):
         # Update variable manager.
-        vs.set_vector(B.cast(x, vs.dtype), *names)
+        vs.set_vector(B.cast(vs.dtype, x), *names)
 
         # Compute objective function value, detach, and convert to NumPy.
         try:

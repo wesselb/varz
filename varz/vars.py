@@ -305,7 +305,7 @@ class Vars(Referentiable):
         if init is None:
             init = generate_init(shape=shape, dtype=dtype)
         else:
-            init = B.cast(init, dtype)
+            init = B.cast(dtype, init)
 
         # Construct optimisable variable.
         latent = inverse_transform(init)
