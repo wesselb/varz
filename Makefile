@@ -1,4 +1,4 @@
-.PHONY: docmake docopen docinit docremove docupdate init install test clean
+.PHONY: docmake docopen docinit docremove docupdate install test clean
 
 PACKAGE := varz
 
@@ -41,10 +41,8 @@ docupdate: docmake
 	git push origin gh-pages
 	git checkout $(BRANCH)
 
-init:
-	pip install -r requirements.txt
-
 install:
+	pip install --upgrade pip cython
 	pip install -r requirements.txt -e .
 
 test:
