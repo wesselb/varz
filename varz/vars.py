@@ -56,6 +56,7 @@ class Vars(Referentiable):
 
         # Lookup:
         self.index_by_name = {}
+        self._get_vars_cache = {}
 
         # Packing:
         self.vector_packer = None
@@ -113,6 +114,13 @@ class Vars(Referentiable):
             else:
                 return self.vars
 
+        # Attempt to use cache.
+        cache_key = (names, kw_args.get('indices', False))
+        try:
+            return self._get_vars_cache[cache_key]
+        except KeyError:
+            pass
+
         # Collect indices of matches.
         indices = set()
         for name in names:
@@ -128,9 +136,13 @@ class Vars(Referentiable):
 
         # Return indices if asked for. Otherwise, return variables.
         if kw_args.get('indices', False):
-            return sorted(indices)
+            res = sorted(indices)
         else:
-            return [self.vars[i] for i in sorted(indices)]
+            res = [self.vars[i] for i in sorted(indices)]
+
+        # Store in cache before returning.
+        self._get_vars_cache[cache_key] = res
+        return res
 
     def get_vector(self, *names):
         """Get all the latent variables stacked in a vector.
@@ -297,6 +309,9 @@ class Vars(Referentiable):
             return self[name]
         except KeyError:
             pass
+
+        # A new variable will be added. Clear lookup cache.
+        self._get_vars_cache.clear()
 
         # Resolve data type.
         dtype = self.dtype if dtype is None else dtype

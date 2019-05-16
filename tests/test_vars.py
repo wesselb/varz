@@ -68,6 +68,14 @@ def test_get_vars():
     yield eq, vs.get_vars('1/*', '2/*', indices=True), [1, 2, 3]
 
 
+def test_get_vars_cache_clearing():
+    vs = Vars(np.int)
+    vs.get(name='var_a')
+    yield eq, vs.get_vars('var_*', indices=True), [0]
+    vs.get(name='var_b')
+    yield eq, vs.get_vars('var_*', indices=True), [0, 1]
+
+
 def test_get_set_vector():
     vs = Vars(np.float64)
 
