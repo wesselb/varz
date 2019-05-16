@@ -6,4 +6,5 @@ scipy
 torch
 tensorflow
 git+git://github.com/wesselb/plum@master#egg=plum
+cython
 git+git://github.com/wesselb/lab@master#egg=lab
