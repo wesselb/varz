@@ -167,8 +167,7 @@ Example of optimising variables:
 
 ```python
 import autograd.numpy as np
-from varz import Vars
-from varz.numpy import minimise_l_bfgs_b
+from varz.autograd import Vars, minimise_l_bfgs_b
 
 target = 5.
 
@@ -200,7 +199,7 @@ Example of optimising variables:
 ```python
 import tensorflow as tf
 from tensorflow.contrib.opt import ScipyOptimizerInterface as SOI
-from varz import Vars
+from varz.tensorflow import Vars
 
 target = tf.constant(5., dtype=tf.float64)
 
@@ -238,8 +237,8 @@ Example of optimising variables:
 
 ```python
 import torch
-from varz import Vars
-from varz.torch import minimise_l_bfgs_b
+from varz.torch import Vars, minimise_l_bfgs_b
+
 
 target = torch.tensor(5., dtype=torch.float64)
 

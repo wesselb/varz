@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import, division, print_function
 
+import importlib
 import logging
 import re
 from itertools import product
@@ -9,9 +10,32 @@ from itertools import product
 import lab as B
 from plum import Referentiable, Dispatcher, Self
 
-__all__ = ['Initialiser', 'Packer', 'match']
+__all__ = ['lazy_tf', 'lazy_torch', 'Initialiser', 'Packer', 'match']
 
 log = logging.getLogger(__name__)
+
+
+class LazyModule(object):
+    """A module that loads once an attribute is requested.
+
+    Args:
+        name (str): Name of module.
+    """
+
+    def __init__(self, name, *extensions):
+        self.name = name
+        self.module = None
+
+    def __getattr__(self, item):
+        # Load module.
+        if self.module is None:
+            self.module = importlib.import_module(self.name)
+
+        return getattr(self.module, item)
+
+
+lazy_tf = LazyModule('tensorflow')
+lazy_torch = LazyModule('torch')
 
 
 class Initialiser(object):

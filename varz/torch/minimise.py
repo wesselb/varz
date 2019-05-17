@@ -4,7 +4,7 @@ from __future__ import absolute_import, division, print_function
 
 import logging
 
-import lab as B
+import lab.torch as B
 import numpy as np
 from scipy.optimize import fmin_l_bfgs_b
 

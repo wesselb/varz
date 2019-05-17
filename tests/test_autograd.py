@@ -5,7 +5,7 @@ from __future__ import absolute_import, division, print_function
 import numpy as np
 
 from . import Vars
-from varz.numpy import minimise_l_bfgs_b
+from varz.autograd import minimise_l_bfgs_b
 # noinspection PyUnresolvedReferences
 from . import eq, neq, lt, le, ge, gt, raises, call, ok, allclose, approx
 

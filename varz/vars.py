@@ -6,11 +6,9 @@ import logging
 
 import lab as B
 import numpy as np
-import torch
-import tensorflow as tf
 from plum import Dispatcher, Self, Referentiable
 
-from .util import Packer, match
+from .util import Packer, match, lazy_tf as tf, lazy_torch as torch
 
 __all__ = ['Vars']
 
