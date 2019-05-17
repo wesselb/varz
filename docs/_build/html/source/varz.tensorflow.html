@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>varz.numpy module &mdash; varz 0.1.0 documentation</title>
+  <title>varz.tensorflow package &mdash; varz 0.1.0 documentation</title>
   
 
   
@@ -35,8 +35,8 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="varz.torch module" href="varz.torch.html" />
-    <link rel="prev" title="Application Programming Interface" href="../api.html" /> 
+    <link rel="next" title="varz.torch package" href="varz.torch.html" />
+    <link rel="prev" title="varz.autograd.minimise module" href="varz.autograd.minimise.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -87,8 +87,11 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../readme.html">Varz</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">Application Programming Interface</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">varz.numpy module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="varz.torch.html">varz.torch module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="varz.autograd.html">varz.autograd package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="varz.autograd.minimise.html">varz.autograd.minimise module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">varz.tensorflow package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="varz.torch.html">varz.torch package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="varz.torch.minimise.html">varz.torch.minimise module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="varz.util.html">varz.util module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="varz.vars.html">varz.vars module</a></li>
 </ul>
@@ -140,13 +143,13 @@
         
           <li><a href="../api.html">Application Programming Interface</a> &raquo;</li>
         
-      <li>varz.numpy module</li>
+      <li>varz.tensorflow package</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../_sources/source/varz.numpy.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/source/varz.tensorflow.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -159,35 +162,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-varz.numpy">
-<span id="varz-numpy-module"></span><h1>varz.numpy module<a class="headerlink" href="#module-varz.numpy" title="Permalink to this headline">¶</a></h1>
-<dl class="function">
-<dt id="varz.numpy.minimise_l_bfgs_b">
-<code class="descclassname">varz.numpy.</code><code class="descname">minimise_l_bfgs_b</code><span class="sig-paren">(</span><em>f</em>, <em>vs</em>, <em>f_calls=10000</em>, <em>iters=1000</em>, <em>trace=False</em>, <em>names=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/numpy.html#minimise_l_bfgs_b"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.numpy.minimise_l_bfgs_b" title="Permalink to this definition">¶</a></dt>
-<dd><p>Minimise a function with L-BFGS-B in NumPy and AutoGrad.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>f</strong> (<em>function</em>) – Function to optimise.</p></li>
-<li><p><strong>vs</strong> (<a class="reference internal" href="varz.vars.html#varz.vars.Vars" title="varz.vars.Vars"><code class="xref py py-class docutils literal notranslate"><span class="pre">vars.Vars</span></code></a>) – Variable manager.</p></li>
-<li><p><strong>f_calls</strong> (<em>int</em><em>, </em><em>optional</em>) – Maximum number of function calls. Defaults to
-<cite>10000</cite>.</p></li>
-<li><p><strong>iters</strong> (<em>int</em><em>, </em><em>optional</em>) – Maximum number of iterations. Defaults to
-<cite>1000</cite>.</p></li>
-<li><p><strong>trace</strong> (<em>bool</em><em>, </em><em>optional</em>) – Show trace of optimisation. Defaults to <cite>False</cite>.</p></li>
-<li><p><strong>names</strong> (<em>list</em><em>, </em><em>optional</em>) – List of names of variables to optimise. Defaults
-to all variables.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Final objective function value.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
-
+  <div class="section" id="module-varz.tensorflow">
+<span id="varz-tensorflow-package"></span><h1>varz.tensorflow package<a class="headerlink" href="#module-varz.tensorflow" title="Permalink to this headline">¶</a></h1>
 </div>
 
 
@@ -198,10 +174,10 @@ to all variables.</p></li>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="varz.torch.html" class="btn btn-neutral float-right" title="varz.torch module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="varz.torch.html" class="btn btn-neutral float-right" title="varz.torch package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../api.html" class="btn btn-neutral float-left" title="Application Programming Interface" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="varz.autograd.minimise.html" class="btn btn-neutral float-left" title="varz.autograd.minimise module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

@@ -1,0 +1,15 @@
+varz.autograd package
+=====================
+
+.. automodule:: varz.autograd
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+
+   varz.autograd.minimise
+

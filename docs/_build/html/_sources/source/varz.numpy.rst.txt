@@ -1,7 +1,0 @@
-varz.numpy module
-=================
-
-.. automodule:: varz.numpy
-    :members:
-    :undoc-members:
-    :show-inheritance:

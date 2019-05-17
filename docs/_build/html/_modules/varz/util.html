@@ -152,6 +152,7 @@
 
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span>
 
+<span class="kn">import</span> <span class="nn">importlib</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="k">import</span> <span class="n">product</span>
@@ -159,9 +160,32 @@
 <span class="kn">import</span> <span class="nn">lab</span> <span class="k">as</span> <span class="nn">B</span>
 <span class="kn">from</span> <span class="nn">plum</span> <span class="k">import</span> <span class="n">Referentiable</span><span class="p">,</span> <span class="n">Dispatcher</span><span class="p">,</span> <span class="n">Self</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Initialiser&#39;</span><span class="p">,</span> <span class="s1">&#39;Packer&#39;</span><span class="p">,</span> <span class="s1">&#39;match&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;lazy_tf&#39;</span><span class="p">,</span> <span class="s1">&#39;lazy_torch&#39;</span><span class="p">,</span> <span class="s1">&#39;Initialiser&#39;</span><span class="p">,</span> <span class="s1">&#39;Packer&#39;</span><span class="p">,</span> <span class="s1">&#39;match&#39;</span><span class="p">]</span>
 
 <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">LazyModule</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A module that loads once an attribute is requested.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        name (str): Name of module.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">extensions</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="c1"># Load module.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">module</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+
+
+<span class="n">lazy_tf</span> <span class="o">=</span> <span class="n">LazyModule</span><span class="p">(</span><span class="s1">&#39;tensorflow&#39;</span><span class="p">)</span>
+<span class="n">lazy_torch</span> <span class="o">=</span> <span class="n">LazyModule</span><span class="p">(</span><span class="s1">&#39;torch&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="Initialiser"><a class="viewcode-back" href="../../source/varz.util.html#varz.util.Initialiser">[docs]</a><span class="k">class</span> <span class="nc">Initialiser</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>

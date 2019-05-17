@@ -1,7 +1,15 @@
-varz.torch module
-=================
+varz.torch package
+==================
 
 .. automodule:: varz.torch
     :members:
     :undoc-members:
     :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+
+   varz.torch.minimise
+

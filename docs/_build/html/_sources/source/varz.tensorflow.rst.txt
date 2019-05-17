@@ -1,0 +1,8 @@
+varz.tensorflow package
+=======================
+
+.. automodule:: varz.tensorflow
+    :members:
+    :undoc-members:
+    :show-inheritance:
+

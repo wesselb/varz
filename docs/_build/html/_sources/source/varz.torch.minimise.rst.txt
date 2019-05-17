@@ -1,0 +1,7 @@
+varz.torch.minimise module
+==========================
+
+.. automodule:: varz.torch.minimise
+    :members:
+    :undoc-members:
+    :show-inheritance:

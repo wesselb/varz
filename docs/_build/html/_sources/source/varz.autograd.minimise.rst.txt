@@ -1,0 +1,7 @@
+varz.autograd.minimise module
+=============================
+
+.. automodule:: varz.autograd.minimise
+    :members:
+    :undoc-members:
+    :show-inheritance:

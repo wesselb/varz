@@ -156,11 +156,9 @@
 
 <span class="kn">import</span> <span class="nn">lab</span> <span class="k">as</span> <span class="nn">B</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 <span class="kn">from</span> <span class="nn">plum</span> <span class="k">import</span> <span class="n">Dispatcher</span><span class="p">,</span> <span class="n">Self</span><span class="p">,</span> <span class="n">Referentiable</span>
 
-<span class="kn">from</span> <span class="nn">.util</span> <span class="k">import</span> <span class="n">Packer</span><span class="p">,</span> <span class="n">match</span>
+<span class="kn">from</span> <span class="nn">.util</span> <span class="k">import</span> <span class="n">Packer</span><span class="p">,</span> <span class="n">match</span><span class="p">,</span> <span class="n">lazy_tf</span> <span class="k">as</span> <span class="n">tf</span><span class="p">,</span> <span class="n">lazy_torch</span> <span class="k">as</span> <span class="n">torch</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Vars&#39;</span><span class="p">]</span>
 

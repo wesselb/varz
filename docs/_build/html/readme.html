@@ -306,8 +306,7 @@ variables, <code class="docutils literal notranslate"><span class="pre">Vars.set
 minimisation using the L-BFGS-B algorithm.</p>
 <p>Example of optimising variables:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">autograd.numpy</span> <span class="kn">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">varz</span> <span class="kn">import</span> <span class="n">Vars</span>
-<span class="kn">from</span> <span class="nn">varz.numpy</span> <span class="kn">import</span> <span class="n">minimise_l_bfgs_b</span>
+<span class="kn">from</span> <span class="nn">varz.autograd</span> <span class="kn">import</span> <span class="n">Vars</span><span class="p">,</span> <span class="n">minimise_l_bfgs_b</span>
 
 <span class="n">target</span> <span class="o">=</span> <span class="mf">5.</span>
 
@@ -336,7 +335,7 @@ minimisation using the L-BFGS-B algorithm.</p>
 <p>Example of optimising variables:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
 <span class="kn">from</span> <span class="nn">tensorflow.contrib.opt</span> <span class="kn">import</span> <span class="n">ScipyOptimizerInterface</span> <span class="k">as</span> <span class="n">SOI</span>
-<span class="kn">from</span> <span class="nn">varz</span> <span class="kn">import</span> <span class="n">Vars</span>
+<span class="kn">from</span> <span class="nn">varz.tensorflow</span> <span class="kn">import</span> <span class="n">Vars</span>
 
 <span class="n">target</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="mf">5.</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
 
@@ -369,8 +368,8 @@ instead. Whether variables require gradients can be configured with
 minimisation using the L-BFGS-B algorithm.</p>
 <p>Example of optimising variables:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">from</span> <span class="nn">varz</span> <span class="kn">import</span> <span class="n">Vars</span>
-<span class="kn">from</span> <span class="nn">varz.torch</span> <span class="kn">import</span> <span class="n">minimise_l_bfgs_b</span>
+<span class="kn">from</span> <span class="nn">varz.torch</span> <span class="kn">import</span> <span class="n">Vars</span><span class="p">,</span> <span class="n">minimise_l_bfgs_b</span>
+
 
 <span class="n">target</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">5.</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
 

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>varz.torch package &mdash; varz 0.1.0 documentation</title>
+  <title>varz.torch.minimise module &mdash; varz 0.1.0 documentation</title>
   
 
   
@@ -35,8 +35,8 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="varz.torch.minimise module" href="varz.torch.minimise.html" />
-    <link rel="prev" title="varz.tensorflow package" href="varz.tensorflow.html" /> 
+    <link rel="next" title="varz.util module" href="varz.util.html" />
+    <link rel="prev" title="varz.torch package" href="varz.torch.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -90,14 +90,14 @@
 <li class="toctree-l2"><a class="reference internal" href="varz.autograd.html">varz.autograd package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="varz.autograd.minimise.html">varz.autograd.minimise module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="varz.tensorflow.html">varz.tensorflow package</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">varz.torch package</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="varz.torch.minimise.html">varz.torch.minimise module</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="varz.torch.html">varz.torch package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="varz.torch.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">varz.torch.minimise module</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="varz.torch.minimise.html">varz.torch.minimise module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">varz.torch.minimise module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="varz.util.html">varz.util module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="varz.vars.html">varz.vars module</a></li>
 </ul>
@@ -149,13 +149,15 @@
         
           <li><a href="../api.html">Application Programming Interface</a> &raquo;</li>
         
-      <li>varz.torch package</li>
+          <li><a href="varz.torch.html">varz.torch package</a> &raquo;</li>
+        
+      <li>varz.torch.minimise module</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../_sources/source/varz.torch.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/source/varz.torch.minimise.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -168,16 +170,35 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-varz.torch">
-<span id="varz-torch-package"></span><h1>varz.torch package<a class="headerlink" href="#module-varz.torch" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="varz.torch.minimise.html">varz.torch.minimise module</a></li>
+  <div class="section" id="module-varz.torch.minimise">
+<span id="varz-torch-minimise-module"></span><h1>varz.torch.minimise module<a class="headerlink" href="#module-varz.torch.minimise" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="varz.torch.minimise.minimise_l_bfgs_b">
+<code class="descclassname">varz.torch.minimise.</code><code class="descname">minimise_l_bfgs_b</code><span class="sig-paren">(</span><em>f</em>, <em>vs</em>, <em>f_calls=10000</em>, <em>iters=1000</em>, <em>trace=False</em>, <em>names=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/torch/minimise.html#minimise_l_bfgs_b"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.torch.minimise.minimise_l_bfgs_b" title="Permalink to this definition">¶</a></dt>
+<dd><p>Minimise a function with L-BFGS-B in PyTorch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>f</strong> (<em>function</em>) – Function to optimise.</p></li>
+<li><p><strong>vs</strong> (<a class="reference internal" href="varz.vars.html#varz.vars.Vars" title="varz.vars.Vars"><code class="xref py py-class docutils literal notranslate"><span class="pre">vars.Vars</span></code></a>) – Variable manager.</p></li>
+<li><p><strong>f_calls</strong> (<em>int</em><em>, </em><em>optional</em>) – Maximum number of function calls. Defaults to
+<cite>10000</cite>.</p></li>
+<li><p><strong>iters</strong> (<em>int</em><em>, </em><em>optional</em>) – Maximum number of iterations. Defaults to
+<cite>1000</cite>.</p></li>
+<li><p><strong>trace</strong> (<em>bool</em><em>, </em><em>optional</em>) – Show trace of optimisation. Defaults to <cite>False</cite>.</p></li>
+<li><p><strong>names</strong> (<em>list</em><em>, </em><em>optional</em>) – List of names of variables to optimise. Defaults
+to all variables.</p></li>
 </ul>
-</div>
-</div>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Final objective function value.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 
 
@@ -188,10 +209,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="varz.torch.minimise.html" class="btn btn-neutral float-right" title="varz.torch.minimise module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="varz.util.html" class="btn btn-neutral float-right" title="varz.util module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="varz.tensorflow.html" class="btn btn-neutral float-left" title="varz.tensorflow package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="varz.torch.html" class="btn btn-neutral float-left" title="varz.torch package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
