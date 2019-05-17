@@ -15,6 +15,6 @@ from .util import *
 
 # Load LAB extensions.
 # noinspection PyUnresolvedReferences
-import lab.tensorflow
-# noinspection PyUnresolvedReferences
 import lab.torch
+# noinspection PyUnresolvedReferences
+import lab.tensorflow
