@@ -259,3 +259,27 @@ array(1.36449515e-13)  # Final objective function value.
 >>> vs['x'] - target ** 2
 tensor(1.6378e-07, dtype=torch.float64)
 ```
+
+
+### Get Variables from a Source
+
+The keyword argument `source` can set to a tensor from which the latent 
+variables will be obtained.
+
+Example:
+
+```python
+>>> vs = Vars(np.float32, source=np.array([1, 2, 3, 4, 5]))
+
+>>> vs.get()
+array(1., dtype=float32)
+
+>>> vs.get(shape=(3,))
+array([2., 3., 4.], dtype=float32)
+
+>>> vs.pos()
+148.41316
+
+>>> np.exp(5).astype(np.float32)
+148.41316
+```

@@ -223,7 +223,7 @@ def test_requires_grad_detach_vars_torch():
     vs = Vars(torch.float64)
     vs.pos(1, name='a')
 
-    # Test the gradients need to first be required.
+    # Test that gradients need to first be required.
     yield raises, RuntimeError, lambda: (2 * vs['a']).backward()
 
     # Test that gradients can be required and are then computed.
@@ -236,3 +236,20 @@ def test_requires_grad_detach_vars_torch():
     result = 2 * vs['b']
     vs.detach_vars()
     yield raises, RuntimeError, lambda: result.backward()
+
+
+def test_source():
+    vs = Vars(np.float32, source=np.ones(10))
+
+    yield eq, vs.get(), 1.
+    yield approx, vs.pos(shape=(5,)), np.exp(np.ones(5))
+    yield approx, vs.pos(), np.exp(1.)
+    yield raises, ValueError, lambda: vs.pos(shape=(5,))
+
+    # Test that the source variables are casted to the right data type.
+
+    vs = Vars(np.float32, source=np.array([1]))
+    yield eq, vs.get().dtype, np.float32
+
+    vs = Vars(np.float64, source=np.array([1]))
+    yield eq, vs.get().dtype, np.float64

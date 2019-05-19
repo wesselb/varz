@@ -3,6 +3,8 @@
 from __future__ import absolute_import, division, print_function
 
 import logging
+from functools import reduce
+from operator import mul
 
 import lab as B
 import numpy as np
@@ -41,11 +43,17 @@ class Vars(Referentiable):
 
     Args:
         dtype (data type): Data type of the variables.
+        source (tensor, optional): Tensor to source variables from. Defaults to
+            not being used.
     """
     _dispatch = Dispatcher(in_class=Self)
 
-    def __init__(self, dtype):
+    def __init__(self, dtype, source=None):
         self.dtype = dtype
+
+        # Source:
+        self.source = source
+        self.source_index = 0
 
         # Storage:
         self.vars = []
@@ -314,21 +322,34 @@ class Vars(Referentiable):
         # Resolve data type.
         dtype = self.dtype if dtype is None else dtype
 
-        # Resolve initialisation and inverse transform.
-        if init is None:
-            init = generate_init(shape=shape, dtype=dtype)
-        else:
-            init = B.cast(dtype, init)
+        # If no source is provided, get the latent from from the provided
+        # initialiser.
+        if self.source is None:
+            # Resolve initialisation and inverse transform.
+            if init is None:
+                init = generate_init(shape=shape, dtype=dtype)
+            else:
+                init = B.cast(dtype, init)
 
-        # Construct optimisable variable.
-        latent = inverse_transform(init)
-        if isinstance(self.dtype, B.TFDType):
-            latent = tf.Variable(latent)
-        elif isinstance(self.dtype, B.TorchDType):
-            pass  # All is good in this case.
+            # Construct optimisable variable.
+            latent = inverse_transform(init)
+            if isinstance(self.dtype, B.TFDType):
+                latent = tf.Variable(latent)
+            elif isinstance(self.dtype, B.TorchDType):
+                pass  # All is good in this case.
+            else:
+                # Must be a NumPy data type.
+                assert isinstance(self.dtype, B.NPDType)
+                latent = np.array(latent)
         else:
-            # Must be a NumPy data type.
-            latent = np.array(latent)
+            # Get the latent variable from the source.
+            length = reduce(mul, shape, 1)
+            latent_flat = \
+                self.source[self.source_index:self.source_index + length]
+            self.source_index += length
+
+            # Cast to the right data type.
+            latent = B.cast(dtype, B.reshape(latent_flat, *shape))
 
         # Store transforms.
         self.vars.append(latent)
