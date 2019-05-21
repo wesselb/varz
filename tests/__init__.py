@@ -11,6 +11,10 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__),
 # noinspection PyUnresolvedReferences
 from varz import *
 
+# Load TensorFlow extension.
+# noinspection PyUnresolvedReferences
+import varz.tensorflow
+
 from .util import *
 
 # Load LAB extensions.

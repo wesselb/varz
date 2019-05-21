@@ -30,6 +30,9 @@ def test_get_vars():
     yield eq, vs.get_vars(), [1, 2, 3, 4]
     yield eq, vs.get_vars(indices=True), [0, 1, 2, 3]
 
+    # Test that names must exist.
+    yield raises, ValueError, lambda: vs.get_vars('e')
+
     # Test some queries.
     yield eq, vs.get_vars('a'), [1]
     yield eq, vs.get_vars('a', '*/b'), [1, 2]
