@@ -2,13 +2,11 @@
 
 from __future__ import absolute_import, division, print_function
 
-import torch
 import numpy as np
+import torch
 
-from . import Vars
-from varz.torch import minimise_l_bfgs_b
-# noinspection PyUnresolvedReferences
-from . import eq, neq, lt, le, ge, gt, raises, call, ok, allclose, approx
+from varz.torch import minimise_l_bfgs_b, Vars
+from .util import approx
 
 
 def test_optimise():
@@ -25,8 +23,8 @@ def test_optimise():
     val_opt = minimise_l_bfgs_b(f, vs)
 
     # Check for equality up to five digits.
-    yield approx, val_opt, 9, 5
-    yield approx, vs['x'].detach().numpy(), 0, 5
+    approx(val_opt, 9, digits=5)
+    approx(vs['x'].detach().numpy(), 0, digits=5)
 
 
 first_call = True
@@ -46,7 +44,7 @@ def test_optimise_runtimeerror():
         return vs_.get(name='x', init=5.) ** 2
 
     # Check that the optimiser runs.
-    yield minimise_l_bfgs_b, f, vs
+    minimise_l_bfgs_b(f, vs)
 
 
 calls = 0
@@ -63,6 +61,6 @@ def test_optimise_zero_calls():
     # Check that running the optimiser for zero iterations only incurs a
     # single call.
     minimise_l_bfgs_b(f, vs, iters=0)
-    yield eq, calls, 1
+    assert calls == 1
     minimise_l_bfgs_b(f, vs, f_calls=0)
-    yield eq, calls, 2
+    assert calls == 2

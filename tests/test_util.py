@@ -4,12 +4,11 @@ from __future__ import absolute_import, division, print_function
 
 from itertools import product
 
-import numpy as np
 import lab as B
+import numpy as np
 
-from . import Vars, Initialiser, Packer
-# noinspection PyUnresolvedReferences
-from . import eq, neq, lt, le, ge, gt, raises, call, ok, allclose
+from varz import Vars, Initialiser, Packer
+from .util import allclose
 
 
 def test_initialiser():
@@ -27,8 +26,8 @@ def test_initialiser():
     # Test the initialisations.
     for initialiser, values in zip(inits, product([-3., 4.], [5., 6.])):
         initialiser()
-        yield eq, vs['a'], values[0]
-        yield allclose, vs['b'], values[1]
+        assert vs['a'] == values[0]
+        allclose(vs['b'], values[1])
 
 
 def test_packer():
@@ -38,10 +37,10 @@ def test_packer():
                             [(a, b, c), ((a, b, c),)]):
         # Test packing.
         packed = packer.pack(*args)
-        yield eq, B.rank(packed), 1
+        assert B.rank(packed) == 1
 
         # Test unpacking.
         a_, b_, c_ = packer.unpack(packed)
-        yield allclose, a, a_
-        yield allclose, b, b_
-        yield allclose, c, c_
+        allclose(a, a_)
+        allclose(b, b_)
+        allclose(c, c_)
