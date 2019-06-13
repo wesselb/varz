@@ -8,7 +8,7 @@ requirements = ['numpy',
                 'autograd',
                 'scipy<=1.2.1',
                 'torch',
-                'tensorflow'
+                'tensorflow',
 
                 'plum-dispatch',
                 'backends']
