@@ -1,7 +1,7 @@
-numpy
-autograd
-scipy<=1.2.1
-torch
-tensorflow
-git+git://github.com/wesselb/plum@master#egg=plum
-git+git://github.com/wesselb/lab@master#egg=lab
+# Requirements for development, testing, and documentation.
+-e .
+sphinx
+sphinx-rtd-theme
+pytest
+pytest-cov
+coveralls

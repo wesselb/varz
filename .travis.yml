@@ -10,9 +10,8 @@ matrix:
 before_install:
   - sudo apt-get install gfortran google-perftools
   - export LD_PRELOAD="/usr/lib/libtcmalloc.so.4"
-  - pip install --upgrade pip
-  - pip install --upgrade cython pytest pytest-cov coveralls
 install:
+  - pip install --upgrade pip setuptools wheel numpy cython
   - pip install --no-cache-dir -U -r requirements.txt | cat
 script:
   - pytest -v --cov=varz --cov-report term-missing
