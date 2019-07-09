@@ -6,6 +6,8 @@
 Painless optimisation of constrained variables in PyTorch, TensorFlow,
 and AutoGrad
 
+*Note:* Varz requires TensorFlow 2.
+
 -  `Installation <#installation>`__
 -  `Manual <#manual>`__
 
@@ -20,16 +22,14 @@ and AutoGrad
 Installation
 ------------
 
-The package is tested for Python 2.7 and Python 3.6, which are the
-versions recommended to use. To install the package, please ensure that
-``gcc`` and ``gfortran`` are available, and then run the following
-commands:
+Before installing the package, please ensure that ``gcc`` and
+``gfortran`` are available. On OS X, these are both installed with
+``brew install gcc``; users of Anaconda may want to instead consider
+``conda install gcc``. Then simply
 
 ::
 
-    git clone https://github.com/wesselb/varz
-    cd varz
-    make install
+    pip install varz
 
 Manual
 ------
@@ -82,9 +82,9 @@ The value of ``x`` may be changed by assigning it a different value.
     array([[ 1.43477728,  0.51006941],
            [-0.74686452, -1.05285767]])
 
-By default, assignment is non-differentiable and overwrites data. For
-differentiable assignment, set the keyword argument
-``differentiable=True``.
+By default, assignment is non-differentiable and *overwrites* data. For
+differentiable assignment, which *replaces* data, set the keyword
+argument ``differentiable=True``.
 
 .. code:: python
 
@@ -92,8 +92,10 @@ differentiable assignment, set the keyword argument
     array([[ 0.12500578, -0.21510423],
            [-0.61336039,  1.23074066]])
 
-*Note:* In TensorFlow, non-differentiable assignment operations return
-tensors that must be run to perform the assignments.
+The variable container can be copied with ``vs.copy()``. Note that the
+copy *shares its variables with the original*. This means that
+assignment will also mutate the original; differentiable assignment,
+however, will not.
 
 Naming
 ~~~~~~
@@ -168,7 +170,7 @@ variables, ``Vars.set_vector`` can be used.
 AutoGrad
 ~~~~~~~~
 
-The function ``varz.numpy.minimise_l_bfgs_b`` can be used to perform
+The function ``varz.autograd.minimise_l_bfgs_b`` can be used to perform
 minimisation using the L-BFGS-B algorithm.
 
 Example of optimising variables:
@@ -178,7 +180,7 @@ Example of optimising variables:
     import autograd.numpy as np
     from varz.autograd import Vars, minimise_l_bfgs_b
 
-    target = 5.
+    target = 5. 
 
 
     def objective(x):  # `x` must be positive!
@@ -200,44 +202,44 @@ Example of optimising variables:
 TensorFlow
 ~~~~~~~~~~
 
-All the variables held by a container can be initialised at once with
-``Vars.init``.
+The function ``varz.tensorflow.minimise_l_bfgs_b`` can be used to
+perform minimisation using the L-BFGS-B algorithm.
 
 Example of optimising variables:
 
 .. code:: python
 
     import tensorflow as tf
-    from tensorflow.contrib.opt import ScipyOptimizerInterface as SOI
-    from varz.tensorflow import Vars
+    from varz.tensorflow import Vars, minimise_l_bfgs_b
 
-    target = tf.constant(5., dtype=tf.float64)
+    target = 5.
 
-    vs = Vars(tf.float64)
-    x = vs.pos(10., name='x')
-    objective = (x ** .5 - target) ** 2  # `x` must be positive!
+
+    def objective(x):  # `x` must be positive!
+        return (x ** .5 - target) ** 2  
 
 .. code:: python
 
-    >>> opt = SOI(objective, var_list=vs.get_vars('x'))
+    >>> vs = Vars(tf.float64)
 
-    >>> sess = tf.Session()
+    >>> vs.pos(10., name='x')
+    <tf.Tensor: id=11, shape=(), dtype=float64, numpy=10.000000000000002>
 
-    >>> vs.init(sess)
+    >>> minimise_l_bfgs_b(lambda v: objective(v['x']), vs, names=['x'])
+    3.17785950743424e-19  # Final objective function value.
 
-    >>> opt.minimize(sess)
-
-    >>> sess.run(vs['x'] - target ** 2)
-    -5.637250666268301e-09
+    >>> vs['x'] - target ** 2
+    <tf.Tensor: id=562, shape=(), dtype=float64, numpy=-5.637250666268301e-09>
 
 PyTorch
 ~~~~~~~
 
 All the variables held by a container can be detached from the current
-computation graph with ``Vars.detach_vars``. To make a copy of the
-container with detached versions of the variables, use ``Vars.detach``
-instead. Whether variables require gradients can be configured with
-``Vars.requires_grad``. By default, no variable requires a gradient.
+computation graph with ``Vars.detach`` . To make a copy of the container
+with detached versions of the variables, use ``Vars.copy`` with
+``detach=True`` instead. Whether variables require gradients can be
+configured with ``Vars.requires_grad``. By default, no variable requires
+a gradient.
 
 The function ``varz.torch.minimise_l_bfgs_b`` can be used to perform
 minimisation using the L-BFGS-B algorithm.
@@ -264,10 +266,34 @@ Example of optimising variables:
     tensor(10.0000, dtype=torch.float64)
 
     >>> minimise_l_bfgs_b(lambda v: objective(v['x']), vs, names=['x'])
-    array(1.36449515e-13)  # Final objective function value.
+    array(3.17785951e-19)  # Final objective function value.
 
     >>> vs['x'] - target ** 2
-    tensor(1.6378e-07, dtype=torch.float64)
+    tensor(-5.6373e-09, dtype=torch.float64)
+
+Get Variables from a Source
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The keyword argument ``source`` can set to a tensor from which the
+latent variables will be obtained.
+
+Example:
+
+.. code:: python
+
+    >>> vs = Vars(np.float32, source=np.array([1, 2, 3, 4, 5]))
+
+    >>> vs.get()
+    array(1., dtype=float32)
+
+    >>> vs.get(shape=(3,))
+    array([2., 3., 4.], dtype=float32)
+
+    >>> vs.pos()
+    148.41316
+
+    >>> np.exp(5).astype(np.float32)
+    148.41316
 
 .. |Build| image:: https://travis-ci.org/wesselb/varz.svg?branch=master
    :target: https://travis-ci.org/wesselb/varz

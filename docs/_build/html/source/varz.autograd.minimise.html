@@ -35,7 +35,7 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="varz.tensorflow package" href="varz.tensorflow.html" />
+    <link rel="next" title="varz.minimise module" href="varz.minimise.html" />
     <link rel="prev" title="varz.autograd package" href="varz.autograd.html" /> 
 </head>
 
@@ -95,7 +95,9 @@
 </ul>
 </li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">varz.autograd.minimise module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="varz.minimise.html">varz.minimise module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="varz.tensorflow.html">varz.tensorflow package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="varz.tensorflow.minimise.html">varz.tensorflow.minimise module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="varz.torch.html">varz.torch package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="varz.torch.minimise.html">varz.torch.minimise module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="varz.util.html">varz.util module</a></li>
@@ -174,30 +176,8 @@
 <span id="varz-autograd-minimise-module"></span><h1>varz.autograd.minimise module<a class="headerlink" href="#module-varz.autograd.minimise" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="varz.autograd.minimise.minimise_l_bfgs_b">
-<code class="descclassname">varz.autograd.minimise.</code><code class="descname">minimise_l_bfgs_b</code><span class="sig-paren">(</span><em>f</em>, <em>vs</em>, <em>f_calls=10000</em>, <em>iters=1000</em>, <em>trace=False</em>, <em>names=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/autograd/minimise.html#minimise_l_bfgs_b"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.autograd.minimise.minimise_l_bfgs_b" title="Permalink to this definition">¶</a></dt>
-<dd><p>Minimise a function with L-BFGS-B in NumPy and AutoGrad.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>f</strong> (<em>function</em>) – Function to optimise.</p></li>
-<li><p><strong>vs</strong> (<a class="reference internal" href="varz.vars.html#varz.vars.Vars" title="varz.vars.Vars"><code class="xref py py-class docutils literal notranslate"><span class="pre">vars.Vars</span></code></a>) – Variable manager.</p></li>
-<li><p><strong>f_calls</strong> (<em>int</em><em>, </em><em>optional</em>) – Maximum number of function calls. Defaults to
-<cite>10000</cite>.</p></li>
-<li><p><strong>iters</strong> (<em>int</em><em>, </em><em>optional</em>) – Maximum number of iterations. Defaults to
-<cite>1000</cite>.</p></li>
-<li><p><strong>trace</strong> (<em>bool</em><em>, </em><em>optional</em>) – Show trace of optimisation. Defaults to <cite>False</cite>.</p></li>
-<li><p><strong>names</strong> (<em>list</em><em>, </em><em>optional</em>) – List of names of variables to optimise. Defaults
-to all variables.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Final objective function value.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
+<code class="descclassname">varz.autograd.minimise.</code><code class="descname">minimise_l_bfgs_b</code><span class="sig-paren">(</span><em>f</em>, <em>vs</em>, <em>f_calls=10000</em>, <em>iters=1000</em>, <em>trace=False</em>, <em>names=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/minimise.html#minimise_l_bfgs_b"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.autograd.minimise.minimise_l_bfgs_b" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </div>
 
@@ -209,7 +189,7 @@ to all variables.</p></li>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="varz.tensorflow.html" class="btn btn-neutral float-right" title="varz.tensorflow package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="varz.minimise.html" class="btn btn-neutral float-right" title="varz.minimise module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="varz.autograd.html" class="btn btn-neutral float-left" title="varz.autograd package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

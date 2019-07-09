@@ -6,3 +6,10 @@ varz.tensorflow package
     :undoc-members:
     :show-inheritance:
 
+Submodules
+----------
+
+.. toctree::
+
+   varz.tensorflow.minimise
+

@@ -94,6 +94,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#autograd">AutoGrad</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tensorflow">TensorFlow</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pytorch">PyTorch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get-variables-from-a-source">Get Variables from a Source</a></li>
 </ul>
 </li>
 </ul>
@@ -168,6 +169,7 @@
 <p><a class="reference external" href="https://travis-ci.org/wesselb/varz"><img alt="Build" src="https://travis-ci.org/wesselb/varz.svg?branch=master" /></a> <a class="reference external" href="https://coveralls.io/github/wesselb/varz?branch=master"><img alt="Coverage Status" src="https://coveralls.io/repos/github/wesselb/varz/badge.svg?branch=master&amp;service=github" /></a> <a class="reference external" href="https://wesselb.github.io/varz"><img alt="Latest Docs" src="https://img.shields.io/badge/docs-latest-blue.svg" /></a></p>
 <p>Painless optimisation of constrained variables in PyTorch, TensorFlow,
 and AutoGrad</p>
+<p><em>Note:</em> Varz requires TensorFlow 2.</p>
 <ul class="simple">
 <li><p><a class="reference external" href="#installation">Installation</a></p></li>
 <li><p><a class="reference external" href="#manual">Manual</a></p>
@@ -184,13 +186,11 @@ Vector</a></p></li>
 </ul>
 <div class="section" id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
-<p>The package is tested for Python 2.7 and Python 3.6, which are the
-versions recommended to use. To install the package, please ensure that
-<code class="docutils literal notranslate"><span class="pre">gcc</span></code> and <code class="docutils literal notranslate"><span class="pre">gfortran</span></code> are available, and then run the following
-commands:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">wesselb</span><span class="o">/</span><span class="n">varz</span>
-<span class="n">cd</span> <span class="n">varz</span>
-<span class="n">make</span> <span class="n">install</span>
+<p>Before installing the package, please ensure that <code class="docutils literal notranslate"><span class="pre">gcc</span></code> and
+<code class="docutils literal notranslate"><span class="pre">gfortran</span></code> are available. On OS X, these are both installed with
+<code class="docutils literal notranslate"><span class="pre">brew</span> <span class="pre">install</span> <span class="pre">gcc</span></code>; users of Anaconda may want to instead consider
+<code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">gcc</span></code>. Then simply</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">varz</span>
 </pre></div>
 </div>
 </div>
@@ -233,16 +233,18 @@ value and a name.</p>
 <span class="go">       [-0.74686452, -1.05285767]])</span>
 </pre></div>
 </div>
-<p>By default, assignment is non-differentiable and overwrites data. For
-differentiable assignment, set the keyword argument
-<code class="docutils literal notranslate"><span class="pre">differentiable=True</span></code>.</p>
+<p>By default, assignment is non-differentiable and <em>overwrites</em> data. For
+differentiable assignment, which <em>replaces</em> data, set the keyword
+argument <code class="docutils literal notranslate"><span class="pre">differentiable=True</span></code>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">vs</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">differentiable</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 <span class="go">array([[ 0.12500578, -0.21510423],</span>
 <span class="go">       [-0.61336039,  1.23074066]])</span>
 </pre></div>
 </div>
-<p><em>Note:</em> In TensorFlow, non-differentiable assignment operations return
-tensors that must be run to perform the assignments.</p>
+<p>The variable container can be copied with <code class="docutils literal notranslate"><span class="pre">vs.copy()</span></code>. Note that the
+copy <em>shares its variables with the original</em>. This means that
+assignment will also mutate the original; differentiable assignment,
+however, will not.</p>
 <div class="section" id="naming">
 <h3>Naming<a class="headerlink" href="#naming" title="Permalink to this headline">¶</a></h3>
 <p>Variables may be organised by naming them hierarchically using <code class="docutils literal notranslate"><span class="pre">/</span></code>s.
@@ -302,7 +304,7 @@ variables, <code class="docutils literal notranslate"><span class="pre">Vars.set
 </div>
 <div class="section" id="autograd">
 <h3>AutoGrad<a class="headerlink" href="#autograd" title="Permalink to this headline">¶</a></h3>
-<p>The function <code class="docutils literal notranslate"><span class="pre">varz.numpy.minimise_l_bfgs_b</span></code> can be used to perform
+<p>The function <code class="docutils literal notranslate"><span class="pre">varz.autograd.minimise_l_bfgs_b</span></code> can be used to perform
 minimisation using the L-BFGS-B algorithm.</p>
 <p>Example of optimising variables:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">autograd.numpy</span> <span class="kn">as</span> <span class="nn">np</span>
@@ -330,40 +332,40 @@ minimisation using the L-BFGS-B algorithm.</p>
 </div>
 <div class="section" id="tensorflow">
 <h3>TensorFlow<a class="headerlink" href="#tensorflow" title="Permalink to this headline">¶</a></h3>
-<p>All the variables held by a container can be initialised at once with
-<code class="docutils literal notranslate"><span class="pre">Vars.init</span></code>.</p>
+<p>The function <code class="docutils literal notranslate"><span class="pre">varz.tensorflow.minimise_l_bfgs_b</span></code> can be used to
+perform minimisation using the L-BFGS-B algorithm.</p>
 <p>Example of optimising variables:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
-<span class="kn">from</span> <span class="nn">tensorflow.contrib.opt</span> <span class="kn">import</span> <span class="n">ScipyOptimizerInterface</span> <span class="k">as</span> <span class="n">SOI</span>
-<span class="kn">from</span> <span class="nn">varz.tensorflow</span> <span class="kn">import</span> <span class="n">Vars</span>
+<span class="kn">from</span> <span class="nn">varz.tensorflow</span> <span class="kn">import</span> <span class="n">Vars</span><span class="p">,</span> <span class="n">minimise_l_bfgs_b</span>
 
-<span class="n">target</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="mf">5.</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+<span class="n">target</span> <span class="o">=</span> <span class="mf">5.</span>
 
-<span class="n">vs</span> <span class="o">=</span> <span class="n">Vars</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
-<span class="n">x</span> <span class="o">=</span> <span class="n">vs</span><span class="o">.</span><span class="n">pos</span><span class="p">(</span><span class="mf">10.</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
-<span class="n">objective</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">**</span> <span class="o">.</span><span class="mi">5</span> <span class="o">-</span> <span class="n">target</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>  <span class="c1"># `x` must be positive!</span>
+
+<span class="k">def</span> <span class="nf">objective</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>  <span class="c1"># `x` must be positive!</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">x</span> <span class="o">**</span> <span class="o">.</span><span class="mi">5</span> <span class="o">-</span> <span class="n">target</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
 </pre></div>
 </div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">opt</span> <span class="o">=</span> <span class="n">SOI</span><span class="p">(</span><span class="n">objective</span><span class="p">,</span> <span class="n">var_list</span><span class="o">=</span><span class="n">vs</span><span class="o">.</span><span class="n">get_vars</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">))</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">vs</span> <span class="o">=</span> <span class="n">Vars</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
 
-<span class="gp">&gt;&gt;&gt; </span><span class="n">sess</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Session</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vs</span><span class="o">.</span><span class="n">pos</span><span class="p">(</span><span class="mf">10.</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
+<span class="go">&lt;tf.Tensor: id=11, shape=(), dtype=float64, numpy=10.000000000000002&gt;</span>
 
-<span class="gp">&gt;&gt;&gt; </span><span class="n">vs</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">sess</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">minimise_l_bfgs_b</span><span class="p">(</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">objective</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]),</span> <span class="n">vs</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">])</span>
+<span class="go">3.17785950743424e-19  # Final objective function value.</span>
 
-<span class="gp">&gt;&gt;&gt; </span><span class="n">opt</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">sess</span><span class="p">)</span>
-
-<span class="gp">&gt;&gt;&gt; </span><span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">vs</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">target</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
-<span class="go">-5.637250666268301e-09</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vs</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">target</span> <span class="o">**</span> <span class="mi">2</span>
+<span class="go">&lt;tf.Tensor: id=562, shape=(), dtype=float64, numpy=-5.637250666268301e-09&gt;</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="pytorch">
 <h3>PyTorch<a class="headerlink" href="#pytorch" title="Permalink to this headline">¶</a></h3>
 <p>All the variables held by a container can be detached from the current
-computation graph with <code class="docutils literal notranslate"><span class="pre">Vars.detach_vars</span></code>. To make a copy of the
-container with detached versions of the variables, use <code class="docutils literal notranslate"><span class="pre">Vars.detach</span></code>
-instead. Whether variables require gradients can be configured with
-<code class="docutils literal notranslate"><span class="pre">Vars.requires_grad</span></code>. By default, no variable requires a gradient.</p>
+computation graph with <code class="docutils literal notranslate"><span class="pre">Vars.detach</span></code> . To make a copy of the container
+with detached versions of the variables, use <code class="docutils literal notranslate"><span class="pre">Vars.copy</span></code> with
+<code class="docutils literal notranslate"><span class="pre">detach=True</span></code> instead. Whether variables require gradients can be
+configured with <code class="docutils literal notranslate"><span class="pre">Vars.requires_grad</span></code>. By default, no variable requires
+a gradient.</p>
 <p>The function <code class="docutils literal notranslate"><span class="pre">varz.torch.minimise_l_bfgs_b</span></code> can be used to perform
 minimisation using the L-BFGS-B algorithm.</p>
 <p>Example of optimising variables:</p>
@@ -384,10 +386,31 @@ minimisation using the L-BFGS-B algorithm.</p>
 <span class="go">tensor(10.0000, dtype=torch.float64)</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">minimise_l_bfgs_b</span><span class="p">(</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">objective</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]),</span> <span class="n">vs</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">])</span>
-<span class="go">array(1.36449515e-13)  # Final objective function value.</span>
+<span class="go">array(3.17785951e-19)  # Final objective function value.</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">vs</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">target</span> <span class="o">**</span> <span class="mi">2</span>
-<span class="go">tensor(1.6378e-07, dtype=torch.float64)</span>
+<span class="go">tensor(-5.6373e-09, dtype=torch.float64)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="get-variables-from-a-source">
+<h3>Get Variables from a Source<a class="headerlink" href="#get-variables-from-a-source" title="Permalink to this headline">¶</a></h3>
+<p>The keyword argument <code class="docutils literal notranslate"><span class="pre">source</span></code> can set to a tensor from which the
+latent variables will be obtained.</p>
+<p>Example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">vs</span> <span class="o">=</span> <span class="n">Vars</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]))</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vs</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+<span class="go">array(1., dtype=float32)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,))</span>
+<span class="go">array([2., 3., 4.], dtype=float32)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vs</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span>
+<span class="go">148.41316</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+<span class="go">148.41316</span>
 </pre></div>
 </div>
 </div>

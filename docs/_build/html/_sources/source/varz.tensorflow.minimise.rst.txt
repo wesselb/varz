@@ -1,0 +1,7 @@
+varz.tensorflow.minimise module
+===============================
+
+.. automodule:: varz.tensorflow.minimise
+    :members:
+    :undoc-members:
+    :show-inheritance:

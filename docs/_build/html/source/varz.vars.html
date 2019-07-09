@@ -88,7 +88,9 @@
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">Application Programming Interface</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="varz.autograd.html">varz.autograd package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="varz.autograd.minimise.html">varz.autograd.minimise module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="varz.minimise.html">varz.minimise module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="varz.tensorflow.html">varz.tensorflow package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="varz.tensorflow.minimise.html">varz.tensorflow.minimise module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="varz.torch.html">varz.torch package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="varz.torch.minimise.html">varz.torch.minimise module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="varz.util.html">varz.util module</a></li>
@@ -165,12 +167,16 @@
 <span id="varz-vars-module"></span><h1>varz.vars module<a class="headerlink" href="#module-varz.vars" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="varz.vars.Vars">
-<em class="property">class </em><code class="descclassname">varz.vars.</code><code class="descname">Vars</code><span class="sig-paren">(</span><em>dtype</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/vars.html#Vars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.vars.Vars" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">varz.vars.</code><code class="descname">Vars</code><span class="sig-paren">(</span><em>dtype</em>, <em>source=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/vars.html#Vars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.vars.Vars" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">plum.resolvable.Referentiable</span></code></p>
 <p>Variable storage manager.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>dtype</strong> (<em>data type</em>) – Data type of the variables.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dtype</strong> (<em>data type</em>) – Data type of the variables.</p></li>
+<li><p><strong>source</strong> (<em>tensor</em><em>, </em><em>optional</em>) – Tensor to source variables from. Defaults to
+not being used.</p></li>
+</ul>
 </dd>
 </dl>
 <dl class="method">
@@ -227,22 +233,26 @@ that of the storage.</p></li>
 </dd></dl>
 
 <dl class="method">
-<dt id="varz.vars.Vars.detach">
-<code class="descname">detach</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/vars.html#Vars.detach"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.vars.Vars.detach" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a detached copy of the variable manager in PyTorch.</p>
+<dt id="varz.vars.Vars.copy">
+<code class="descname">copy</code><span class="sig-paren">(</span><em>detach=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/vars.html#Vars.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.vars.Vars.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a copy of the variable manager that shares the same variables.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Detached copy.</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>detach</strong> (<em>bool</em><em>, </em><em>optional</em>) – Detach the variables in PyTorch. Defaults
+to <cite>False</cite>.</p>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="#varz.vars.Vars" title="varz.vars.Vars"><code class="xref py py-class docutils literal notranslate"><span class="pre">vars.Vars</span></code></a></p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Copy.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#varz.vars.Vars" title="varz.vars.Vars"><code class="xref py py-class docutils literal notranslate"><span class="pre">vars.Vars</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="method">
-<dt id="varz.vars.Vars.detach_vars">
-<code class="descname">detach_vars</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/vars.html#Vars.detach_vars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.vars.Vars.detach_vars" title="Permalink to this definition">¶</a></dt>
+<dt id="varz.vars.Vars.detach">
+<code class="descname">detach</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/vars.html#Vars.detach"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.vars.Vars.detach" title="Permalink to this definition">¶</a></dt>
 <dd><p>Detach all variables held in PyTorch.</p>
 </dd></dl>
 
@@ -312,17 +322,6 @@ Defaults to <cite>False</cite>.</p></li>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>tensor</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="varz.vars.Vars.init">
-<code class="descname">init</code><span class="sig-paren">(</span><em>session</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/vars.html#Vars.init"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.vars.Vars.init" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialise the variables.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>session</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">B.Session</span></code>) – TensorFlow session.</p>
 </dd>
 </dl>
 </dd></dl>
