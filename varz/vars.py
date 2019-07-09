@@ -27,7 +27,7 @@ def _assign(x, value):
 
 @_dispatch(B.TFNumeric, B.Numeric)
 def _assign(x, value):
-    return tf.assign(x, value)
+    return x.assign(value)
 
 
 @_dispatch(B.TorchNumeric, B.Numeric)
@@ -67,25 +67,31 @@ class Vars(Referentiable):
         # Packing:
         self.vector_packer = None
 
-    def detach(self):
-        """Create a detached copy of the variable manager in PyTorch.
+    def copy(self, detach=False):
+        """Create a copy of the variable manager that shares the same variables.
+
+        Args:
+            detach (bool, optional): Detach the variables in PyTorch. Defaults
+                to `False`.
 
         Returns:
-            :class:`.vars.Vars`: Detached copy.
+            :class:`.vars.Vars`: Copy.
         """
         vs = Vars(dtype=self.dtype)
         vs.transforms = list(self.transforms)
         vs.inverse_transforms = list(self.inverse_transforms)
         vs.index_by_name = dict(self.index_by_name)
         vs.vector_packer = self.vector_packer
-        for var in self.vars:
-            vs.vars.append(var.detach())
+        if detach:
+            for var in self.vars:
+                vs.vars.append(var.detach())
+        else:
+            vs.vars = list(self.vars)
         return vs
 
-    def detach_vars(self):
+    def detach(self):
         """Detach all variables held in PyTorch."""
-        for var in self.vars:
-            var.detach_()
+        self.vars = [v.detach() for v in self.vars]
 
     def requires_grad(self, value, *names):
         """Set which variables require a gradient in PyTorch.
@@ -193,14 +199,6 @@ class Vars(Referentiable):
             for var, value in zip(self.get_vars(*names), values):
                 assignments.append(_assign(var, value))
             return assignments
-
-    def init(self, session):
-        """Initialise the variables.
-
-        Args:
-            session (:class:`B.Session`): TensorFlow session.
-        """
-        session.run(tf.variables_initializer(self.vars))
 
     def get(self, init=None, shape=(), dtype=None, name=None):
         """Get an unbounded variable.
