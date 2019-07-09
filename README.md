@@ -7,6 +7,8 @@
 Painless optimisation of constrained variables in PyTorch, TensorFlow, and 
 AutoGrad
 
+_Note:_ Varz requires TensorFlow 2.
+
 * [Installation](#installation)
 * [Manual](#manual)
     - [Naming](#naming)
@@ -15,7 +17,7 @@ AutoGrad
     - [AutoGrad](#autograd)
     - [TensorFlow](#tensorflow)
     - [PyTorch](#pytorch)
-
+    
 ## Installation
 
 Before installing the package, please ensure that `gcc` and `gfortran` are 
@@ -171,7 +173,7 @@ Example of optimising variables:
 import autograd.numpy as np
 from varz.autograd import Vars, minimise_l_bfgs_b
 
-target = 5.
+target = 5. 
 
 
 def objective(x):  # `x` must be positive!
