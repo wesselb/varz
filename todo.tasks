@@ -1,8 +1,12 @@
 Features:
     ☐ Exclusion mechanism for variables by prefixing with "-".
-    ☐ Add minimise_l_bfgs_b reports.
-    ☐ Support other optimisers.
+    ☐ Add Adam optimiser. @high
     ☐ Centralise warning messages.
 
 Refactor:
-    ☐ Unify PyTorch optimiser with NumPy one?
+    ☐ Refactor tests to use PyTest: remove raises, fixtures, and parametrisation. @high
+
+
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+Archive:
+ ✓ Unify PyTorch optimiser with NumPy one? @done (19-07-09 22:32) @project(Refactor)
