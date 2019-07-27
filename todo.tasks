@@ -1,6 +1,10 @@
 Features:
-    ☐ Exclusion mechanism for variables by prefixing with "-".
+    Variables:
+        ☐ PSD matrix @high
+        ☐ Orthogonal matrix @high
     ☐ Add Adam optimiser. @high
+
+    ☐ Exclusion mechanism for variables by prefixing with "-".
     ☐ Centralise warning messages.
 
 Refactor:
