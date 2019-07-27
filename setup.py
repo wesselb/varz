@@ -11,7 +11,8 @@ requirements = ['numpy>=1.16',
                 'tensorflow>=2.0.0b',
 
                 'plum-dispatch',
-                'backends>=0.2']
+                'backends>=0.2',
+                'wbml']
 
 setup(packages=find_packages(exclude=['docs']),
       install_requires=requirements,
