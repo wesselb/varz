@@ -50,7 +50,7 @@ def test_optimise_disconnected_gradient(dtype_minimise_l_bfgs_b):
     minimise(lambda v: B.cast(v.dtype, 0), vs)
 
 
-def test_optimise_runtimeerror(dtype_minimise_l_bfgs_b):
+def test_optimise_exception(dtype_minimise_l_bfgs_b):
     dtype, minimise = dtype_minimise_l_bfgs_b
     vs = Vars(dtype=dtype)
 
@@ -62,7 +62,7 @@ def test_optimise_runtimeerror(dtype_minimise_l_bfgs_b):
             first_call.val = False
         else:
             if np.random.rand() > .5:
-                raise RuntimeError('Fail!')
+                raise Exception('Fail!')
         return vs_.get(name='x', init=5.) ** 2
 
     # Check that the optimiser runs.

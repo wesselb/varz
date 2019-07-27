@@ -7,7 +7,7 @@ import logging
 import numpy as np
 from autograd import value_and_grad
 
-from ..minimise import make_l_bfgs_b
+from ..minimise import make_l_bfgs_b, exception
 
 __all__ = ['minimise_l_bfgs_b']
 
@@ -26,12 +26,8 @@ def _wrap_f(vs, names, f):
         # Compute objective function value.
         try:
             return value_and_grad(f_vectorised)(x)
-        except RuntimeError as e:
-            log.warning('Caught exception during function evaluation: '
-                        '"{}". Returning NaN.'.format(e))
-            grad_nan = np.empty(x.shape)
-            grad_nan[:] = np.nan
-            return np.nan, grad_nan
+        except Exception as e:
+            return exception(x, e)
 
     return f_wrapped
 

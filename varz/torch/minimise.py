@@ -27,7 +27,7 @@ def _wrap_f(vs, names, f):
             obj_value = f(vs_copy)
             obj_value.backward()
             obj_value = obj_value.detach_().numpy()
-        except RuntimeError as e:
+        except Exception as e:
             return exception(x, e)
 
         # Extract gradient.

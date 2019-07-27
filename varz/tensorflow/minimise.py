@@ -25,7 +25,7 @@ def _wrap_f(vs, names, f):
                 obj_value = f(vs)
                 grads = t.gradient(obj_value, vs.get_vars(*names),
                                    unconnected_gradients='zero')
-        except RuntimeError as e:
+        except Exception as e:
             return exception(x, e)
 
         # Construct gradient.
