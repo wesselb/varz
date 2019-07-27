@@ -4,7 +4,6 @@ from __future__ import absolute_import, division, print_function
 
 import logging
 
-import numpy as np
 from autograd import value_and_grad
 
 from ..minimise import make_l_bfgs_b, exception
@@ -18,6 +17,9 @@ def _wrap_f(vs, names, f):
     # Differentiable assignments will overwrite the variables, so make a copy.
     vs_copy = vs.copy()
 
+    # Keep track of function evaluations.
+    f_evals = []
+
     def f_vectorised(x):
         vs_copy.set_vector(x, *names, differentiable=True)
         return f(vs_copy)
@@ -25,11 +27,14 @@ def _wrap_f(vs, names, f):
     def f_wrapped(x):
         # Compute objective function value.
         try:
-            return value_and_grad(f_vectorised)(x)
+            obj_value, grad = value_and_grad(f_vectorised)(x)
         except Exception as e:
             return exception(x, e)
 
-    return f_wrapped
+        f_evals.append(obj_value)
+        return obj_value, grad
+
+    return f_evals, f_wrapped
 
 
 minimise_l_bfgs_b = make_l_bfgs_b(_wrap_f)

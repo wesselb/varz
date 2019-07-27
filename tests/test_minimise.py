@@ -2,17 +2,36 @@
 
 from __future__ import absolute_import, division, print_function
 
+import lab as B
 import numpy as np
 import pytest
 import tensorflow as tf
 import torch
-import lab as B
-
 import varz.autograd
 import varz.tensorflow
 import varz.torch
+import wbml.out as out
 from varz import Vars
+
 from .util import approx, Value
+
+
+class OutStream(object):
+    """Mock the streams of `wbml.out`."""
+
+    def __init__(self):
+        self.output = ''
+
+    def write(self, msg):
+        self.output += msg
+
+    def __enter__(self):
+        self._orig_streams = list(out.streams)
+        out.streams[:] = [self]
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        out.streams[:] = self._orig_streams
 
 
 @pytest.fixture(params=[(np.float64, varz.autograd.minimise_l_bfgs_b),
@@ -22,7 +41,7 @@ def dtype_minimise_l_bfgs_b(request):
     yield request.param
 
 
-def test_optimise(dtype_minimise_l_bfgs_b):
+def test_minimise(dtype_minimise_l_bfgs_b):
     dtype, minimise = dtype_minimise_l_bfgs_b
     vs = Vars(dtype=dtype)
 
@@ -41,7 +60,7 @@ def test_optimise(dtype_minimise_l_bfgs_b):
     approx(vs['x'], 0, digits=5)
 
 
-def test_optimise_disconnected_gradient(dtype_minimise_l_bfgs_b):
+def test_minimise_disconnected_gradient(dtype_minimise_l_bfgs_b):
     dtype, minimise = dtype_minimise_l_bfgs_b
     vs = Vars(dtype=dtype)
     vs.get(name='x')
@@ -50,7 +69,7 @@ def test_optimise_disconnected_gradient(dtype_minimise_l_bfgs_b):
     minimise(lambda v: B.cast(v.dtype, 0), vs)
 
 
-def test_optimise_exception(dtype_minimise_l_bfgs_b):
+def test_minimise_exception(dtype_minimise_l_bfgs_b):
     dtype, minimise = dtype_minimise_l_bfgs_b
     vs = Vars(dtype=dtype)
 
@@ -69,7 +88,7 @@ def test_optimise_exception(dtype_minimise_l_bfgs_b):
     minimise(f, vs)
 
 
-def test_optimise_zero_calls(dtype_minimise_l_bfgs_b):
+def test_minimise_zero_calls(dtype_minimise_l_bfgs_b):
     dtype, minimise = dtype_minimise_l_bfgs_b
     vs = Vars(dtype=dtype)
 
@@ -85,3 +104,20 @@ def test_optimise_zero_calls(dtype_minimise_l_bfgs_b):
     assert calls.val == 1
     minimise(f, vs, f_calls=0)
     assert calls.val == 2
+
+
+def test_minimise_trace(dtype_minimise_l_bfgs_b):
+    dtype, minimise = dtype_minimise_l_bfgs_b
+
+    def f(vs_):
+        return vs_.get(name='x') ** 2
+
+    # Test that `trace=False` prints nothing.
+    with OutStream() as stream:
+        minimise(f, Vars(dtype=dtype), trace=False)
+        assert stream.output == ''
+
+    # Test that `trace=False` prints something.
+    with OutStream() as stream:
+        minimise(f, Vars(dtype=dtype), trace=True)
+        assert stream.output != ''

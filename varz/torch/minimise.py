@@ -18,6 +18,9 @@ def _wrap_f(vs, names, f):
     # with detached variables.
     vs_copy = vs.copy(detach=True)
 
+    # Keep track of function evaluations.
+    f_evals = []
+
     def f_wrapped(x):
         x_torch = torch.tensor(x, requires_grad=True)
 
@@ -33,9 +36,10 @@ def _wrap_f(vs, names, f):
         # Extract gradient.
         grad = x_torch.grad.detach_().numpy()
 
+        f_evals.append(obj_value)
         return obj_value, grad
 
-    return f_wrapped
+    return f_evals, f_wrapped
 
 
 minimise_l_bfgs_b = make_l_bfgs_b(_wrap_f)

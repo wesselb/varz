@@ -14,6 +14,9 @@ log = logging.getLogger(__name__)
 
 
 def _wrap_f(vs, names, f):
+    # Keep track of function evaluations.
+    f_evals = []
+
     def f_wrapped(x):
         # Update to current point.
         vs.set_vector(x, *names)
@@ -31,9 +34,10 @@ def _wrap_f(vs, names, f):
         # Construct gradient.
         grad = vs.vector_packer.pack(*grads)
 
+        f_evals.append(obj_value)
         return obj_value.numpy(), grad.numpy()
 
-    return f_wrapped
+    return f_evals, f_wrapped
 
 
 minimise_l_bfgs_b = make_l_bfgs_b(_wrap_f)
