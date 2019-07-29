@@ -5,7 +5,6 @@ from __future__ import absolute_import, division, print_function
 import lab as B
 from numpy.testing import assert_allclose, assert_array_almost_equal
 from plum import Dispatcher
-import numpy as np
 
 __all__ = ['allclose', 'approx', 'Value']
 
@@ -17,7 +16,7 @@ class Value(object):
         self.val = val
 
 
-@_dispatch({B.NP, list})
+@_dispatch({B.Number, B.NP, list})
 def _to_numpy(x):
     return x
 

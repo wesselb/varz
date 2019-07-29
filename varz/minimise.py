@@ -17,7 +17,7 @@ log = logging.getLogger(__name__)
 _dispatch = Dispatcher()
 
 
-@_dispatch(B.NP)
+@_dispatch({B.Number, B.NP})
 def _to_numpy(x):
     return x
 
