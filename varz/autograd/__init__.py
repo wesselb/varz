@@ -5,4 +5,7 @@ from __future__ import absolute_import, division, print_function
 # noinspection PyUnresolvedReferences
 from .. import *
 
+# noinspection PyUnresolvedReferences
+import lab.autograd
+
 from .minimise import *
