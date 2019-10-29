@@ -7,7 +7,7 @@
 Painless optimisation of constrained variables in PyTorch, TensorFlow, and 
 AutoGrad
 
-_Note:_ Varz requires TensorFlow 2.
+_Note:_ Varz requires Python 3.5+ TensorFlow 2 if TensorFlow is used.
 
 * [Installation](#installation)
 * [Manual](#manual)
