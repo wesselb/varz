@@ -166,6 +166,8 @@ array([1., 1., 1., 1., 1., 1.])
 
 The function `varz.autograd.minimise_l_bfgs_b` can be used to perform 
 minimisation using the L-BFGS-B algorithm.
+The function `varz.autograd.minimise_adam` can be used to perform 
+minimisation of stochastic objectives using Adam.
 
 Example of optimising variables:
 
@@ -197,6 +199,8 @@ def objective(x):  # `x` must be positive!
 
 The function `varz.tensorflow.minimise_l_bfgs_b` can be used to perform 
 minimisation using the L-BFGS-B algorithm.
+The function `varz.tensorflow.minimise_adam` can be used to perform 
+minimisation of stochastic objectives using Adam.
 
 Example of optimising variables:
 
@@ -235,6 +239,8 @@ By default, no variable requires a gradient.
 
 The function `varz.torch.minimise_l_bfgs_b` can be used to perform minimisation 
 using the L-BFGS-B algorithm.
+The function `varz.torch.minimise_adam` can be used to perform 
+minimisation of stochastic objectives using Adam.
 
 Example of optimising variables:
 

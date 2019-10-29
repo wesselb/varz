@@ -6,9 +6,9 @@ import logging
 
 from autograd import value_and_grad
 
-from ..minimise import make_l_bfgs_b, exception
+from ..minimise import make_l_bfgs_b, make_adam, exception
 
-__all__ = ['minimise_l_bfgs_b']
+__all__ = ['minimise_l_bfgs_b', 'minimise_adam']
 
 log = logging.getLogger(__name__)
 
@@ -38,3 +38,4 @@ def _wrap_f(vs, names, f):
 
 
 minimise_l_bfgs_b = make_l_bfgs_b(_wrap_f)
+minimise_adam = make_adam(_wrap_f)
