@@ -22,7 +22,7 @@ def test_get_vars():
     vs.get(1, name='a')
     vs.get(2, name='1/b')
     vs.get(3, name='2/c')
-    vs.get(4, name='2/d')
+    vs.unbounded(4, name='2/d')  # Test alias.
 
     # Test getting all.
     assert vs.get_vars() == [1, 2, 3, 4]
@@ -82,14 +82,14 @@ def test_positive():
     vs = Vars(np.float64)
     for _ in range(10):
         assert vs.pos() >= 0
+        assert vs.positive() >= 0
 
 
 def test_bounded():
     vs = Vars(np.float64)
     for _ in range(10):
-        v = vs.bnd(lower=10, upper=11)
-        assert v >= 10
-        assert v <= 11
+        assert 10 <= vs.bnd(lower=10, upper=11) <= 11
+        assert 10 <= vs.bounded(lower=10, upper=11) <= 11
 
 
 def test_get_set_vector(dtype):

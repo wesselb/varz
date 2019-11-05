@@ -18,7 +18,7 @@ class LazyModule:
         name (str): Name of module.
     """
 
-    def __init__(self, name, *extensions):
+    def __init__(self, name):
         self.name = name
         self.module = None
 
@@ -70,7 +70,7 @@ def _construct_assigner(vs, names, values):
     return assign
 
 
-class Packer(Referentiable):
+class Packer(metaclass=Referentiable):
     """Pack objects into a vector.
 
     Args:
