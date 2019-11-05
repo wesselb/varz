@@ -1,13 +1,9 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import absolute_import, division, print_function
-
 from itertools import product
 
 import lab as B
 import numpy as np
-
 from varz import Vars, Initialiser, Packer
+
 from .util import allclose
 
 

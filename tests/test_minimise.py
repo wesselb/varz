@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import absolute_import, division, print_function
-
 import lab as B
 import numpy as np
 import pytest
@@ -16,7 +12,7 @@ from varz import Vars
 from .util import approx, Value
 
 
-class OutStream(object):
+class OutStream:
     """Mock the streams of `wbml.out`."""
 
     def __init__(self):

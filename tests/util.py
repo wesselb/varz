@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import absolute_import, division, print_function
-
 import lab as B
 from numpy.testing import assert_allclose, assert_array_almost_equal
 from plum import Dispatcher
@@ -11,7 +7,7 @@ __all__ = ['allclose', 'approx', 'Value']
 _dispatch = Dispatcher()
 
 
-class Value(object):
+class Value:
     def __init__(self, val):
         self.val = val
 
