@@ -37,11 +37,11 @@ def _assign(x, value):
 
 class Provider(metaclass=Referentiable(ABCMeta)):
     @abstractmethod
-    def get(self,
-            init=None,
-            shape=(),
-            dtype=None,
-            name=None):  # pragma: no cover
+    def unbounded(self,
+                  init=None,
+                  shape=(),
+                  dtype=None,
+                  name=None):  # pragma: no cover
         """Get an unbounded variable.
 
         Args:
@@ -56,9 +56,9 @@ class Provider(metaclass=Referentiable(ABCMeta)):
             tensor: Variable.
         """
 
-    def unbounded(self, *args, **kw_args):
-        """Alias for :meth:`.vars.Provider.get`."""
-        return self.get(*args, **kw_args)
+    def get(self, *args, **kw_args):
+        """Alias for :meth:`.vars.Provider.unbounded`."""
+        return self.unbounded(*args, **kw_args)
 
     @abstractmethod
     def positive(self,
@@ -147,7 +147,7 @@ class Vars(Provider):
         self.inverse_transforms = []
 
         # Lookup:
-        self.index_by_name = {}
+        self.name_to_index = {}
         self._get_vars_cache = {}
 
         # Packing:
@@ -212,12 +212,12 @@ class Vars(Provider):
 
         # Store name if given.
         if name is not None:
-            self.index_by_name[name] = index
+            self.name_to_index[name] = index
 
         # Generate the variable and return.
         return transform(latent)
 
-    def get(self, init=None, shape=(), dtype=None, name=None):
+    def unbounded(self, init=None, shape=(), dtype=None, name=None):
         def generate_init(shape, dtype):
             return B.randn(dtype, *shape)
 
@@ -266,7 +266,7 @@ class Vars(Provider):
                              name=name)
 
     def __getitem__(self, name):
-        index = self.index_by_name[name]
+        index = self.name_to_index[name]
         return self.transforms[index](self.vars[index])
 
     def assign(self, name, value, differentiable=False):
@@ -280,7 +280,7 @@ class Vars(Provider):
         Returns:
             tensor: Assignment result.
         """
-        index = self.index_by_name[name]
+        index = self.name_to_index[name]
         if differentiable:
             # Do a differentiable assignment.
             self.vars[index] = value
@@ -303,7 +303,7 @@ class Vars(Provider):
         vs = Vars(dtype=self.dtype)
         vs.transforms = list(self.transforms)
         vs.inverse_transforms = list(self.inverse_transforms)
-        vs.index_by_name = dict(self.index_by_name)
+        vs.name_to_index = dict(self.name_to_index)
         vs.vector_packer = self.vector_packer
         if detach:
             for var in self.vars:
@@ -360,7 +360,7 @@ class Vars(Provider):
         indices = set()
         for name in names:
             a_match = False
-            for k, v in self.index_by_name.items():
+            for k, v in self.name_to_index.items():
                 if match(name, k):
                     indices |= {v}
                     a_match = True

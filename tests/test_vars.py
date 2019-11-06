@@ -172,13 +172,13 @@ def test_copy_torch():
     del vs.transforms[:]
     del vs.inverse_transforms[:]
     del vs.vars[:]
-    vs.index_by_name.clear()
+    vs.name_to_index.clear()
 
     for vs_copied in [vs_copy, vs_detached]:
         assert len(vs_copied.transforms) > 0
         assert len(vs_copied.inverse_transforms) > 0
         assert len(vs_copied.vars) > 0
-        assert len(vs_copied.index_by_name) > 0
+        assert len(vs_copied.name_to_index) > 0
         assert vs_copied.vector_packer != None
 
 
