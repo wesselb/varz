@@ -3,7 +3,7 @@ import pytest
 import torch
 from varz import Vars
 
-from .util import allclose, approx, KV, dtype
+from .util import allclose, approx, KV, dtype, vs
 
 
 def test_get_vars():
@@ -64,23 +64,20 @@ def test_get_vars():
     assert vs.get_vars('1/*', '2/*', indices=True) == [1, 2, 3]
 
 
-def test_get_vars_cache_clearing():
-    vs = Vars(np.float32)
+def test_get_vars_cache_clearing(vs):
     vs.get(name='var_a')
     assert vs.get_vars('var_*', indices=True) == [0]
     vs.get(name='var_b')
     assert vs.get_vars('var_*', indices=True) == [0, 1]
 
 
-def test_positive():
-    vs = Vars(np.float64)
+def test_positive(vs):
     for _ in range(10):
         assert vs.pos() >= 0
         assert vs.positive() >= 0
 
 
-def test_bounded():
-    vs = Vars(np.float64)
+def test_bounded(vs):
     for _ in range(10):
         assert 10 <= vs.bnd(lower=10, upper=11) <= 11
         assert 10 <= vs.bounded(lower=10, upper=11) <= 11
@@ -215,8 +212,7 @@ def test_source():
     assert vs.get().dtype == np.float64
 
 
-def test_names():
-    vs = Vars(np.float64)
+def test_names(vs):
     assert vs.names == []
     vs.get()
     assert vs.names == []
@@ -228,9 +224,8 @@ def test_names():
     assert vs.names == ['a', 'b', 'c']
 
 
-def test_print():
+def test_print(vs):
     with KV() as mock:
-        vs = Vars(np.float32)
         vs.print()
         assert mock.keys == []
         assert mock.values == []

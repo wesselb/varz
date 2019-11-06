@@ -4,11 +4,11 @@ import lab as B
 import numpy as np
 from varz import Vars, Initialiser, Packer
 
-from .util import allclose
+from .util import allclose, vs
 
 
-def test_initialiser():
-    vs, init = Vars(np.float64), Initialiser()
+def test_initialiser(vs):
+    init = Initialiser()
 
     # Initialise two variables.
     vs.get(1., name='a')

@@ -7,6 +7,7 @@ import wbml.out
 from numpy.testing import assert_allclose, assert_array_almost_equal
 from plum import Dispatcher
 from wbml import out as out
+from varz import Vars
 
 __all__ = ['Value',
            'allclose',
@@ -14,6 +15,7 @@ __all__ = ['Value',
 
            # Fixtures:
            'dtype',
+           'vs',
 
            # Mocks:
            'KV',
@@ -54,6 +56,12 @@ def allclose(x, y):
 @pytest.fixture(params=[np.float64, torch.float64, tf.float64])
 def dtype(request):
     yield request.param
+
+
+@pytest.fixture()
+def vs():
+    vs = Vars(np.float64)
+    yield vs
 
 
 # Mocks:
