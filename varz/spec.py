@@ -1,31 +1,21 @@
 import inspect
 from abc import ABCMeta, abstractmethod
 from functools import wraps
+from inspect import isfunction
 
-from .vars import Vars
+from .vars import Provider
 
-
-class VarsProxy:
-    """A proxy for a :class:`.vars.Vars` object.
-
-    Args:
-        vs (:class:`.vs.Vars`): Variable container to wrap.
-    """
-
-    def __init__(self, vs):
-        self.vs = vs
-
-    def __getattr__(self, item):
-        return getattr(self.vs, item)
+__all__ = ['sequential',
+           'Unbounded',
+           'Positive',
+           'Bounded',
+           'parametrised']
 
 
-def is_vars(x):
-    return isinstance(x, (Vars, VarsProxy))
-
-
-class Sequential(VarsProxy):
-    """A proxy for a :class:`.vars.Vars` object that automatically names
-    unnamed variables sequentially.
+class Sequential(Provider):
+    """A variable provider that wraps a :class:`.vars.Vars` object and
+    automatically names unnamed variables sequentially (0, 1, 2, ...) with a
+    possible prefix.
 
     Args:
         vs (:class:`.vs.Vars`): Variable container to wrap.
@@ -33,61 +23,63 @@ class Sequential(VarsProxy):
     """
 
     def __init__(self, vs, prefix):
-        VarsProxy.__init__(self, vs)
+        self.vs = vs
         self.prefix = prefix
         self.count = 0
 
-    def _get_var(self, method, args, kw_args):
+    def _get_var(self, getter, args, kw_args):
         if 'name' not in kw_args:
             kw_args['name'] = f'{self.prefix}{self.count}'
             self.count += 1
-        return getattr(self.vs, method)(*args, **kw_args)
+        return getter(*args, **kw_args)
 
-    def get(self, *args, **kw_args):
-        return self._get_var('get', args, kw_args)
+    def unbounded(self, *args, **kw_args):
+        return self._get_var(self.vs.unbounded, args, kw_args)
 
     def positive(self, *args, **kw_args):
-        return self._get_var('positive', args, kw_args)
-
-    def pos(self, *args, **kw_args):
-        return self._get_vars('pos', *args, **kw_args)
+        return self._get_var(self.vs.positive, *args, **kw_args)
 
     def bounded(self, *args, **kw_args):
-        return self._get_var('bounded', args, kw_args)
+        return self._get_var(self.vs.bounded, args, kw_args)
 
-    def bnd(self, *args, **kw_args):
-        return self._get_var('bnd', *args, **kw_args)
+    def __getitem__(self, name):
+        return self.vs[name]
 
 
 def _to_sequential(x, prefix):
-    """Convert an variable container to sequential, if it is one.
+    """Convert a variable provider to sequential, if it is one.
 
     Args:
         x (object): Object to convert.
         prefix (str): Prefix for names in the sequence.
 
     Returns:
-        object: `x` converted to sequential if it is a variable container,
+        object: `x` converted to sequential if it is a variable provider,
             otherwise just `x`.
     """
-    return Sequential(x, prefix) if is_vars(x) else x
+    return Sequential(x, prefix) if isinstance(x, Provider) else x
 
 
 def _extract_prefix_and_f(prefix_or_f):
+    """Extract the prefix and function.
+
+    Args:
+        prefix_or_f (object): Either a prefix or a function.
+
+    Returns:
+        tuple: Tuple containing the predict and the function. If a function
+            was given, the prefix defaults to an empty string; and if a prefix
+            was given, the function defaults to `None`.
+    """
     if prefix_or_f is None:
         # Not used as decorator and prefix is left unspecified.
-        prefix = ''
-        f = None
-    elif isinstance(prefix_or_f, str):
-        # Not used as decorator and prefix is specified.
-        prefix = prefix_or_f
-        f = None
-    else:
+        return '', None
+    elif isfunction(prefix_or_f):
         # Used as a decorator.
-        prefix = ''
-        f = prefix_or_f
-
-    return prefix, f
+        return '', prefix_or_f
+    else:
+        # Not used as decorator and prefix is specified.
+        return prefix_or_f, None
 
 
 def sequential(prefix_or_f=None):
@@ -111,6 +103,9 @@ def sequential(prefix_or_f=None):
 
 
 class VariableType(metaclass=ABCMeta):
+    """A type of a variable. Any arguments are passed to the appropriate method
+    of :class:`.vars.Vars` to instantiate the variable."""
+
     def __init__(self, *args, **kw_args):
         self.args = args
         self.kw_args = kw_args
@@ -139,20 +134,33 @@ class VariableType(metaclass=ABCMeta):
 
     @abstractmethod
     def instantiate(self, vs, name, init):  # pragma: no cover
-        pass
+        """Instantiate the variable.
+
+        Args:
+            vs (:class:`.vars.Vars`): Variable container to extract the variable
+                from.
+            name (str): Name of the variable.
+            init (object): Initial value.
+        """
 
 
 class Unbounded(VariableType):
+    """Type of an unbounded variable."""
+
     def instantiate(self, vs, name, init):
         return self._get_var(vs.get, name, init)
 
 
 class Positive(VariableType):
+    """Type of a positive variable."""
+
     def instantiate(self, vs, name, init):
         return self._get_var(vs.positive, name, init)
 
 
 class Bounded(VariableType):
+    """Type of a bounded variable."""
+
     def instantiate(self, vs, name, init):
         return self._get_var(vs.bounded, name, init)
 
@@ -172,14 +180,14 @@ def parametrised(prefix_or_f=None):
 
             # Look for variable container.
             values = args + tuple(kw_args.values())
-            num_containers = sum([is_vars(x) for x in values])
+            num_containers = sum([isinstance(x, Provider) for x in values])
             if num_containers == 0:
                 raise ValueError('No variable container found.')
             elif num_containers > 1:
                 raise ValueError('Multiple variable containers found.')
             else:
                 # There is exactly only variable container. Find it.
-                vs = [x for x in values if is_vars(x)][0]
+                vs = [x for x in values if isinstance(x, Provider)][0]
 
             # Walk through the arguments.
             for name, parameter in signature.parameters.items():
