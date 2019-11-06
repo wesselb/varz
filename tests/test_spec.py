@@ -31,9 +31,15 @@ def test_sequential(vs, decorator, names):
 
     @decorator
     def f(x, vs_, y):
-        return vs_['z'], vs_.get(), vs_.pos(), vs_.bnd()
+        return vs_['z'], vs_.get(), vs_.pos(), vs_.bnd(lower=10, upper=11)
 
+    # Test that the same variables are retrieved
     assert f(1, vs, 2) == f(3, vs, 4)
     assert vs.names == names
     assert f(1, vs, 2) == f(3, vs, 4)
     assert vs.names == names
+
+    # Test correctness off variables.
+    assert f(1, vs, 2)[0] == 0
+    assert f(1, vs, 2)[2] >= 0
+    assert 10 <= f(1, vs, 2)[3] <= 11
