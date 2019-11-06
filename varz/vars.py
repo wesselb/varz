@@ -1,10 +1,12 @@
 import logging
 from abc import ABCMeta, abstractmethod
+from collections import OrderedDict
 from functools import reduce
 from operator import mul
 
 import lab as B
 import numpy as np
+import wbml.out
 from plum import Dispatcher, Self, Referentiable
 
 from .util import Packer, match, lazy_tf as tf, lazy_torch as torch
@@ -147,7 +149,7 @@ class Vars(Provider):
         self.inverse_transforms = []
 
         # Lookup:
-        self.name_to_index = {}
+        self.name_to_index = OrderedDict()
         self._get_vars_cache = {}
 
         # Packing:
@@ -303,7 +305,7 @@ class Vars(Provider):
         vs = Vars(dtype=self.dtype)
         vs.transforms = list(self.transforms)
         vs.inverse_transforms = list(self.inverse_transforms)
-        vs.name_to_index = dict(self.name_to_index)
+        vs.name_to_index = OrderedDict(self.name_to_index)
         vs.vector_packer = self.vector_packer
         if detach:
             for var in self.vars:
@@ -422,3 +424,13 @@ class Vars(Provider):
             for var, value in zip(self.get_vars(*names), values):
                 assignments.append(_assign(var, value))
             return assignments
+
+    @property
+    def names(self):
+        """All available names."""
+        return list(self.name_to_index.keys())
+
+    def print(self):
+        """Print all variables."""
+        for name in self.names:
+            wbml.out.kv(name, self[name])

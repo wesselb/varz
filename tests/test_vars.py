@@ -3,6 +3,7 @@ import pytest
 import tensorflow as tf
 import torch
 from varz import Vars
+import wbml.out
 
 from .util import allclose, approx
 
@@ -219,3 +220,59 @@ def test_source():
 
     vs = Vars(np.float64, source=np.array([1]))
     assert vs.get().dtype == np.float64
+
+
+def test_names():
+    vs = Vars(np.float64)
+    assert vs.names == []
+    vs.get()
+    assert vs.names == []
+    vs.pos(name='a')
+    assert vs.names == ['a']
+    vs.bnd(name='b')
+    assert vs.names == ['a', 'b']
+    vs.get(name='c')
+    assert vs.names == ['a', 'b', 'c']
+
+
+class KVMock:
+    def __init__(self):
+        self.keys = []
+        self.values = []
+
+    def __call__(self, key, value):
+        self.keys.append(key)
+        self.values.append(value)
+
+
+def test_print():
+    # Mock the key-value printing method.
+    kv = wbml.out.kv
+    mock = KVMock()
+    wbml.out.kv = mock
+
+    vs = Vars(np.float32)
+    vs.print()
+    assert mock.keys == []
+    assert mock.values == []
+
+    vs.get()
+    vs.print()
+    assert mock.keys == []
+    assert mock.values == []
+
+    vs.print()
+    vs.get(1, name='a')
+    vs.print()
+    assert mock.keys == ['a']
+    assert mock.values == [1]
+
+    vs.get(2, name='b')
+    vs.print()
+    assert mock.keys == ['a', 'a', 'b']
+    assert mock.values == [1, 1, 2]
+
+    vs.get(3, name='c')
+    vs.print()
+    assert mock.keys == ['a', 'a', 'b', 'a', 'b', 'c']
+    assert mock.values == [1, 1, 2, 1, 2, 3]
