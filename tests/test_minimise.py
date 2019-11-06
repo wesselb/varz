@@ -6,28 +6,9 @@ import torch
 import varz.autograd
 import varz.tensorflow
 import varz.torch
-import wbml.out as out
 from varz import Vars
 
-from .util import approx, Value
-
-
-class OutStream:
-    """Mock the streams of `wbml.out`."""
-
-    def __init__(self):
-        self.output = ''
-
-    def write(self, msg):
-        self.output += msg
-
-    def __enter__(self):
-        self._orig_streams = list(out.streams)
-        out.streams[:] = [self]
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        out.streams[:] = self._orig_streams
+from .util import approx, Value, OutStream
 
 
 @pytest.fixture(params=[(np.float64, varz.autograd.minimise_l_bfgs_b, {}),
