@@ -125,7 +125,7 @@ class VariableType(metaclass=ABCMeta):
         kw_args['init'] = init
 
         # Set name.
-        if name in kw_args and kw_args['name'] is not None:
+        if 'name' in kw_args and kw_args['name'] is not None:
             raise ValueError(f'Name doubly specified: '
                              f'{name} and {kw_args["name"]}.')
         kw_args['name'] = name
@@ -198,9 +198,9 @@ def parametrised(prefix_or_f=None):
                         issubclass(annotation, VariableType)):
                     annotation = annotation()
 
-                # Check whether the parameter is a variable that needs to be
-                # extracted.
                 if isinstance(annotation, VariableType):
+                    # Parameter is a variable that needs to be extracted.
+
                     # Check for default value.
                     if parameter.default is not parameter.empty:
                         init = parameter.default
@@ -210,15 +210,28 @@ def parametrised(prefix_or_f=None):
                     # Store the instantiated variable.
                     filled_kwargs[name] = \
                         annotation.instantiate(vs, prefix + name, init)
+
                 else:
+                    # Parameter is a regular parameter. Find it.
+
                     if len(args) > 0:
                         # Positional arguments left. Must be next one.
                         filled_kwargs[name] = args[0]
                         args = args[1:]
                     else:
                         # No position arguments left. Extract from keywords.
-                        filled_kwargs[name] = kw_args[name]
-                        del kw_args[name]
+                        try:
+                            filled_kwargs[name] = kw_args[name]
+                            del kw_args[name]
+                        except KeyError:
+                            # Also not found in keywords. Resort to default
+                            # value. If a default value is not given,
+                            # the user did not specify a positional argument.
+                            if parameter.default is parameter.empty:
+                                raise ValueError(f'Positional argument '
+                                                 f'"{name}" not given.')
+                            else:
+                                filled_kwargs[name] = parameter.default
 
             # Ensure that everything is parsed.
             if len(args) > 0:
