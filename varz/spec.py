@@ -37,7 +37,7 @@ class Sequential(Provider):
         return self._get_var(self.vs.unbounded, args, kw_args)
 
     def positive(self, *args, **kw_args):
-        return self._get_var(self.vs.positive, *args, **kw_args)
+        return self._get_var(self.vs.positive, args, kw_args)
 
     def bounded(self, *args, **kw_args):
         return self._get_var(self.vs.bounded, args, kw_args)
