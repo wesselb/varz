@@ -11,7 +11,7 @@ from plum import Dispatcher, Self, Referentiable
 
 from .util import Packer, match, lazy_tf as tf, lazy_torch as torch
 
-__all__ = ['Vars']
+__all__ = ['Provider', 'Vars']
 
 log = logging.getLogger(__name__)
 
