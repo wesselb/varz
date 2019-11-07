@@ -82,10 +82,15 @@ def _extract_prefix_and_f(prefix_or_f):
         return prefix_or_f, None
 
 
-def sequential(prefix_or_f=None):
+def sequential(prefix=None):
     """Decorator that generates variable names for unnamed variables
-    sequentially."""
-    prefix, f = _extract_prefix_and_f(prefix_or_f)
+    sequentially.
+
+    Args:
+        prefix (str, optional): Prefix to prepend to the name of generated
+            variables. Defaults to no prefix.
+    """
+    prefix, f = _extract_prefix_and_f(prefix)
 
     def decorator(f_):
         @wraps(f_)
@@ -165,10 +170,15 @@ class Bounded(VariableType):
         return self._get_var(vs.bounded, name, init)
 
 
-def parametrised(prefix_or_f=None):
-    """Decorator to specify variables with types."""
+def parametrised(prefix=None):
+    """Decorator to specify variables with types.
 
-    prefix, f = _extract_prefix_and_f(prefix_or_f)
+    Args:
+        prefix (str, optional): Prefix to prepend to the name of generated
+            variables. Defaults to no prefix.
+    """
+
+    prefix, f = _extract_prefix_and_f(prefix)
 
     def decorator(f_):
         @wraps(f_)
