@@ -203,8 +203,8 @@ sequential and parametrised specification.
 
 Sequential specification can be used if, upon execution of `objective`, 
 variables are always obtained in the *same order*.
-This means that variables can be identified to their position in this order and
-hence be named accordingly.
+This means that variables can be identified with their position in this order
+and hence be named accordingly.
 To use sequential specification, decorate the function with `sequential`.
 
 Example:
@@ -244,8 +244,8 @@ Sequential specification still suffers from boilerplate code like
 `x = vs.get(5)` and `y = vs.get()`.
 This is the problem that parametrised specification addresses, which allows 
 you to specify variables as *arguments to your function*.
-To indicate that an argument of the function is a variable, its type hint must
- be set accordingly, as follows:
+To indicate that an argument of the function is a variable, as opposed to a 
+regular argument, the argument's type hint must be set accordingly, as follows:
 
 * **Unbounded variables:** `def f(vs, x: Unbounded)`.
 
@@ -254,9 +254,9 @@ To indicate that an argument of the function is a variable, its type hint must
 * **Bounded variables:** `def f(vs, x: Bounded)` to use the default bounds, and
     `def f(vs, x: Bounded(lower=1, upper=10))` otherwise.
     
-As can be seen to the above, the variable container must also be an argument 
-of the function, because that is where the variables will be extracted from.
-An argument can be given an initial variable in the way you would expect:
+As can be seen from the above, the variable container must also be an argument 
+of the function, because that is where the variables will be obtained from.
+An variable can be given an initial value in the way you would expect:
 `def f(vs, x: Unbounded = 5)`.
 
 Variable arguments and regular arguments can be mixed.
@@ -293,7 +293,7 @@ Option: other
 Option: other
 9.757481795615316
 
->>> objective(vs, x=5)  # This is not valid, because `x` will be obtained automatically.
+>>> objective(vs, x=5)  # This is not valid, because `x` will be obtained automatically from `vs`.
 ValueError: 1 keyword argument(s) not parsed: x.
 
 >>> vs.print()
