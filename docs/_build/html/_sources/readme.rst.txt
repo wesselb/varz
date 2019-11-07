@@ -259,16 +259,16 @@ follows:
 -  **Positive variables:** ``def f(vs, x: Positive)``.
 
 -  **Bounded variables:** ``def f(vs, x: Bounded)`` to use the default
-   bound, and ``def f(vs, x: Bounded(lower=1, upper=10))`` otherwise.
+   bounds, and ``def f(vs, x: Bounded(lower=1, upper=10))`` otherwise.
 
 As can be seen to the above, the variable container must also be an
 argument of the function, because that is where the variables will be
 extracted from. An argument can be given an initial variable in the way
 you would expect: ``def f(vs, x: Unbounded = 5)``.
 
-Variable argument and regular argument can be mixed. If ``f`` is called,
-the variable argument must not be specified, because they will be
-extracted. Regular arguments, however, must be specified.
+Variable arguments and regular arguments can be mixed. If ``f`` is
+called, variable arguments must not be specified, because they will be
+obtained automatically. Regular arguments, however, must be specified.
 
 To use parametrised specification, decorate the function with
 ``parametrised``.

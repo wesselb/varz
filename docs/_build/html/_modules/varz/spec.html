@@ -232,10 +232,15 @@
         <span class="k">return</span> <span class="n">prefix_or_f</span><span class="p">,</span> <span class="kc">None</span>
 
 
-<div class="viewcode-block" id="sequential"><a class="viewcode-back" href="../../source/varz.spec.html#varz.spec.sequential">[docs]</a><span class="k">def</span> <span class="nf">sequential</span><span class="p">(</span><span class="n">prefix_or_f</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="sequential"><a class="viewcode-back" href="../../source/varz.spec.html#varz.spec.sequential">[docs]</a><span class="k">def</span> <span class="nf">sequential</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Decorator that generates variable names for unnamed variables</span>
-<span class="sd">    sequentially.&quot;&quot;&quot;</span>
-    <span class="n">prefix</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">_extract_prefix_and_f</span><span class="p">(</span><span class="n">prefix_or_f</span><span class="p">)</span>
+<span class="sd">    sequentially.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        prefix (str, optional): Prefix to prepend to the name of generated</span>
+<span class="sd">            variables. Defaults to no prefix.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">prefix</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">_extract_prefix_and_f</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">f_</span><span class="p">):</span>
         <span class="nd">@wraps</span><span class="p">(</span><span class="n">f_</span><span class="p">)</span>
@@ -315,10 +320,15 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_var</span><span class="p">(</span><span class="n">vs</span><span class="o">.</span><span class="n">bounded</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">init</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="parametrised"><a class="viewcode-back" href="../../source/varz.spec.html#varz.spec.parametrised">[docs]</a><span class="k">def</span> <span class="nf">parametrised</span><span class="p">(</span><span class="n">prefix_or_f</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Decorator to specify variables with types.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="parametrised"><a class="viewcode-back" href="../../source/varz.spec.html#varz.spec.parametrised">[docs]</a><span class="k">def</span> <span class="nf">parametrised</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Decorator to specify variables with types.</span>
 
-    <span class="n">prefix</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">_extract_prefix_and_f</span><span class="p">(</span><span class="n">prefix_or_f</span><span class="p">)</span>
+<span class="sd">    Args:</span>
+<span class="sd">        prefix (str, optional): Prefix to prepend to the name of generated</span>
+<span class="sd">            variables. Defaults to no prefix.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">prefix</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">_extract_prefix_and_f</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">f_</span><span class="p">):</span>
         <span class="nd">@wraps</span><span class="p">(</span><span class="n">f_</span><span class="p">)</span>

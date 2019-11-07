@@ -400,15 +400,15 @@ follows:</p>
 <li><p><strong>Unbounded variables:</strong> <code class="docutils literal notranslate"><span class="pre">def</span> <span class="pre">f(vs,</span> <span class="pre">x:</span> <span class="pre">Unbounded)</span></code>.</p></li>
 <li><p><strong>Positive variables:</strong> <code class="docutils literal notranslate"><span class="pre">def</span> <span class="pre">f(vs,</span> <span class="pre">x:</span> <span class="pre">Positive)</span></code>.</p></li>
 <li><p><strong>Bounded variables:</strong> <code class="docutils literal notranslate"><span class="pre">def</span> <span class="pre">f(vs,</span> <span class="pre">x:</span> <span class="pre">Bounded)</span></code> to use the default
-bound, and <code class="docutils literal notranslate"><span class="pre">def</span> <span class="pre">f(vs,</span> <span class="pre">x:</span> <span class="pre">Bounded(lower=1,</span> <span class="pre">upper=10))</span></code> otherwise.</p></li>
+bounds, and <code class="docutils literal notranslate"><span class="pre">def</span> <span class="pre">f(vs,</span> <span class="pre">x:</span> <span class="pre">Bounded(lower=1,</span> <span class="pre">upper=10))</span></code> otherwise.</p></li>
 </ul>
 <p>As can be seen to the above, the variable container must also be an
 argument of the function, because that is where the variables will be
 extracted from. An argument can be given an initial variable in the way
 you would expect: <code class="docutils literal notranslate"><span class="pre">def</span> <span class="pre">f(vs,</span> <span class="pre">x:</span> <span class="pre">Unbounded</span> <span class="pre">=</span> <span class="pre">5)</span></code>.</p>
-<p>Variable argument and regular argument can be mixed. If <code class="docutils literal notranslate"><span class="pre">f</span></code> is called,
-the variable argument must not be specified, because they will be
-extracted. Regular arguments, however, must be specified.</p>
+<p>Variable arguments and regular arguments can be mixed. If <code class="docutils literal notranslate"><span class="pre">f</span></code> is
+called, variable arguments must not be specified, because they will be
+obtained automatically. Regular arguments, however, must be specified.</p>
 <p>To use parametrised specification, decorate the function with
 <code class="docutils literal notranslate"><span class="pre">parametrised</span></code>.</p>
 <p>Example:</p>
