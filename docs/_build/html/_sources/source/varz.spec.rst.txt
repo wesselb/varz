@@ -1,0 +1,7 @@
+varz.spec module
+================
+
+.. automodule:: varz.spec
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -88,13 +88,24 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Varz</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#manual">Manual</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#basics">Basics</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#naming">Naming</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#constrained-variables">Constrained Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#automatic-naming-of-variables">Automatic Naming of Variables</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#sequential-specification">Sequential Specification</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#parametrised-specification">Parametrised Specification</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#optimisers">Optimisers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pytorch-specifics">PyTorch Specifics</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#getting-and-setting-variables-as-a-vector">Getting and Setting Variables as a Vector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#get-variables-from-a-source">Get Variables from a Source</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#examples">Examples</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#autograd">AutoGrad</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#tensorflow">TensorFlow</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pytorch">PyTorch</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#get-variables-from-a-source">Get Variables from a Source</a></li>
 </ul>
 </li>
 </ul>
@@ -167,17 +178,27 @@
   <div class="section" id="varz">
 <h1><a class="reference external" href="http://github.com/wesselb/varz">Varz</a><a class="headerlink" href="#varz" title="Permalink to this headline">¶</a></h1>
 <p><a class="reference external" href="https://travis-ci.org/wesselb/varz"><img alt="Build" src="https://travis-ci.org/wesselb/varz.svg?branch=master" /></a> <a class="reference external" href="https://coveralls.io/github/wesselb/varz?branch=master"><img alt="Coverage Status" src="https://coveralls.io/repos/github/wesselb/varz/badge.svg?branch=master&amp;service=github" /></a> <a class="reference external" href="https://wesselb.github.io/varz"><img alt="Latest Docs" src="https://img.shields.io/badge/docs-latest-blue.svg" /></a></p>
-<p>Painless optimisation of constrained variables in PyTorch, TensorFlow,
-and AutoGrad</p>
-<p><em>Note:</em> Varz requires TensorFlow 2.</p>
+<p>Painless optimisation of constrained variables in AutoGrad, TensorFlow,
+and PyTorch</p>
+<p><em>Note:</em> Varz requires Python 3.6 or higher and TensorFlow 2 if
+TensorFlow is used.</p>
 <ul class="simple">
 <li><p><a class="reference external" href="#installation">Installation</a></p></li>
 <li><p><a class="reference external" href="#manual">Manual</a></p>
 <ul>
+<li><p><a class="reference external" href="#basics">Basics</a></p></li>
 <li><p><a class="reference external" href="#naming">Naming</a></p></li>
 <li><p><a class="reference external" href="#constrained-variables">Constrained Variables</a></p></li>
+<li><p><a class="reference external" href="#automatic-naming-of-variables">Automatic Naming of Variables</a></p></li>
+<li><p><a class="reference external" href="#optimisers">Optimisers</a></p></li>
+<li><p><a class="reference external" href="#pytorch-specifics">PyTorch Specifics</a></p></li>
 <li><p><a class="reference external" href="#getting-and-setting-variables-as-a-vector">Getting and Setting Variables as a
 Vector</a></p></li>
+<li><p><a class="reference external" href="#get-variables-from-a-source">Getting Variables from a Source</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference external" href="#examples">Examples</a></p>
+<ul>
 <li><p><a class="reference external" href="#autograd">AutoGrad</a></p></li>
 <li><p><a class="reference external" href="#tensorflow">TensorFlow</a></p></li>
 <li><p><a class="reference external" href="#pytorch">PyTorch</a></p></li>
@@ -189,20 +210,24 @@ Vector</a></p></li>
 <p>Before installing the package, please ensure that <code class="docutils literal notranslate"><span class="pre">gcc</span></code> and
 <code class="docutils literal notranslate"><span class="pre">gfortran</span></code> are available. On OS X, these are both installed with
 <code class="docutils literal notranslate"><span class="pre">brew</span> <span class="pre">install</span> <span class="pre">gcc</span></code>; users of Anaconda may want to instead consider
-<code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">gcc</span></code>. Then simply</p>
+<code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">gcc</span></code>. On Linux, <code class="docutils literal notranslate"><span class="pre">gcc</span></code> is most likely already
+available, and <code class="docutils literal notranslate"><span class="pre">gfortran</span></code> can be installed with
+<code class="docutils literal notranslate"><span class="pre">apt-get</span> <span class="pre">install</span> <span class="pre">gfortran</span></code>. Then simply</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">varz</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="manual">
 <h2>Manual<a class="headerlink" href="#manual" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="basics">
+<h3>Basics<a class="headerlink" href="#basics" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">varz</span> <span class="kn">import</span> <span class="n">Vars</span>
 </pre></div>
 </div>
-<p>To begin with, create a variable container of the right data type. For
-use with NumPy and AutoGrad, use a <code class="docutils literal notranslate"><span class="pre">np.*</span></code> data type; for use with
-PyTorch, use a <code class="docutils literal notranslate"><span class="pre">torch.*</span></code> data type; and for use with TensorFlow, use a
-<code class="docutils literal notranslate"><span class="pre">tf.*</span></code> data type. In this example we’ll use NumPy and AutoGrad.</p>
+<p>To begin with, create a <em>variable container</em> of the right data type. For
+use with AutoGrad, use a <code class="docutils literal notranslate"><span class="pre">np.*</span></code> data type; for use with PyTorch, use a
+<code class="docutils literal notranslate"><span class="pre">torch.*</span></code> data type; and for use with TensorFlow, use a <code class="docutils literal notranslate"><span class="pre">tf.*</span></code> data
+type. In this example we’ll use AutoGrad.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">vs</span> <span class="o">=</span> <span class="n">Vars</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -221,13 +246,17 @@ value and a name.</p>
 </pre></div>
 </div>
 <p>Alternatively, indexing syntax may be used to get the existing variable
-<code class="docutils literal notranslate"><span class="pre">x</span></code>.</p>
+<code class="docutils literal notranslate"><span class="pre">x</span></code>. This asserts that a variable with a name <code class="docutils literal notranslate"><span class="pre">x</span></code> already exists,
+and will throw a <code class="docutils literal notranslate"><span class="pre">KeyError</span></code> otherwise.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">vs</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span>
 <span class="go">array([[ 1.04404354, -1.98478763],</span>
 <span class="go">       [ 1.14176728, -3.2915562 ]])</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vs</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span>
+<span class="go">KeyError: &#39;y&#39;</span>
 </pre></div>
 </div>
-<p>The value of <code class="docutils literal notranslate"><span class="pre">x</span></code> may be changed by assigning it a different value.</p>
+<p>The value of <code class="docutils literal notranslate"><span class="pre">x</span></code> can be changed by assigning it a different value.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">vs</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
 <span class="go">array([[ 1.43477728,  0.51006941],</span>
 <span class="go">       [-0.74686452, -1.05285767]])</span>
@@ -243,8 +272,9 @@ argument <code class="docutils literal notranslate"><span class="pre">differenti
 </div>
 <p>The variable container can be copied with <code class="docutils literal notranslate"><span class="pre">vs.copy()</span></code>. Note that the
 copy <em>shares its variables with the original</em>. This means that
-assignment will also mutate the original; differentiable assignment,
-however, will not.</p>
+non-differentiable assignment will also mutate the original;
+differentiable assignment, however, will not.</p>
+</div>
 <div class="section" id="naming">
 <h3>Naming<a class="headerlink" href="#naming" title="Permalink to this headline">¶</a></h3>
 <p>Variables may be organised by naming them hierarchically using <code class="docutils literal notranslate"><span class="pre">/</span></code>s.
@@ -253,21 +283,48 @@ helpful for extracting collections of variables, where wildcards may be
 used to match names. For example, <code class="docutils literal notranslate"><span class="pre">*/bar</span></code> would match <code class="docutils literal notranslate"><span class="pre">group1/bar</span></code>
 and <code class="docutils literal notranslate"><span class="pre">group2/bar</span></code>, and <code class="docutils literal notranslate"><span class="pre">group1/*</span></code> would match <code class="docutils literal notranslate"><span class="pre">group1/bar</span></code> and
 <code class="docutils literal notranslate"><span class="pre">group1/foo</span></code>.</p>
+<p>The names of all variables can be obtained with <code class="docutils literal notranslate"><span class="pre">Vars.names</span></code>, and
+variables can be printed with <code class="docutils literal notranslate"><span class="pre">Vars.print</span></code>.</p>
+<p>Example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">vs</span> <span class="o">=</span> <span class="n">Vars</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;x1&#39;</span><span class="p">)</span>
+<span class="go">array(1.)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;x2&#39;</span><span class="p">)</span>
+<span class="go">array(2.)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">)</span>
+<span class="go">array(3.)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vs</span><span class="o">.</span><span class="n">names</span>
+<span class="go">[&#39;x1&#39;, &#39;x2&#39;, &#39;y&#39;]</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vs</span><span class="o">.</span><span class="k">print</span><span class="p">()</span>
+<span class="go">x1:         1.0</span>
+<span class="go">x2:         2.0</span>
+<span class="go">y:          3.0</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="constrained-variables">
 <h3>Constrained Variables<a class="headerlink" href="#constrained-variables" title="Permalink to this headline">¶</a></h3>
-<p>A variable that is constrained to be <em>positive</em> can be created using
-<code class="docutils literal notranslate"><span class="pre">Vars.positive</span></code> or <code class="docutils literal notranslate"><span class="pre">Vars.pos</span></code>.</p>
+<ul>
+<li><p><strong>Positive variables:</strong> A variable that is constrained to be
+<em>positive</em> can be created using <code class="docutils literal notranslate"><span class="pre">Vars.positive</span></code> or <code class="docutils literal notranslate"><span class="pre">Vars.pos</span></code>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">vs</span><span class="o">.</span><span class="n">pos</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;positive_variable&#39;</span><span class="p">)</span>
 <span class="go">0.016925610008314832</span>
 </pre></div>
 </div>
-<p>A variable that is constrained to be <em>bounded</em> can be created using
-<code class="docutils literal notranslate"><span class="pre">Vars.bounded</span></code> or <code class="docutils literal notranslate"><span class="pre">Vars.bnd</span></code>.</p>
+</li>
+<li><p><strong>Bounded variables:</strong> A variable that is constrained to be <em>bounded</em>
+can be created using <code class="docutils literal notranslate"><span class="pre">Vars.bounded</span></code> or <code class="docutils literal notranslate"><span class="pre">Vars.bnd</span></code>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">vs</span><span class="o">.</span><span class="n">bnd</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;bounded_variable&#39;</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 <span class="go">1.646772663807718</span>
 </pre></div>
 </div>
+</li>
+</ul>
 <p>These constrained variables are created by transforming some <em>latent
 unconstrained representation</em> to the desired constrained space. The
 latent variables can be obtained using <code class="docutils literal notranslate"><span class="pre">Vars.get_vars</span></code>.</p>
@@ -280,6 +337,133 @@ latent variables can be obtained using <code class="docutils literal notranslate
 <span class="go">[array(-4.07892742), array(-0.604883)]</span>
 </pre></div>
 </div>
+</div>
+<div class="section" id="automatic-naming-of-variables">
+<h3>Automatic Naming of Variables<a class="headerlink" href="#automatic-naming-of-variables" title="Permalink to this headline">¶</a></h3>
+<p>To parametrise functions, a common pattern is the following:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">objective</span><span class="p">(</span><span class="n">vs</span><span class="p">):</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">vs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">vs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">y</span> <span class="o">-</span> <span class="mi">5</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">x</span> <span class="o">**</span> <span class="mi">2</span>
+</pre></div>
+</div>
+<p>The names for <code class="docutils literal notranslate"><span class="pre">x</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code> are necessary, because otherwise new
+variables will be created and initialised every time <code class="docutils literal notranslate"><span class="pre">objective</span></code> is
+ran. Varz offers two ways to not having to specify a name for every
+variable: sequential and parametrised specification.</p>
+<div class="section" id="sequential-specification">
+<h4>Sequential Specification<a class="headerlink" href="#sequential-specification" title="Permalink to this headline">¶</a></h4>
+<p>Sequential specification can be used if, upon execution of
+<code class="docutils literal notranslate"><span class="pre">objective</span></code>, variables are always obtained in the <em>same order</em>. This
+means that variables can be identified to their position in this order
+and hence be named accordingly. To use sequential specification,
+decorate the function with <code class="docutils literal notranslate"><span class="pre">sequential</span></code>.</p>
+<p>Example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">varz</span> <span class="kn">import</span> <span class="n">sequential</span>
+
+
+<span class="nd">@sequential</span>
+<span class="k">def</span> <span class="nf">objective</span><span class="p">(</span><span class="n">vs</span><span class="p">):</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">vs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>  <span class="c1"># Initialise to 5.</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">vs</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>   <span class="c1"># Initialise randomly.</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">y</span> <span class="o">-</span> <span class="mi">5</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">x</span> <span class="o">**</span> <span class="mi">2</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">vs</span> <span class="o">=</span> <span class="n">Vars</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">objective</span><span class="p">(</span><span class="n">vs</span><span class="p">)</span>
+<span class="go">68.65047879833773</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">objective</span><span class="p">(</span><span class="n">vs</span><span class="p">)</span>  <span class="c1"># Running the objective again reuses the same variables.</span>
+<span class="go">68.65047879833773</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vs</span><span class="o">.</span><span class="n">names</span>
+<span class="go">[&#39;0&#39;, &#39;1&#39;]</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vs</span><span class="o">.</span><span class="k">print</span><span class="p">()</span>
+<span class="go">0:          5.0      # This is `x`.</span>
+<span class="go">1:          -0.3214  # This is `y`.</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="parametrised-specification">
+<h4>Parametrised Specification<a class="headerlink" href="#parametrised-specification" title="Permalink to this headline">¶</a></h4>
+<p>Sequential specification still suffers from boilerplate code like
+<code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">vs.get(5)</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span> <span class="pre">=</span> <span class="pre">vs.get()</span></code>. This is the problem that
+parametrised specification addresses, which allows you to specify
+variables as <em>arguments to your function</em>. To indicate that an argument
+of the function is a variable, its type hint must be set accordingly, as
+follows:</p>
+<ul class="simple">
+<li><p><strong>Unbounded variables:</strong> <code class="docutils literal notranslate"><span class="pre">def</span> <span class="pre">f(vs,</span> <span class="pre">x:</span> <span class="pre">Unbounded)</span></code>.</p></li>
+<li><p><strong>Positive variables:</strong> <code class="docutils literal notranslate"><span class="pre">def</span> <span class="pre">f(vs,</span> <span class="pre">x:</span> <span class="pre">Positive)</span></code>.</p></li>
+<li><p><strong>Bounded variables:</strong> <code class="docutils literal notranslate"><span class="pre">def</span> <span class="pre">f(vs,</span> <span class="pre">x:</span> <span class="pre">Bounded)</span></code> to use the default
+bound, and <code class="docutils literal notranslate"><span class="pre">def</span> <span class="pre">f(vs,</span> <span class="pre">x:</span> <span class="pre">Bounded(lower=1,</span> <span class="pre">upper=10))</span></code> otherwise.</p></li>
+</ul>
+<p>As can be seen to the above, the variable container must also be an
+argument of the function, because that is where the variables will be
+extracted from. An argument can be given an initial variable in the way
+you would expect: <code class="docutils literal notranslate"><span class="pre">def</span> <span class="pre">f(vs,</span> <span class="pre">x:</span> <span class="pre">Unbounded</span> <span class="pre">=</span> <span class="pre">5)</span></code>.</p>
+<p>Variable argument and regular argument can be mixed. If <code class="docutils literal notranslate"><span class="pre">f</span></code> is called,
+the variable argument must not be specified, because they will be
+extracted. Regular arguments, however, must be specified.</p>
+<p>To use parametrised specification, decorate the function with
+<code class="docutils literal notranslate"><span class="pre">parametrised</span></code>.</p>
+<p>Example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">varz</span> <span class="kn">import</span> <span class="n">parametrised</span><span class="p">,</span> <span class="n">Unbounded</span><span class="p">,</span> <span class="n">Bounded</span>
+
+
+<span class="nd">@parametrised</span>
+<span class="k">def</span> <span class="nf">objective</span><span class="p">(</span><span class="n">vs</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Unbounded</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">Bounded</span><span class="p">(</span><span class="n">lower</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">option</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Option:&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">y</span> <span class="o">-</span> <span class="mi">5</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">x</span> <span class="o">**</span> <span class="mi">2</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">vs</span> <span class="o">=</span> <span class="n">Vars</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">objective</span><span class="p">(</span><span class="n">vs</span><span class="p">)</span>
+<span class="go">Option: None</span>
+<span class="go">9.757481795615316</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">objective</span><span class="p">(</span><span class="n">vs</span><span class="p">,</span> <span class="s1">&#39;other&#39;</span><span class="p">)</span>
+<span class="go">Option: other</span>
+<span class="go">9.757481795615316</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">objective</span><span class="p">(</span><span class="n">vs</span><span class="p">,</span> <span class="n">option</span><span class="o">=</span><span class="s1">&#39;other&#39;</span><span class="p">)</span>
+<span class="go">Option: other</span>
+<span class="go">9.757481795615316</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">objective</span><span class="p">(</span><span class="n">vs</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>  <span class="c1"># This is not valid, because `x` will be obtained automatically.</span>
+<span class="go">ValueError: 1 keyword argument(s) not parsed: x.</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vs</span><span class="o">.</span><span class="k">print</span><span class="p">()</span>
+<span class="go">x:          1.025</span>
+<span class="go">y:          2.0</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="optimisers">
+<h3>Optimisers<a class="headerlink" href="#optimisers" title="Permalink to this headline">¶</a></h3>
+<p>The following optimisers are available:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">varz</span><span class="o">.</span><span class="p">{</span><span class="n">autograd</span><span class="p">,</span><span class="n">tensorflow</span><span class="p">,</span><span class="n">torch</span><span class="p">}</span><span class="o">.</span><span class="n">minimise_l_bfgs_b</span> <span class="p">(</span><span class="n">L</span><span class="o">-</span><span class="n">BFGS</span><span class="o">-</span><span class="n">B</span><span class="p">)</span>
+<span class="n">varz</span><span class="o">.</span><span class="p">{</span><span class="n">autograd</span><span class="p">,</span><span class="n">tensorflow</span><span class="p">,</span><span class="n">torch</span><span class="p">}</span><span class="o">.</span><span class="n">minimise_adam</span>     <span class="p">(</span><span class="n">Adam</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The L-BFGS-B algorithm is recommended for deterministic objectives, and
+Adam is recommended for stochastic objectives.</p>
+<p>See the examples for an illustration how these optimisers can be used.</p>
+</div>
+<div class="section" id="pytorch-specifics">
+<h3>PyTorch Specifics<a class="headerlink" href="#pytorch-specifics" title="Permalink to this headline">¶</a></h3>
+<p>All the variables held by a container can be detached from the current
+computation graph with <code class="docutils literal notranslate"><span class="pre">Vars.detach</span></code> . To make a copy of the container
+with detached versions of the variables, use <code class="docutils literal notranslate"><span class="pre">Vars.copy</span></code> with
+<code class="docutils literal notranslate"><span class="pre">detach=True</span></code> instead. Whether variables require gradients can be
+configured with <code class="docutils literal notranslate"><span class="pre">Vars.requires_grad</span></code>. By default, no variable requires
+a gradient.</p>
 </div>
 <div class="section" id="getting-and-setting-variables-as-a-vector">
 <h3>Getting and Setting Variables as a Vector<a class="headerlink" href="#getting-and-setting-variables-as-a-vector" title="Permalink to this headline">¶</a></h3>
@@ -302,97 +486,6 @@ variables, <code class="docutils literal notranslate"><span class="pre">Vars.set
 </pre></div>
 </div>
 </div>
-<div class="section" id="autograd">
-<h3>AutoGrad<a class="headerlink" href="#autograd" title="Permalink to this headline">¶</a></h3>
-<p>The function <code class="docutils literal notranslate"><span class="pre">varz.autograd.minimise_l_bfgs_b</span></code> can be used to perform
-minimisation using the L-BFGS-B algorithm.</p>
-<p>Example of optimising variables:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">autograd.numpy</span> <span class="kn">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">varz.autograd</span> <span class="kn">import</span> <span class="n">Vars</span><span class="p">,</span> <span class="n">minimise_l_bfgs_b</span>
-
-<span class="n">target</span> <span class="o">=</span> <span class="mf">5.</span>
-
-
-<span class="k">def</span> <span class="nf">objective</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>  <span class="c1"># `x` must be positive!</span>
-    <span class="k">return</span> <span class="p">(</span><span class="n">x</span> <span class="o">**</span> <span class="o">.</span><span class="mi">5</span> <span class="o">-</span> <span class="n">target</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
-</pre></div>
-</div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">vs</span> <span class="o">=</span> <span class="n">Vars</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
-
-<span class="gp">&gt;&gt;&gt; </span><span class="n">vs</span><span class="o">.</span><span class="n">pos</span><span class="p">(</span><span class="mf">10.</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
-<span class="go">10.000000000000002</span>
-
-<span class="gp">&gt;&gt;&gt; </span><span class="n">minimise_l_bfgs_b</span><span class="p">(</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">objective</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]),</span> <span class="n">vs</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">])</span>
-<span class="go">3.17785950743424e-19  # Final objective function value.</span>
-
-<span class="gp">&gt;&gt;&gt; </span><span class="n">vs</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">target</span> <span class="o">**</span> <span class="mi">2</span>
-<span class="go">-5.637250666268301e-09</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="tensorflow">
-<h3>TensorFlow<a class="headerlink" href="#tensorflow" title="Permalink to this headline">¶</a></h3>
-<p>The function <code class="docutils literal notranslate"><span class="pre">varz.tensorflow.minimise_l_bfgs_b</span></code> can be used to
-perform minimisation using the L-BFGS-B algorithm.</p>
-<p>Example of optimising variables:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
-<span class="kn">from</span> <span class="nn">varz.tensorflow</span> <span class="kn">import</span> <span class="n">Vars</span><span class="p">,</span> <span class="n">minimise_l_bfgs_b</span>
-
-<span class="n">target</span> <span class="o">=</span> <span class="mf">5.</span>
-
-
-<span class="k">def</span> <span class="nf">objective</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>  <span class="c1"># `x` must be positive!</span>
-    <span class="k">return</span> <span class="p">(</span><span class="n">x</span> <span class="o">**</span> <span class="o">.</span><span class="mi">5</span> <span class="o">-</span> <span class="n">target</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
-</pre></div>
-</div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">vs</span> <span class="o">=</span> <span class="n">Vars</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
-
-<span class="gp">&gt;&gt;&gt; </span><span class="n">vs</span><span class="o">.</span><span class="n">pos</span><span class="p">(</span><span class="mf">10.</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
-<span class="go">&lt;tf.Tensor: id=11, shape=(), dtype=float64, numpy=10.000000000000002&gt;</span>
-
-<span class="gp">&gt;&gt;&gt; </span><span class="n">minimise_l_bfgs_b</span><span class="p">(</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">objective</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]),</span> <span class="n">vs</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">])</span>
-<span class="go">3.17785950743424e-19  # Final objective function value.</span>
-
-<span class="gp">&gt;&gt;&gt; </span><span class="n">vs</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">target</span> <span class="o">**</span> <span class="mi">2</span>
-<span class="go">&lt;tf.Tensor: id=562, shape=(), dtype=float64, numpy=-5.637250666268301e-09&gt;</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="pytorch">
-<h3>PyTorch<a class="headerlink" href="#pytorch" title="Permalink to this headline">¶</a></h3>
-<p>All the variables held by a container can be detached from the current
-computation graph with <code class="docutils literal notranslate"><span class="pre">Vars.detach</span></code> . To make a copy of the container
-with detached versions of the variables, use <code class="docutils literal notranslate"><span class="pre">Vars.copy</span></code> with
-<code class="docutils literal notranslate"><span class="pre">detach=True</span></code> instead. Whether variables require gradients can be
-configured with <code class="docutils literal notranslate"><span class="pre">Vars.requires_grad</span></code>. By default, no variable requires
-a gradient.</p>
-<p>The function <code class="docutils literal notranslate"><span class="pre">varz.torch.minimise_l_bfgs_b</span></code> can be used to perform
-minimisation using the L-BFGS-B algorithm.</p>
-<p>Example of optimising variables:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">torch</span>
-<span class="kn">from</span> <span class="nn">varz.torch</span> <span class="kn">import</span> <span class="n">Vars</span><span class="p">,</span> <span class="n">minimise_l_bfgs_b</span>
-
-
-<span class="n">target</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">5.</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
-
-
-<span class="k">def</span> <span class="nf">objective</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>  <span class="c1"># `x` must be positive!</span>
-    <span class="k">return</span> <span class="p">(</span><span class="n">x</span> <span class="o">**</span> <span class="o">.</span><span class="mi">5</span> <span class="o">-</span> <span class="n">target</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
-</pre></div>
-</div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">vs</span> <span class="o">=</span> <span class="n">Vars</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
-
-<span class="gp">&gt;&gt;&gt; </span><span class="n">vs</span><span class="o">.</span><span class="n">pos</span><span class="p">(</span><span class="mf">10.</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
-<span class="go">tensor(10.0000, dtype=torch.float64)</span>
-
-<span class="gp">&gt;&gt;&gt; </span><span class="n">minimise_l_bfgs_b</span><span class="p">(</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">objective</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]),</span> <span class="n">vs</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">])</span>
-<span class="go">array(3.17785951e-19)  # Final objective function value.</span>
-
-<span class="gp">&gt;&gt;&gt; </span><span class="n">vs</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">target</span> <span class="o">**</span> <span class="mi">2</span>
-<span class="go">tensor(-5.6373e-09, dtype=torch.float64)</span>
-</pre></div>
-</div>
-</div>
 <div class="section" id="get-variables-from-a-source">
 <h3>Get Variables from a Source<a class="headerlink" href="#get-variables-from-a-source" title="Permalink to this headline">¶</a></h3>
 <p>The keyword argument <code class="docutils literal notranslate"><span class="pre">source</span></code> can set to a tensor from which the
@@ -411,6 +504,86 @@ latent variables will be obtained.</p>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 <span class="go">148.41316</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<p>The follow examples show how a function can be minimised using the
+L-BFGS-B algorithm.</p>
+<div class="section" id="autograd">
+<h3>AutoGrad<a class="headerlink" href="#autograd" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">autograd.numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">varz.autograd</span> <span class="kn">import</span> <span class="n">Vars</span><span class="p">,</span> <span class="n">minimise_l_bfgs_b</span>
+
+<span class="n">target</span> <span class="o">=</span> <span class="mf">5.</span>
+
+
+<span class="k">def</span> <span class="nf">objective</span><span class="p">(</span><span class="n">vs</span><span class="p">):</span>
+    <span class="c1"># Get a variable named &quot;x&quot;, which must be positive, initialised to 10.</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">vs</span><span class="o">.</span><span class="n">pos</span><span class="p">(</span><span class="mf">10.</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">x</span> <span class="o">**</span> <span class="o">.</span><span class="mi">5</span> <span class="o">-</span> <span class="n">target</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">vs</span> <span class="o">=</span> <span class="n">Vars</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">minimise_l_bfgs_b</span><span class="p">(</span><span class="n">objective</span><span class="p">,</span> <span class="n">vs</span><span class="p">)</span>
+<span class="go">3.17785950743424e-19  # Final objective function value.</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vs</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">target</span> <span class="o">**</span> <span class="mi">2</span>
+<span class="go">-5.637250666268301e-09</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="tensorflow">
+<h3>TensorFlow<a class="headerlink" href="#tensorflow" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
+<span class="kn">from</span> <span class="nn">varz.tensorflow</span> <span class="kn">import</span> <span class="n">Vars</span><span class="p">,</span> <span class="n">minimise_l_bfgs_b</span>
+
+<span class="n">target</span> <span class="o">=</span> <span class="mf">5.</span>
+
+
+<span class="k">def</span> <span class="nf">objective</span><span class="p">(</span><span class="n">vs</span><span class="p">):</span>
+    <span class="c1"># Get a variable named &quot;x&quot;, which must be positive, initialised to 10.</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">vs</span><span class="o">.</span><span class="n">pos</span><span class="p">(</span><span class="mf">10.</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">x</span> <span class="o">**</span> <span class="o">.</span><span class="mi">5</span> <span class="o">-</span> <span class="n">target</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">vs</span> <span class="o">=</span> <span class="n">Vars</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">minimise_l_bfgs_b</span><span class="p">(</span><span class="n">objective</span><span class="p">,</span> <span class="n">vs</span><span class="p">)</span>
+<span class="go">3.17785950743424e-19  # Final objective function value.</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vs</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">target</span> <span class="o">**</span> <span class="mi">2</span>
+<span class="go">&lt;tf.Tensor: id=562, shape=(), dtype=float64, numpy=-5.637250666268301e-09&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="pytorch">
+<h3>PyTorch<a class="headerlink" href="#pytorch" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">varz.torch</span> <span class="kn">import</span> <span class="n">Vars</span><span class="p">,</span> <span class="n">minimise_l_bfgs_b</span>
+
+<span class="n">target</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">5.</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">objective</span><span class="p">(</span><span class="n">vs</span><span class="p">):</span>
+    <span class="c1"># Get a variable named &quot;x&quot;, which must be positive, initialised to 10.</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">vs</span><span class="o">.</span><span class="n">pos</span><span class="p">(</span><span class="mf">10.</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">x</span> <span class="o">**</span> <span class="o">.</span><span class="mi">5</span> <span class="o">-</span> <span class="n">target</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">vs</span> <span class="o">=</span> <span class="n">Vars</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">minimise_l_bfgs_b</span><span class="p">(</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">objective</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]),</span> <span class="n">vs</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">])</span>
+<span class="go">array(3.17785951e-19)  # Final objective function value.</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vs</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">target</span> <span class="o">**</span> <span class="mi">2</span>
+<span class="go">tensor(-5.6373e-09, dtype=torch.float64)</span>
 </pre></div>
 </div>
 </div>

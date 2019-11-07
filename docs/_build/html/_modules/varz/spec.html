@@ -1,0 +1,441 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>varz.spec &mdash; varz 0.1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> varz
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">Varz</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">Application Programming Interface</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">varz</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>varz.spec</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for varz.spec</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="k">import</span> <span class="n">ABCMeta</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">wraps</span>
+<span class="kn">from</span> <span class="nn">inspect</span> <span class="k">import</span> <span class="n">isfunction</span>
+
+<span class="kn">from</span> <span class="nn">.vars</span> <span class="k">import</span> <span class="n">Provider</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;sequential&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;Unbounded&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;Positive&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;Bounded&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;parametrised&#39;</span><span class="p">]</span>
+
+
+<span class="k">class</span> <span class="nc">Sequential</span><span class="p">(</span><span class="n">Provider</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A variable provider that wraps a :class:`.vars.Vars` object and</span>
+<span class="sd">    automatically names unnamed variables sequentially (0, 1, 2, ...) with a</span>
+<span class="sd">    possible prefix.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        vs (:class:`.vs.Vars`): Variable container to wrap.</span>
+<span class="sd">        prefix (str): Prefix for names in the sequence.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vs</span><span class="p">,</span> <span class="n">prefix</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vs</span> <span class="o">=</span> <span class="n">vs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prefix</span> <span class="o">=</span> <span class="n">prefix</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="nf">_get_var</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">getter</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kw_args</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s1">&#39;name&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kw_args</span><span class="p">:</span>
+            <span class="n">kw_args</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="s1">&#39;</span><span class="si">{self.prefix}{self.count}</span><span class="s1">&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">getter</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw_args</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">unbounded</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw_args</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_var</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vs</span><span class="o">.</span><span class="n">unbounded</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kw_args</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">positive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw_args</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_var</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vs</span><span class="o">.</span><span class="n">positive</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kw_args</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">bounded</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw_args</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_var</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vs</span><span class="o">.</span><span class="n">bounded</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kw_args</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vs</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">_to_sequential</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">prefix</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert a variable provider to sequential, if it is one.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x (object): Object to convert.</span>
+<span class="sd">        prefix (str): Prefix for names in the sequence.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        object: `x` converted to sequential if it is a variable provider,</span>
+<span class="sd">            otherwise just `x`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Sequential</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">prefix</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Provider</span><span class="p">)</span> <span class="k">else</span> <span class="n">x</span>
+
+
+<span class="k">def</span> <span class="nf">_extract_prefix_and_f</span><span class="p">(</span><span class="n">prefix_or_f</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Extract the prefix and function.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        prefix_or_f (object): Either a prefix or a function.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple: Tuple containing the predict and the function. If a function</span>
+<span class="sd">            was given, the prefix defaults to an empty string; and if a prefix</span>
+<span class="sd">            was given, the function defaults to `None`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">prefix_or_f</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Not used as decorator and prefix is left unspecified.</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="kc">None</span>
+    <span class="k">elif</span> <span class="n">isfunction</span><span class="p">(</span><span class="n">prefix_or_f</span><span class="p">):</span>
+        <span class="c1"># Used as a decorator.</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">prefix_or_f</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Not used as decorator and prefix is specified.</span>
+        <span class="k">return</span> <span class="n">prefix_or_f</span><span class="p">,</span> <span class="kc">None</span>
+
+
+<div class="viewcode-block" id="sequential"><a class="viewcode-back" href="../../source/varz.spec.html#varz.spec.sequential">[docs]</a><span class="k">def</span> <span class="nf">sequential</span><span class="p">(</span><span class="n">prefix_or_f</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Decorator that generates variable names for unnamed variables</span>
+<span class="sd">    sequentially.&quot;&quot;&quot;</span>
+    <span class="n">prefix</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">_extract_prefix_and_f</span><span class="p">(</span><span class="n">prefix_or_f</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">f_</span><span class="p">):</span>
+        <span class="nd">@wraps</span><span class="p">(</span><span class="n">f_</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">wrapped_f</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw_args</span><span class="p">):</span>
+            <span class="c1"># Replace all variable containers with their sequential variants.</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="n">_to_sequential</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">prefix</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">args</span><span class="p">]</span>
+            <span class="n">kw_args</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">_to_sequential</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">prefix</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kw_args</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+            <span class="k">return</span> <span class="n">f_</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw_args</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">wrapped_f</span>
+
+    <span class="c1"># Return the decorated function directly if a function was given.</span>
+    <span class="k">return</span> <span class="n">decorator</span> <span class="k">if</span> <span class="n">f</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">decorator</span><span class="p">(</span><span class="n">f</span><span class="p">)</span></div>
+
+
+<span class="k">class</span> <span class="nc">VariableType</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">ABCMeta</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A type of a variable. Any arguments are passed to the appropriate method</span>
+<span class="sd">    of :class:`.vars.Vars` to instantiate the variable.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw_args</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="n">args</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kw_args</span> <span class="o">=</span> <span class="n">kw_args</span>
+
+    <span class="k">def</span> <span class="nf">_get_var</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">init</span><span class="p">):</span>
+        <span class="c1"># Copy dict to not modify the original.</span>
+        <span class="n">kw_args</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kw_args</span><span class="p">)</span>
+
+        <span class="c1"># Set initial value.</span>
+        <span class="k">if</span> <span class="p">(</span>
+                <span class="n">init</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span>
+                <span class="s1">&#39;init&#39;</span> <span class="ow">in</span> <span class="n">kw_args</span> <span class="ow">and</span>
+                <span class="n">kw_args</span><span class="p">[</span><span class="s1">&#39;init&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Initial value doubly specified: &#39;</span>
+                             <span class="n">f</span><span class="s1">&#39;&quot;</span><span class="si">{init}</span><span class="s1">&quot; and &quot;</span><span class="si">{kw_args[&quot;init&quot;]}</span><span class="s1">&quot;.&#39;</span><span class="p">)</span>
+        <span class="n">kw_args</span><span class="p">[</span><span class="s1">&#39;init&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">init</span>
+
+        <span class="c1"># Set name.</span>
+        <span class="k">if</span> <span class="s1">&#39;name&#39;</span> <span class="ow">in</span> <span class="n">kw_args</span> <span class="ow">and</span> <span class="n">kw_args</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Name doubly specified: &#39;</span>
+                             <span class="n">f</span><span class="s1">&#39;</span><span class="si">{name}</span><span class="s1"> and </span><span class="si">{kw_args[&quot;name&quot;]}</span><span class="s1">.&#39;</span><span class="p">)</span>
+        <span class="n">kw_args</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
+
+        <span class="k">return</span> <span class="n">method</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw_args</span><span class="p">)</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">instantiate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vs</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">init</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
+        <span class="sd">&quot;&quot;&quot;Instantiate the variable.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            vs (:class:`.vars.Vars`): Variable container to extract the variable</span>
+<span class="sd">                from.</span>
+<span class="sd">            name (str): Name of the variable.</span>
+<span class="sd">            init (object): Initial value.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="Unbounded"><a class="viewcode-back" href="../../source/varz.spec.html#varz.spec.Unbounded">[docs]</a><span class="k">class</span> <span class="nc">Unbounded</span><span class="p">(</span><span class="n">VariableType</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Type of an unbounded variable.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Unbounded.instantiate"><a class="viewcode-back" href="../../source/varz.spec.html#varz.spec.Unbounded.instantiate">[docs]</a>    <span class="k">def</span> <span class="nf">instantiate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vs</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">init</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_var</span><span class="p">(</span><span class="n">vs</span><span class="o">.</span><span class="n">get</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">init</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="Positive"><a class="viewcode-back" href="../../source/varz.spec.html#varz.spec.Positive">[docs]</a><span class="k">class</span> <span class="nc">Positive</span><span class="p">(</span><span class="n">VariableType</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Type of a positive variable.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Positive.instantiate"><a class="viewcode-back" href="../../source/varz.spec.html#varz.spec.Positive.instantiate">[docs]</a>    <span class="k">def</span> <span class="nf">instantiate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vs</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">init</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_var</span><span class="p">(</span><span class="n">vs</span><span class="o">.</span><span class="n">positive</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">init</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="Bounded"><a class="viewcode-back" href="../../source/varz.spec.html#varz.spec.Bounded">[docs]</a><span class="k">class</span> <span class="nc">Bounded</span><span class="p">(</span><span class="n">VariableType</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Type of a bounded variable.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Bounded.instantiate"><a class="viewcode-back" href="../../source/varz.spec.html#varz.spec.Bounded.instantiate">[docs]</a>    <span class="k">def</span> <span class="nf">instantiate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vs</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">init</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_var</span><span class="p">(</span><span class="n">vs</span><span class="o">.</span><span class="n">bounded</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">init</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="parametrised"><a class="viewcode-back" href="../../source/varz.spec.html#varz.spec.parametrised">[docs]</a><span class="k">def</span> <span class="nf">parametrised</span><span class="p">(</span><span class="n">prefix_or_f</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Decorator to specify variables with types.&quot;&quot;&quot;</span>
+
+    <span class="n">prefix</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">_extract_prefix_and_f</span><span class="p">(</span><span class="n">prefix_or_f</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">f_</span><span class="p">):</span>
+        <span class="nd">@wraps</span><span class="p">(</span><span class="n">f_</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">wrapped_f</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw_args</span><span class="p">):</span>
+            <span class="n">signature</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">f_</span><span class="p">)</span>
+
+            <span class="c1"># Convert all arguments to keyword arguments, and store them here.</span>
+            <span class="n">filled_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+
+            <span class="c1"># Look for variable container.</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="n">args</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">kw_args</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+            <span class="n">num_containers</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Provider</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">values</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">num_containers</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No variable container found.&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">num_containers</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Multiple variable containers found.&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># There is exactly only variable container. Find it.</span>
+                <span class="n">vs</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">values</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Provider</span><span class="p">)][</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="c1"># Walk through the arguments.</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">parameter</span> <span class="ow">in</span> <span class="n">signature</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">annotation</span> <span class="o">=</span> <span class="n">parameter</span><span class="o">.</span><span class="n">annotation</span>
+
+                <span class="c1"># Instantiate uninstantiated variable types.</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">annotation</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span>
+                        <span class="nb">issubclass</span><span class="p">(</span><span class="n">annotation</span><span class="p">,</span> <span class="n">VariableType</span><span class="p">)):</span>
+                    <span class="n">annotation</span> <span class="o">=</span> <span class="n">annotation</span><span class="p">()</span>
+
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">annotation</span><span class="p">,</span> <span class="n">VariableType</span><span class="p">):</span>
+                    <span class="c1"># Parameter is a variable that needs to be extracted.</span>
+
+                    <span class="c1"># Check for default value.</span>
+                    <span class="k">if</span> <span class="n">parameter</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">parameter</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+                        <span class="n">init</span> <span class="o">=</span> <span class="n">parameter</span><span class="o">.</span><span class="n">default</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">init</span> <span class="o">=</span> <span class="kc">None</span>
+
+                    <span class="c1"># Store the instantiated variable.</span>
+                    <span class="n">filled_kwargs</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> \
+                        <span class="n">annotation</span><span class="o">.</span><span class="n">instantiate</span><span class="p">(</span><span class="n">vs</span><span class="p">,</span> <span class="n">prefix</span> <span class="o">+</span> <span class="n">name</span><span class="p">,</span> <span class="n">init</span><span class="p">)</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># Parameter is a regular parameter. Find it.</span>
+
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="c1"># Positional arguments left. Must be next one.</span>
+                        <span class="n">filled_kwargs</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="n">args</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1"># No position arguments left. Extract from keywords.</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">filled_kwargs</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">kw_args</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+                            <span class="k">del</span> <span class="n">kw_args</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+                        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                            <span class="c1"># Also not found in keywords. Resort to default</span>
+                            <span class="c1"># value. If a default value is not given,</span>
+                            <span class="c1"># the user did not specify a positional argument.</span>
+                            <span class="k">if</span> <span class="n">parameter</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="n">parameter</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+                                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Positional argument &#39;</span>
+                                                 <span class="n">f</span><span class="s1">&#39;&quot;</span><span class="si">{name}</span><span class="s1">&quot; not given.&#39;</span><span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">filled_kwargs</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">parameter</span><span class="o">.</span><span class="n">default</span>
+
+            <span class="c1"># Ensure that everything is parsed.</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;{len(args)} positional argument(s) not &#39;</span>
+                                 <span class="n">f</span><span class="s1">&#39;parsed.&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">kw_args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;{len(kw_args)} keyword argument(s) not &#39;</span>
+                                 <span class="n">f</span><span class="s1">&#39;parsed: {&quot;, &quot;.join(kw_args.keys())}.&#39;</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">f_</span><span class="p">(</span><span class="o">**</span><span class="n">filled_kwargs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">wrapped_f</span>
+
+    <span class="c1"># Return the decorated function directly if a function was given.</span>
+    <span class="k">return</span> <span class="n">decorator</span> <span class="k">if</span> <span class="n">f</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">decorator</span><span class="p">(</span><span class="n">f</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Wessel Bruinsma
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

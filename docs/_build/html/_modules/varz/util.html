@@ -148,11 +148,7 @@
            <div itemprop="articleBody">
             
   <h1>Source code for varz.util</h1><div class="highlight"><pre>
-<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span>
-
-<span class="kn">import</span> <span class="nn">importlib</span>
+<span></span><span class="kn">import</span> <span class="nn">importlib</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="k">import</span> <span class="n">product</span>
@@ -165,14 +161,14 @@
 <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
-<span class="k">class</span> <span class="nc">LazyModule</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">LazyModule</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;A module that loads once an attribute is requested.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        name (str): Name of module.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">extensions</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">module</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -188,7 +184,7 @@
 <span class="n">lazy_torch</span> <span class="o">=</span> <span class="n">LazyModule</span><span class="p">(</span><span class="s1">&#39;torch&#39;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="Initialiser"><a class="viewcode-back" href="../../source/varz.util.html#varz.util.Initialiser">[docs]</a><span class="k">class</span> <span class="nc">Initialiser</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="Initialiser"><a class="viewcode-back" href="../../source/varz.util.html#varz.util.Initialiser">[docs]</a><span class="k">class</span> <span class="nc">Initialiser</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Variable initialiser.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -224,7 +220,7 @@
     <span class="k">return</span> <span class="n">assign</span>
 
 
-<div class="viewcode-block" id="Packer"><a class="viewcode-back" href="../../source/varz.util.html#varz.util.Packer">[docs]</a><span class="k">class</span> <span class="nc">Packer</span><span class="p">(</span><span class="n">Referentiable</span><span class="p">):</span>
+<div class="viewcode-block" id="Packer"><a class="viewcode-back" href="../../source/varz.util.html#varz.util.Packer">[docs]</a><span class="k">class</span> <span class="nc">Packer</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">Referentiable</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Pack objects into a vector.</span>
 
 <span class="sd">    Args:</span>

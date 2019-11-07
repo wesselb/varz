@@ -89,6 +89,7 @@
 <li class="toctree-l2"><a class="reference internal" href="varz.autograd.html">varz.autograd package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="varz.autograd.minimise.html">varz.autograd.minimise module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="varz.minimise.html">varz.minimise module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="varz.spec.html">varz.spec module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="varz.tensorflow.html">varz.tensorflow package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="varz.tensorflow.minimise.html">varz.tensorflow.minimise module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="varz.torch.html">varz.torch package</a></li>
@@ -166,10 +167,108 @@
   <div class="section" id="module-varz.vars">
 <span id="varz-vars-module"></span><h1>varz.vars module<a class="headerlink" href="#module-varz.vars" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
+<dt id="varz.vars.Provider">
+<em class="property">class </em><code class="descclassname">varz.vars.</code><code class="descname">Provider</code><a class="reference internal" href="../_modules/varz/vars.html#Provider"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.vars.Provider" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="varz.vars.Provider.bnd">
+<code class="descname">bnd</code><span class="sig-paren">(</span><em>*args</em>, <em>**kw_args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/vars.html#Provider.bnd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.vars.Provider.bnd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for <a class="reference internal" href="#varz.vars.Vars.bounded" title="varz.vars.Vars.bounded"><code class="xref py py-meth docutils literal notranslate"><span class="pre">vars.Vars.bounded()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="varz.vars.Provider.bounded">
+<code class="descname">bounded</code><span class="sig-paren">(</span><em>init=None</em>, <em>lower=0.0001</em>, <em>upper=10000.0</em>, <em>shape=()</em>, <em>dtype=None</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/vars.html#Provider.bounded"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.vars.Provider.bounded" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a bounded variable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>init</strong> (<em>tensor</em><em>, </em><em>optional</em>) – Initialisation of the variable.</p></li>
+<li><p><strong>lower</strong> (<em>tensor</em><em>, </em><em>optional</em>) – Lower bound. Defaults to <cite>1e-4</cite>.</p></li>
+<li><p><strong>upper</strong> (<em>tensor</em><em>, </em><em>optional</em>) – Upper bound. Defaults to <cite>1e4</cite>.</p></li>
+<li><p><strong>shape</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Shape of the variable. Defaults to
+scalar.</p></li>
+<li><p><strong>dtype</strong> (<em>data type</em><em>, </em><em>optional</em>) – Data type of the variable. Defaults to
+that of the storage.</p></li>
+<li><p><strong>name</strong> (<em>hashable</em><em>, </em><em>optional</em>) – Name of the variable.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Variable.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="varz.vars.Provider.get">
+<code class="descname">get</code><span class="sig-paren">(</span><em>*args</em>, <em>**kw_args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/vars.html#Provider.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.vars.Provider.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for <a class="reference internal" href="#varz.vars.Provider.unbounded" title="varz.vars.Provider.unbounded"><code class="xref py py-meth docutils literal notranslate"><span class="pre">vars.Provider.unbounded()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="varz.vars.Provider.pos">
+<code class="descname">pos</code><span class="sig-paren">(</span><em>*args</em>, <em>**kw_args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/vars.html#Provider.pos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.vars.Provider.pos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for <a class="reference internal" href="#varz.vars.Vars.positive" title="varz.vars.Vars.positive"><code class="xref py py-meth docutils literal notranslate"><span class="pre">vars.Vars.positive()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="varz.vars.Provider.positive">
+<code class="descname">positive</code><span class="sig-paren">(</span><em>init=None</em>, <em>shape=()</em>, <em>dtype=None</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/vars.html#Provider.positive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.vars.Provider.positive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a positive variable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>init</strong> (<em>tensor</em><em>, </em><em>optional</em>) – Initialisation of the variable.</p></li>
+<li><p><strong>shape</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Shape of the variable. Defaults to
+scalar.</p></li>
+<li><p><strong>dtype</strong> (<em>data type</em><em>, </em><em>optional</em>) – Data type of the variable. Defaults to
+that of the storage.</p></li>
+<li><p><strong>name</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the variable.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Variable.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="varz.vars.Provider.unbounded">
+<code class="descname">unbounded</code><span class="sig-paren">(</span><em>init=None</em>, <em>shape=()</em>, <em>dtype=None</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/vars.html#Provider.unbounded"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.vars.Provider.unbounded" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get an unbounded variable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>init</strong> (<em>tensor</em><em>, </em><em>optional</em>) – Initialisation of the variable.</p></li>
+<li><p><strong>shape</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Shape of the variable. Defaults to
+scalar.</p></li>
+<li><p><strong>dtype</strong> (<em>data type</em><em>, </em><em>optional</em>) – Data type of the variable. Defaults to
+that of the storage.</p></li>
+<li><p><strong>name</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the variable.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Variable.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
 <dt id="varz.vars.Vars">
 <em class="property">class </em><code class="descclassname">varz.vars.</code><code class="descname">Vars</code><span class="sig-paren">(</span><em>dtype</em>, <em>source=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/vars.html#Vars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.vars.Vars" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">plum.resolvable.Referentiable</span></code></p>
-<p>Variable storage manager.</p>
+<dd><p>Bases: <a class="reference internal" href="#varz.vars.Provider" title="varz.vars.Provider"><code class="xref py py-class docutils literal notranslate"><span class="pre">varz.vars.Provider</span></code></a></p>
+<p>Variable storage.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -201,12 +300,6 @@ not being used.</p></li>
 </dd></dl>
 
 <dl class="method">
-<dt id="varz.vars.Vars.bnd">
-<code class="descname">bnd</code><span class="sig-paren">(</span><em>*args</em>, <em>**kw_args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/vars.html#Vars.bnd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.vars.Vars.bnd" title="Permalink to this definition">¶</a></dt>
-<dd><p>Alias for <a class="reference internal" href="#varz.vars.Vars.bounded" title="varz.vars.Vars.bounded"><code class="xref py py-meth docutils literal notranslate"><span class="pre">vars.Vars.bounded()</span></code></a>.</p>
-</dd></dl>
-
-<dl class="method">
 <dt id="varz.vars.Vars.bounded">
 <code class="descname">bounded</code><span class="sig-paren">(</span><em>init=None</em>, <em>lower=0.0001</em>, <em>upper=10000.0</em>, <em>shape=()</em>, <em>dtype=None</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/vars.html#Vars.bounded"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.vars.Vars.bounded" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get a bounded variable.</p>
@@ -235,7 +328,7 @@ that of the storage.</p></li>
 <dl class="method">
 <dt id="varz.vars.Vars.copy">
 <code class="descname">copy</code><span class="sig-paren">(</span><em>detach=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/vars.html#Vars.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.vars.Vars.copy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a copy of the variable manager that shares the same variables.</p>
+<dd><p>Create a copy of the variable manager that shares the variables.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>detach</strong> (<em>bool</em><em>, </em><em>optional</em>) – Detach the variables in PyTorch. Defaults
@@ -254,30 +347,6 @@ to <cite>False</cite>.</p>
 <dt id="varz.vars.Vars.detach">
 <code class="descname">detach</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/vars.html#Vars.detach"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.vars.Vars.detach" title="Permalink to this definition">¶</a></dt>
 <dd><p>Detach all variables held in PyTorch.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="varz.vars.Vars.get">
-<code class="descname">get</code><span class="sig-paren">(</span><em>init=None</em>, <em>shape=()</em>, <em>dtype=None</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/vars.html#Vars.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.vars.Vars.get" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get an unbounded variable.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>init</strong> (<em>tensor</em><em>, </em><em>optional</em>) – Initialisation of the variable.</p></li>
-<li><p><strong>shape</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Shape of the variable. Defaults to
-scalar.</p></li>
-<li><p><strong>dtype</strong> (<em>data type</em><em>, </em><em>optional</em>) – Data type of the variable. Defaults to
-that of the storage.</p></li>
-<li><p><strong>name</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the variable.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Variable.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>tensor</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="method">
@@ -326,10 +395,10 @@ Defaults to <cite>False</cite>.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="varz.vars.Vars.pos">
-<code class="descname">pos</code><span class="sig-paren">(</span><em>*args</em>, <em>**kw_args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/vars.html#Vars.pos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.vars.Vars.pos" title="Permalink to this definition">¶</a></dt>
-<dd><p>Alias for <a class="reference internal" href="#varz.vars.Vars.positive" title="varz.vars.Vars.positive"><code class="xref py py-meth docutils literal notranslate"><span class="pre">vars.Vars.positive()</span></code></a>.</p>
+<dl class="attribute">
+<dt id="varz.vars.Vars.names">
+<code class="descname">names</code><a class="headerlink" href="#varz.vars.Vars.names" title="Permalink to this definition">¶</a></dt>
+<dd><p>All available names.</p>
 </dd></dl>
 
 <dl class="method">
@@ -354,6 +423,12 @@ that of the storage.</p></li>
 <dd class="field-odd"><p>tensor</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="varz.vars.Vars.print">
+<code class="descname">print</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/vars.html#Vars.print"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.vars.Vars.print" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print all variables.</p>
 </dd></dl>
 
 <dl class="method">
@@ -389,6 +464,30 @@ to <cite>False</cite>.</p></li>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="varz.vars.Vars.unbounded">
+<code class="descname">unbounded</code><span class="sig-paren">(</span><em>init=None</em>, <em>shape=()</em>, <em>dtype=None</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/varz/vars.html#Vars.unbounded"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#varz.vars.Vars.unbounded" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get an unbounded variable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>init</strong> (<em>tensor</em><em>, </em><em>optional</em>) – Initialisation of the variable.</p></li>
+<li><p><strong>shape</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Shape of the variable. Defaults to
+scalar.</p></li>
+<li><p><strong>dtype</strong> (<em>data type</em><em>, </em><em>optional</em>) – Data type of the variable. Defaults to
+that of the storage.</p></li>
+<li><p><strong>name</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the variable.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Variable.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tensor</p>
 </dd>
 </dl>
 </dd></dl>
