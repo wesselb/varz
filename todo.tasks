@@ -1,8 +1,8 @@
 Features:
     Variables:
+        ☐ Lower triangular matrix @high
         ☐ PSD matrix @high
         ☐ Orthogonal matrix @high
-    ☐ Add Adam optimiser. @high
 
     ☐ Exclusion mechanism for variables by prefixing with "-".
     ☐ Centralise warning messages.
@@ -13,4 +13,11 @@ Refactor:
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✓ Sequential @high @started @done (19-11-07 16:13) @project(Features)
+ ✓ README @done (19-11-07 16:13) @project(Features)
+ ✓ README @done (19-11-07 16:13) @project(Features)
+ ✓ Parametrised @high @started @done (19-11-07 16:13) @project(Features)
+ ✓ Implementation @done (19-11-07 15:32) @project(Features)
+ ✓ Implementation @done (19-11-07 15:31) @project(Features)
+ ✓ Add Adam optimiser. @high @done (19-11-07 15:31) @project(Features)
  ✓ Unify PyTorch optimiser with NumPy one? @done (19-07-09 22:32) @project(Refactor)
