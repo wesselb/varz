@@ -252,7 +252,7 @@ To indicate that an argument of the function is a variable, its type hint must
 * **Positive variables:** `def f(vs, x: Positive)`.
 
 * **Bounded variables:** `def f(vs, x: Bounded)` to use the default bound, and
-    `def f(vs, x: Bounded(lower=1, upper=10)` otherwise.
+    `def f(vs, x: Bounded(lower=1, upper=10))` otherwise.
     
 As can be seen to the above, the variable container must also be an argument 
 of the function, because that is where the variables will be extracted from.
