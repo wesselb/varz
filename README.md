@@ -35,7 +35,7 @@ On Linux, `gcc` is most likely already available, and `gfortran` can be
 installed with `apt-get install gfortran`.
 Then simply
 
-```
+```bash
 pip install varz
 ```
 
@@ -75,7 +75,7 @@ array([[ 1.04404354, -1.98478763],
 ```
 
 Alternatively, indexing syntax may be used to get the existing variable `x`.
-This asserts that a variable with a name `x` already exists, and will throw a
+This asserts that a variable with the name `x` already exists and will throw a
 `KeyError` otherwise.
 
 ```python
