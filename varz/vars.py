@@ -115,6 +115,75 @@ class Provider(metaclass=Referentiable(ABCMeta)):
         return self.bounded(*args, **kw_args)
 
     @abstractmethod
+    def lower_triangular(self,
+                         init=None,
+                         shape=None,
+                         dtype=None,
+                         name=None):  # pragma: no cover
+        """Get a lower-triangular matrix.
+
+        Args:
+            init (tensor, optional): Initialisation of the variable.
+            shape (int, optional): Number of rows and columns of the matrix.
+            dtype (data type, optional): Data type of the variable. Defaults to
+                that of the storage.
+            name (hashable, optional): Name of the variable.
+
+        Returns:
+            tensor: Variable.
+        """
+
+    def tril(self, *args, **kw_args):
+        """Alias for :meth:`.vars.Vars.lower_triangular`."""
+        return self.lower_triangular(*args, **kw_args)
+
+    @abstractmethod
+    def positive_definite(self,
+                          init=None,
+                          shape=None,
+                          dtype=None,
+                          name=None):  # pragma: no cover
+        """Get a positive-definite matrix.
+
+        Args:
+            init (tensor, optional): Initialisation of the variable.
+            shape (int, optional): Number of rows and columns of the matrix.
+            dtype (data type, optional): Data type of the variable. Defaults to
+                that of the storage.
+            name (hashable, optional): Name of the variable.
+
+        Returns:
+            tensor: Variable.
+        """
+
+    def pd(self, *args, **kw_args):
+        """Alias for :meth:`.vars.Vars.positive_definite`."""
+        return self.positive_definite(*args, **kw_args)
+
+    @abstractmethod
+    def orthogonal(self,
+                   init=None,
+                   shape=None,
+                   dtype=None,
+                   name=None):  # pragma: no cover
+        """Get an orthogonal matrix.
+
+        Args:
+            init (tensor, optional): Initialisation of the variable.
+            shape (int, optional): Number of rows and columns of the matrix.
+            dtype (data type, optional): Data type of the variable. Defaults to
+                that of the storage.
+            name (hashable, optional): Name of the variable.
+
+        Returns:
+            tensor: Variable.
+        """
+
+    def orth(self, *args, **kw_args):
+        """Alias for :meth:`.vars.Vars.orthogonal`."""
+        return self.orthogonal(*args, **kw_args)
+
+    @abstractmethod
     def __getitem__(self, name):  # pragma: no cover
         """Get a variable by name.
 
@@ -124,6 +193,28 @@ class Provider(metaclass=Referentiable(ABCMeta)):
         Returns:
             tensor: Variable.
         """
+
+
+@_dispatch(type(None))
+def _check_matrix_shape(shape):
+    pass
+
+
+@_dispatch(object)
+def _check_matrix_shape(shape):
+    raise ValueError(f'Incorrect shape {shape}.')
+
+
+@_dispatch(tuple)
+def _check_matrix_shape(shape):
+    if len(shape) != 2 or shape[0] != shape[1]:
+        raise ValueError(f'Shape {shape} must be the shape of a square matrix.')
+
+
+def _check_init_shape(init, shape):
+    if init is None and shape is None:
+        raise ValueError(f'The shape must be given to automatically initialise '
+                         f'a matrix variable.')
 
 
 class Vars(Provider):
@@ -258,6 +349,90 @@ class Vars(Provider):
 
         def generate_init(shape, dtype):
             return lower + B.rand(dtype, *shape) * (upper - lower)
+
+        return self._get_var(transform=transform,
+                             inverse_transform=inverse_transform,
+                             init=init,
+                             generate_init=generate_init,
+                             shape=shape,
+                             dtype=dtype,
+                             name=name)
+
+    def lower_triangular(self,
+                         init=None,
+                         shape=None,
+                         dtype=None,
+                         name=None):
+        _check_init_shape(init, shape)
+        _check_matrix_shape(shape)
+
+        def transform(x):
+            return B.vec_to_tril(x)
+
+        def inverse_transform(x):
+            return B.tril_to_vec(x)
+
+        def generate_init(shape, dtype):
+            mat = B.randn(dtype, *shape)
+            return transform(B.tril_to_vec(mat))
+
+        return self._get_var(transform=transform,
+                             inverse_transform=inverse_transform,
+                             init=init,
+                             generate_init=generate_init,
+                             shape=shape,
+                             dtype=dtype,
+                             name=name)
+
+    def positive_definite(self,
+                          init=None,
+                          shape=None,
+                          dtype=None,
+                          name=None):
+        _check_init_shape(init, shape)
+        _check_matrix_shape(shape)
+
+        def transform(x):
+            chol = B.vec_to_tril(x)
+            return B.matmul(chol, chol, tr_b=True)
+
+        def inverse_transform(x):
+            chol = B.cholesky(x)
+            return B.tril_to_vec(chol)
+
+        def generate_init(shape, dtype):
+            mat = B.randn(dtype, *shape)
+            return transform(B.tril_to_vec(mat))
+
+        return self._get_var(transform=transform,
+                             inverse_transform=inverse_transform,
+                             init=init,
+                             generate_init=generate_init,
+                             shape=shape,
+                             dtype=dtype,
+                             name=name)
+
+    def orthogonal(self,
+                   init=None,
+                   shape=None,
+                   dtype=None,
+                   name=None):
+        _check_init_shape(init, shape)
+        _check_matrix_shape(shape)
+
+        def transform(x):
+            tril = B.vec_to_tril(x)
+            skew = tril - B.transpose(tril)
+            eye = B.eye(skew)
+            return B.solve(eye + skew, eye - skew)
+
+        def inverse_transform(x):
+            eye = B.eye(x)
+            return B.tril_to_vec(B.solve(eye + x, eye - x))
+
+        def generate_init(shape, dtype):
+            mat = B.randn(dtype, *shape)
+            return transform(B.tril_to_vec(mat))
 
         return self._get_var(transform=transform,
                              inverse_transform=inverse_transform,

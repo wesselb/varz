@@ -165,6 +165,39 @@ y:          3.0
     >>> vs.bnd(name='bounded_variable', lower=1, upper=2)
     1.646772663807718
     ```
+  
+* **Lower-triangular matrix:**
+    A matrix variable that is contrained to be *lower triangular* can be
+    created using `Vars.lower_triangular` or `Vars.tril`. Either an
+    initialisation or a shape of square matrix must be given.
+    
+    ```python
+    >>> vs.tril(shape=(2, 2), name='lower_triangular')
+    array([[ 2.64204459,  0.        ],
+           [-0.14055559, -1.91298679]])
+    ```
+  
+* **Positive-definite matrix:**
+    A matrix variable that is contrained to be *positive definite* can be
+    created using `Vars.positive_definite` or `Vars.pd`. Either an
+    initialisation or a shape of square matrix must be given.
+    
+    ```python
+    >>> vs.pd(shape=(2, 2), name='positive_definite')
+    array([[ 1.64097496, -0.52302151],
+           [-0.52302151,  0.32628302]])
+    ```
+  
+* **Orthogonal matrix:**
+    A matrix variable that is contrained to be *orthogonal* can be created using
+    `Vars.orthogonal` or `Vars.orth`. Either an initialisation or a
+    shape of square matrix must be given.
+    
+    ```python
+    >>> vs.orth(shape=(2, 2), name='orthogonal')
+    array([[ 0.31290403, -0.94978475],
+           [ 0.94978475,  0.31290403]])
+    ```
 
 These constrained variables are created by transforming some *latent 
 unconstrained representation* to the desired constrained space.
@@ -247,17 +280,65 @@ you to specify variables as *arguments to your function*.
 To indicate that an argument of the function is a variable, as opposed to a 
 regular argument, the argument's type hint must be set accordingly, as follows:
 
-* **Unbounded variables:** `def f(vs, x: Unbounded)`.
+* **Unbounded variables:**
+    ```python
+    @parametrised
+    def f(vs, x: Unbounded):
+        ...
+    ```
 
-* **Positive variables:** `def f(vs, x: Positive)`.
+* **Positive variables:**
+    ```python
+    @parametrised
+    def f(vs, x: Positive):
+        ...
+    ```
 
-* **Bounded variables:** `def f(vs, x: Bounded)` to use the default bounds, and
-    `def f(vs, x: Bounded(lower=1, upper=10))` otherwise.
+* **Bounded variables:**
+    The following two specifications are possible. The former uses the
+    default bounds and the latter uses specified bounds.
+     
+    ```python
+    @parametrised
+    def f(vs, x: Bounded):
+        ...
+    ```
+  
+    ```python
+    @parametrised
+    def f(vs, x: Bounded(lower=1, upper=10)):
+        ...
+    ```
+    
+* **Lower-triangular variables:**
+    ```python
+    @parametrised
+    def f(vs, x: LowerTriangular(shape=(2, 2))):
+        ...
+    ```
+
+* **Positive-definite variables:**
+    ```python
+    @parametrised
+    def f(vs, x: PositiveDefinite(shape=(2, 2))):
+        ...
+    ```
+  
+* **Orthogonal variables:**
+    ```python
+    @parametrised
+    def f(vs, x: Orthogonal(shape=(2, 2))):
+        ...
+    ```
     
 As can be seen from the above, the variable container must also be an argument 
 of the function, because that is where the variables will be obtained from.
-An variable can be given an initial value in the way you would expect:
-`def f(vs, x: Unbounded = 5)`.
+A variable can be given an initial value in the way you would expect:
+```python
+@parametrised
+def f(vs, x: Unbounded = 5):
+    ...
+```
 
 Variable arguments and regular arguments can be mixed.
 If `f` is called, variable arguments must not be specified, because they 

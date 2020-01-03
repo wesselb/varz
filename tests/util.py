@@ -13,6 +13,11 @@ __all__ = ['Value',
            'allclose',
            'approx',
 
+           # Numerical checks:
+           'assert_lower_triangular',
+           'assert_positive_definite',
+           'assert_orthogonal',
+
            # Fixtures:
            'dtype',
            'vs',
@@ -49,6 +54,33 @@ def allclose(x, y):
     x = _to_numpy(x)
     y = _to_numpy(y)
     assert_allclose(x, y)
+
+
+# Numerical checks:
+
+def assert_lower_triangular(x):
+    """Assert that a matrix is lower triangular."""
+    # Check that matrix is square.
+    assert B.shape(x)[0] == B.shape(x)[1]
+
+    # Check that upper part is all zeros.
+    upper = x[np.triu_indices(B.shape(x)[0], k=1)]
+    allclose(upper, B.zeros(upper))
+
+
+def assert_positive_definite(x):
+    """Assert that a matrix is positive definite."""
+    # Check that Cholesky decomposition succeeds.
+    B.cholesky(x)
+
+
+def assert_orthogonal(x):
+    """Assert that a matrix is orthogonal."""
+    # Check that matrix is square.
+    assert B.shape(x)[0] == B.shape(x)[1]
+
+    # Check that its transpose is its inverse.
+    approx(B.matmul(x, x, tr_a=True), B.eye(x))
 
 
 # Fixtures:

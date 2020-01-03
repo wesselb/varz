@@ -2,8 +2,19 @@ import numpy as np
 import pytest
 import torch
 from varz import Vars
+import lab as B
 
-from .util import allclose, approx, KV, dtype, vs
+# noinspection PyUnresolvedReferences
+from .util import (
+    allclose,
+    approx,
+    KV,
+    dtype,
+    vs,
+    assert_lower_triangular,
+    assert_positive_definite,
+    assert_orthogonal
+)
 
 
 def test_get_vars():
@@ -71,16 +82,136 @@ def test_get_vars_cache_clearing(vs):
     assert vs.get_vars('var_*', indices=True) == [0, 1]
 
 
+def test_unbounded_init(vs):
+    vs.get(1, name='x')
+    allclose(vs['x'], 1)
+
+
+def test_unbounded_assignment(vs):
+    vs.get(1, name='x')
+    vs.assign('x', 2)
+    allclose(vs['x'], 2)
+
+
 def test_positive(vs):
     for _ in range(10):
         assert vs.pos() >= 0
         assert vs.positive() >= 0
 
 
+def test_positive_init(vs):
+    vs.pos(1, name='x')
+    allclose(vs['x'], 1)
+
+
+def test_positive_assignment(vs):
+    vs.pos(1, name='x')
+    vs.assign('x', 2)
+    allclose(vs['x'], 2)
+
+
 def test_bounded(vs):
     for _ in range(10):
         assert 10 <= vs.bnd(lower=10, upper=11) <= 11
         assert 10 <= vs.bounded(lower=10, upper=11) <= 11
+
+
+def test_bounded_init(vs):
+    vs.bnd(2, name='x', lower=1, upper=4)
+    allclose(vs['x'], 2)
+
+
+def test_bounded_assignment(vs):
+    vs.bnd(2, name='x', lower=1, upper=4)
+    vs.assign('x', 3)
+    allclose(vs['x'], 3)
+
+
+def test_lower_triangular(vs):
+    for _ in range(10):
+        assert B.shape(vs.tril(shape=(5, 5))) == (5, 5)
+        assert_lower_triangular(vs.tril(shape=(5, 5)))
+        assert_lower_triangular(vs.lower_triangular(shape=(5, 5)))
+
+
+def test_lower_triangular_init(vs):
+    x = vs.tril(shape=(5, 5))
+
+    vs.tril(x, name='x')
+    allclose(vs['x'], x)
+
+    with pytest.raises(ValueError):
+        vs.tril()
+    with pytest.raises(ValueError):
+        vs.tril(shape=5)
+    with pytest.raises(ValueError):
+        vs.tril(shape=(5, 6))
+
+
+def test_lower_triangular_assignment(vs):
+    x = vs.tril(shape=(5, 5))
+
+    vs.tril(shape=(5, 5), name='x')
+    vs.assign('x', x)
+    allclose(vs['x'], x)
+
+
+def test_positive_definite(vs):
+    for _ in range(10):
+        assert B.shape(vs.pd(shape=(5, 5))) == (5, 5)
+        assert_positive_definite(vs.pd(shape=(5, 5)))
+        assert_positive_definite(vs.positive_definite(shape=(5, 5)))
+
+
+def test_positive_definite_init(vs):
+    x = vs.pd(shape=(5, 5))
+
+    vs.pd(x, name='x')
+    allclose(vs['x'], x)
+
+    with pytest.raises(ValueError):
+        vs.pd()
+    with pytest.raises(ValueError):
+        vs.pd(shape=5)
+    with pytest.raises(ValueError):
+        vs.pd(shape=(5, 6))
+
+
+def test_positive_definite_assignment(vs):
+    x = vs.pd(shape=(5, 5))
+
+    vs.pd(shape=(5, 5), name='x')
+    vs.assign('x', x)
+    allclose(vs['x'], x)
+
+
+def test_orthogonal(vs):
+    for i in range(10):
+        assert B.shape(vs.orth(shape=(5, 5))) == (5, 5)
+        assert_orthogonal(vs.orth(shape=(5, 5)))
+        assert_orthogonal(vs.orthogonal(shape=(5, 5)))
+
+
+def test_orthogonal_init(vs):
+    x = vs.orth(shape=(5, 5))
+
+    vs.orth(x, name='x')
+    allclose(vs['x'], x)
+
+    with pytest.raises(ValueError):
+        vs.orth()
+    with pytest.raises(ValueError):
+        vs.orth(shape=5)
+    with pytest.raises(ValueError):
+        vs.orth(shape=(5, 6))
+
+
+def test_orthogonal_assignment(vs):
+    x = vs.orth(shape=(5, 5))
+
+    vs.orth(shape=(5, 5), name='x')
+    vs.assign('x', x)
+    allclose(vs['x'], x)
 
 
 def test_get_set_vector(dtype):
@@ -104,32 +235,11 @@ def test_get_set_vector(dtype):
     assert np.all(vs['b'] == np.array([['3', '4'], ['5', '6']]))
 
 
-def test_assignment(dtype):
-    vs = Vars(dtype=dtype)
-
-    # Generate some variables.
-    vs.get(1., name='unbounded')
-    vs.pos(2., name='positive')
-    vs.bnd(3., lower=0, upper=10, name='bounded')
-
-    # Check that they have the right values.
-    allclose(1., vs['unbounded'])
-    allclose(2., vs['positive'])
-    allclose(3., vs['bounded'])
-
-    # Assign some new values.
-    vs.assign('unbounded', 4.)
-    vs.assign('positive', 5.)
-    vs.assign('bounded', 6.)
-
-    # Again check that they have the right values.
-    allclose(4., vs['unbounded'])
-    allclose(5., vs['positive'])
-    allclose(6., vs['bounded'])
-
-    # Differentiably assign new values. This should allow for anything.
-    vs.assign('unbounded', 'value', differentiable=True)
-    assert vs['unbounded'] == 'value'
+def test_differentiable_assignment(vs):
+    # Differentiably assigning new values should allow for anything.
+    vs.get(name='x')
+    vs.assign('x', 'value', differentiable=True)
+    assert vs['x'] == 'value'
 
 
 def test_copy_torch():
@@ -184,7 +294,7 @@ def test_requires_grad_detach_vars_torch():
     # Test that gradients can be required and are then computed.
     vs.requires_grad(True)
     (2 * vs['a']).backward()
-    assert type(vs.vars[0].grad) != type(None)
+    assert vs.vars[0].grad is not None
 
     # Test that variables can be detached.
     vs.pos(1, name='b')

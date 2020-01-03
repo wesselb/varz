@@ -1,8 +1,7 @@
 Features:
     Variables:
-        ☐ Lower triangular matrix @high
-        ☐ PSD matrix @high
-        ☐ Orthogonal matrix @high
+        ☐ PSD matrix: parametrise _positive_ factor and embed in structured matrix object
+        ☐ Orthogonal matrix: do not parametrise diagonal of triangular matrix
 
     ☐ Exclusion mechanism for variables by prefixing with "-".
     ☐ Centralise warning messages.
@@ -13,6 +12,9 @@ Refactor:
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✓ PSD matrix @high @done (20-01-03 13:03) @project(Features / Variables)
+ ✓ Orthogonal matrix @high @done (20-01-03 13:03) @project(Features / Variables)
+ ✓ Lower triangular matrix @high @done (20-01-03 13:03) @project(Features / Variables)
  ✓ Sequential @high @started @done (19-11-07 16:13) @project(Features)
  ✓ README @done (19-11-07 16:13) @project(Features)
  ✓ README @done (19-11-07 16:13) @project(Features)

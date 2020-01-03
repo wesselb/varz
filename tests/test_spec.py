@@ -1,16 +1,23 @@
 import pytest
-import numpy as np
-from varz.spec import _extract_prefix_and_f
+
 from varz import (
-    Vars,
     sequential,
     Unbounded,
     Positive,
     Bounded,
+    LowerTriangular,
+    PositiveDefinite,
+    Orthogonal,
     parametrised
 )
-
-from .util import vs
+from varz.spec import _extract_prefix_and_f
+# noinspection PyUnresolvedReferences
+from .util import (
+    vs,
+    assert_lower_triangular,
+    assert_positive_definite,
+    assert_orthogonal
+)
 
 
 def test_extract_prefix_and_f():
@@ -35,7 +42,7 @@ def test_sequential(vs, decorator, names):
         assert y == 2
         return vs_['z'], vs_.get(), vs_.pos(), vs_.bnd(lower=10, upper=11)
 
-    # Test that the same variables are retrieved
+    # Test that the same variables are retrieved.
     assert f(1, vs, 2) == f(1, vs, 2)
     assert vs.names == names
     assert f(1, vs, 2) == f(1, vs, 2)
@@ -45,6 +52,54 @@ def test_sequential(vs, decorator, names):
     assert f(1, vs, 2)[0] == 0
     assert f(1, vs, 2)[2] >= 0
     assert 10 <= f(1, vs, 2)[3] <= 11
+
+
+def test_sequential_unbounded(vs):
+    @sequential
+    def f(vs_):
+        return vs_.get(1)
+
+    assert f(vs) == 1
+
+
+def test_sequential_positive(vs):
+    @sequential
+    def f(vs_):
+        return vs_.pos()
+
+    assert f(vs) > 0
+
+
+def test_sequential_bounded(vs):
+    @sequential
+    def f(vs_):
+        return vs_.bnd(lower=10, upper=11)
+
+    assert 10 <= f(vs) <= 11
+
+
+def test_sequential_lower_triangular(vs):
+    @sequential
+    def f(vs_):
+        return vs_.tril(shape=(5, 5))
+
+    assert_lower_triangular(f(vs))
+
+
+def test_sequential_positive_definite(vs):
+    @sequential
+    def f(vs_):
+        return vs_.pd(shape=(5, 5))
+
+    assert_positive_definite(f(vs))
+
+
+def test_sequential_orthogonal(vs):
+    @sequential
+    def f(vs_):
+        return vs_.orth(shape=(5, 5))
+
+    assert_orthogonal(f(vs))
 
 
 @pytest.mark.parametrize('decorator, types, names',
@@ -137,3 +192,51 @@ def test_parametrised_double_name(vs):
 
     with pytest.raises(ValueError):
         f(vs)
+
+
+def test_parametrised_unbounded(vs):
+    @parametrised
+    def f(vs_, x: Unbounded = 1):
+        return x
+
+    assert f(vs) == 1
+
+
+def test_parametrised_positive(vs):
+    @parametrised
+    def f(vs_, x: Positive):
+        return x
+
+    assert f(vs) > 0
+
+
+def test_parametrised_bounded(vs):
+    @parametrised
+    def f(vs_, x: Bounded(lower=10, upper=11)):
+        return x
+
+    assert 10 <= f(vs) <= 11
+
+
+def test_parametrised_lower_triangular(vs):
+    @parametrised
+    def f(vs_, x: LowerTriangular(shape=(5, 5))):
+        return x
+
+    assert_lower_triangular(f(vs))
+
+
+def test_parametrised_positive_definite(vs):
+    @parametrised
+    def f(vs_, x: PositiveDefinite(shape=(5, 5))):
+        return x
+
+    assert_positive_definite(f(vs))
+
+
+def test_parametrised_orthogonal(vs):
+    @parametrised
+    def f(vs_, x: Orthogonal(shape=(5, 5))):
+        return x
+
+    assert_orthogonal(f(vs))

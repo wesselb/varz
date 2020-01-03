@@ -9,6 +9,9 @@ __all__ = ['sequential',
            'Unbounded',
            'Positive',
            'Bounded',
+           'LowerTriangular',
+           'PositiveDefinite',
+           'Orthogonal',
            'parametrised']
 
 
@@ -41,6 +44,15 @@ class Sequential(Provider):
 
     def bounded(self, *args, **kw_args):
         return self._get_var(self.vs.bounded, args, kw_args)
+
+    def lower_triangular(self, *args, **kw_args):
+        return self._get_var(self.vs.lower_triangular, args, kw_args)
+
+    def positive_definite(self, *args, **kw_args):
+        return self._get_var(self.vs.positive_definite, args, kw_args)
+
+    def orthogonal(self, *args, **kw_args):
+        return self._get_var(self.vs.orthogonal, args, kw_args)
 
     def __getitem__(self, name):
         return self.vs[name]
@@ -168,6 +180,27 @@ class Bounded(VariableType):
 
     def instantiate(self, vs, name, init):
         return self._get_var(vs.bounded, name, init)
+
+
+class LowerTriangular(VariableType):
+    """Type of a lower-triangular matrix."""
+
+    def instantiate(self, vs, name, init):
+        return self._get_var(vs.lower_triangular, name, init)
+
+
+class PositiveDefinite(VariableType):
+    """Type of a positive-definite matrix."""
+
+    def instantiate(self, vs, name, init):
+        return self._get_var(vs.positive_definite, name, init)
+
+
+class Orthogonal(VariableType):
+    """Type of an orthogonal matrix."""
+
+    def instantiate(self, vs, name, init):
+        return self._get_var(vs.orthogonal, name, init)
 
 
 def parametrised(prefix=None):
