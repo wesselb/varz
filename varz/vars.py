@@ -215,6 +215,9 @@ def _check_init_shape(init, shape):
     if init is None and shape is None:
         raise ValueError(f'The shape must be given to automatically initialise '
                          f'a matrix variable.')
+    if shape is None:
+        shape = B.shape(init)
+    return init, shape
 
 
 class Vars(Provider):
@@ -252,6 +255,7 @@ class Vars(Provider):
                  init,
                  generate_init,
                  shape,
+                 shape_latent,
                  dtype,
                  name):
         # If the name already exists, return that variable.
@@ -287,13 +291,13 @@ class Vars(Provider):
                 latent = np.array(latent)
         else:
             # Get the latent variable from the source.
-            length = reduce(mul, shape, 1)
+            length = reduce(mul, shape_latent, 1)
             latent_flat = \
                 self.source[self.source_index:self.source_index + length]
             self.source_index += length
 
             # Cast to the right data type.
-            latent = B.cast(dtype, B.reshape(latent_flat, *shape))
+            latent = B.cast(dtype, B.reshape(latent_flat, *shape_latent))
 
         # Store transforms.
         self.vars.append(latent)
@@ -319,6 +323,7 @@ class Vars(Provider):
                              init=init,
                              generate_init=generate_init,
                              shape=shape,
+                             shape_latent=shape,
                              dtype=dtype,
                              name=name)
 
@@ -331,6 +336,7 @@ class Vars(Provider):
                              init=init,
                              generate_init=generate_init,
                              shape=shape,
+                             shape_latent=shape,
                              dtype=dtype,
                              name=name)
 
@@ -355,6 +361,7 @@ class Vars(Provider):
                              init=init,
                              generate_init=generate_init,
                              shape=shape,
+                             shape_latent=shape,
                              dtype=dtype,
                              name=name)
 
@@ -363,7 +370,7 @@ class Vars(Provider):
                          shape=None,
                          dtype=None,
                          name=None):
-        _check_init_shape(init, shape)
+        init, shape = _check_init_shape(init, shape)
         _check_matrix_shape(shape)
 
         def transform(x):
@@ -376,11 +383,13 @@ class Vars(Provider):
             mat = B.randn(dtype, *shape)
             return transform(B.tril_to_vec(mat))
 
+        shape_latent = (int(shape[0] * (shape[0] + 1) / 2),)
         return self._get_var(transform=transform,
                              inverse_transform=inverse_transform,
                              init=init,
                              generate_init=generate_init,
                              shape=shape,
+                             shape_latent=shape_latent,
                              dtype=dtype,
                              name=name)
 
@@ -389,7 +398,7 @@ class Vars(Provider):
                           shape=None,
                           dtype=None,
                           name=None):
-        _check_init_shape(init, shape)
+        init, shape = _check_init_shape(init, shape)
         _check_matrix_shape(shape)
 
         def transform(x):
@@ -404,11 +413,13 @@ class Vars(Provider):
             mat = B.randn(dtype, *shape)
             return transform(B.tril_to_vec(mat))
 
+        shape_latent = (int(shape[0] * (shape[0] + 1) / 2),)
         return self._get_var(transform=transform,
                              inverse_transform=inverse_transform,
                              init=init,
                              generate_init=generate_init,
                              shape=shape,
+                             shape_latent=shape_latent,
                              dtype=dtype,
                              name=name)
 
@@ -417,7 +428,7 @@ class Vars(Provider):
                    shape=None,
                    dtype=None,
                    name=None):
-        _check_init_shape(init, shape)
+        init, shape = _check_init_shape(init, shape)
         _check_matrix_shape(shape)
 
         def transform(x):
@@ -434,11 +445,13 @@ class Vars(Provider):
             mat = B.randn(dtype, *shape)
             return transform(B.tril_to_vec(mat))
 
+        shape_latent = (int(shape[0] * (shape[0] + 1) / 2),)
         return self._get_var(transform=transform,
                              inverse_transform=inverse_transform,
                              init=init,
                              generate_init=generate_init,
                              shape=shape,
+                             shape_latent=shape_latent,
                              dtype=dtype,
                              name=name)
 

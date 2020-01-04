@@ -11,6 +11,7 @@ from .util import (
     KV,
     dtype,
     vs,
+    vs_source,
     assert_lower_triangular,
     assert_positive_definite,
     assert_orthogonal
@@ -82,6 +83,12 @@ def test_get_vars_cache_clearing(vs):
     assert vs.get_vars('var_*', indices=True) == [0, 1]
 
 
+def test_unbounded(vs_source):
+    for _ in range(10):
+        vs_source.get()
+        vs_source.unbounded()
+
+
 def test_unbounded_init(vs):
     vs.get(1, name='x')
     allclose(vs['x'], 1)
@@ -93,10 +100,10 @@ def test_unbounded_assignment(vs):
     allclose(vs['x'], 2)
 
 
-def test_positive(vs):
+def test_positive(vs_source):
     for _ in range(10):
-        assert vs.pos() >= 0
-        assert vs.positive() >= 0
+        assert vs_source.pos() >= 0
+        assert vs_source.positive() >= 0
 
 
 def test_positive_init(vs):
@@ -110,10 +117,10 @@ def test_positive_assignment(vs):
     allclose(vs['x'], 2)
 
 
-def test_bounded(vs):
+def test_bounded(vs_source):
     for _ in range(10):
-        assert 10 <= vs.bnd(lower=10, upper=11) <= 11
-        assert 10 <= vs.bounded(lower=10, upper=11) <= 11
+        assert 10 <= vs_source.bnd(lower=10, upper=11) <= 11
+        assert 10 <= vs_source.bounded(lower=10, upper=11) <= 11
 
 
 def test_bounded_init(vs):
@@ -127,11 +134,11 @@ def test_bounded_assignment(vs):
     allclose(vs['x'], 3)
 
 
-def test_lower_triangular(vs):
+def test_lower_triangular(vs_source):
     for _ in range(10):
-        assert B.shape(vs.tril(shape=(5, 5))) == (5, 5)
-        assert_lower_triangular(vs.tril(shape=(5, 5)))
-        assert_lower_triangular(vs.lower_triangular(shape=(5, 5)))
+        assert B.shape(vs_source.tril(shape=(5, 5))) == (5, 5)
+        assert_lower_triangular(vs_source.tril(shape=(5, 5)))
+        assert_lower_triangular(vs_source.lower_triangular(shape=(5, 5)))
 
 
 def test_lower_triangular_init(vs):
@@ -156,11 +163,11 @@ def test_lower_triangular_assignment(vs):
     allclose(vs['x'], x)
 
 
-def test_positive_definite(vs):
+def test_positive_definite(vs_source):
     for _ in range(10):
-        assert B.shape(vs.pd(shape=(5, 5))) == (5, 5)
-        assert_positive_definite(vs.pd(shape=(5, 5)))
-        assert_positive_definite(vs.positive_definite(shape=(5, 5)))
+        assert B.shape(vs_source.pd(shape=(5, 5))) == (5, 5)
+        assert_positive_definite(vs_source.pd(shape=(5, 5)))
+        assert_positive_definite(vs_source.positive_definite(shape=(5, 5)))
 
 
 def test_positive_definite_init(vs):
@@ -185,11 +192,11 @@ def test_positive_definite_assignment(vs):
     allclose(vs['x'], x)
 
 
-def test_orthogonal(vs):
+def test_orthogonal(vs_source):
     for i in range(10):
-        assert B.shape(vs.orth(shape=(5, 5))) == (5, 5)
-        assert_orthogonal(vs.orth(shape=(5, 5)))
-        assert_orthogonal(vs.orthogonal(shape=(5, 5)))
+        assert B.shape(vs_source.orth(shape=(5, 5))) == (5, 5)
+        assert_orthogonal(vs_source.orth(shape=(5, 5)))
+        assert_orthogonal(vs_source.orthogonal(shape=(5, 5)))
 
 
 def test_orthogonal_init(vs):

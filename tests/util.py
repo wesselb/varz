@@ -21,6 +21,7 @@ __all__ = ['Value',
            # Fixtures:
            'dtype',
            'vs',
+           'vs_source',
 
            # Mocks:
            'KV',
@@ -87,13 +88,21 @@ def assert_orthogonal(x):
 
 @pytest.fixture(params=[np.float64, torch.float64, tf.float64])
 def dtype(request):
-    yield request.param
+    return request.param
 
 
 @pytest.fixture()
 def vs():
-    vs = Vars(np.float64)
-    yield vs
+    return Vars(np.float64)
+
+
+@pytest.fixture(params=[False, True])
+def vs_source(request):
+    if request.param:
+        source = B.randn(np.float64, 1000)
+        return Vars(np.float64, source=source)
+    else:
+        return Vars(np.float64)
 
 
 # Mocks:
