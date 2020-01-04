@@ -195,14 +195,9 @@ class Provider(metaclass=Referentiable(ABCMeta)):
         """
 
 
-@_dispatch(type(None))
-def _check_matrix_shape(shape):
-    pass
-
-
 @_dispatch(object)
 def _check_matrix_shape(shape):
-    raise ValueError(f'Incorrect shape {shape}.')
+    raise ValueError(f'Object {shape} is not a shape.')
 
 
 @_dispatch(tuple)
