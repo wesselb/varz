@@ -401,7 +401,7 @@ class Vars(Provider):
             return B.matmul(chol, chol, tr_b=True)
 
         def inverse_transform(x):
-            chol = B.cholesky(x)
+            chol = B.cholesky(B.reg(x))
             return B.tril_to_vec(chol)
 
         def generate_init(shape, dtype):
