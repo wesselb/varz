@@ -228,7 +228,7 @@ def objective(vs):
 ```
 
 The names for `x` and `y` are necessary, because otherwise new variables will
- be created and initialised every time `objective` is ran.
+ be created and initialised every time `objective` is run.
 Varz offers two ways to not having to specify a name for every variable: 
 sequential and parametrised specification.
 
