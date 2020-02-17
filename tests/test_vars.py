@@ -192,11 +192,12 @@ def test_positive_definite_assignment(vs):
     allclose(vs['x'], x)
 
 
-def test_orthogonal(vs_source):
+@pytest.mark.parametrize('method', ['expm', 'cayley'])
+def test_orthogonal(vs_source, method):
     for i in range(10):
-        assert B.shape(vs_source.orth(shape=(5, 5))) == (5, 5)
-        assert_orthogonal(vs_source.orth(shape=(5, 5)))
-        assert_orthogonal(vs_source.orthogonal(shape=(5, 5)))
+        assert B.shape(vs_source.orth(shape=(5, 5), method=method)) == (5, 5)
+        assert_orthogonal(vs_source.orth(shape=(5, 5), method=method))
+        assert_orthogonal(vs_source.orthogonal(shape=(5, 5), method=method))
 
 
 def test_orthogonal_init(vs):
@@ -211,12 +212,15 @@ def test_orthogonal_init(vs):
         vs.orth(shape=5)
     with pytest.raises(ValueError):
         vs.orth(shape=(5, 6))
+    with pytest.raises(ValueError):
+        vs.orth(shape=(5, 5), method='bla')
 
 
-def test_orthogonal_assignment(vs):
+@pytest.mark.parametrize('method', ['expm', 'cayley'])
+def test_orthogonal_assignment(vs, method):
     x = vs.orth(shape=(5, 5))
 
-    vs.orth(shape=(5, 5), name='x')
+    vs.orth(shape=(5, 5), name='x', method=method)
     vs.assign('x', x)
     allclose(vs['x'], x)
 

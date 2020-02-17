@@ -165,7 +165,8 @@ class Provider(metaclass=Referentiable(ABCMeta)):
                    init=None,
                    shape=None,
                    dtype=None,
-                   name=None):  # pragma: no cover
+                   name=None,
+                   method='expm'):  # pragma: no cover
         """Get an orthogonal matrix.
 
         Args:
@@ -174,6 +175,8 @@ class Provider(metaclass=Referentiable(ABCMeta)):
             dtype (data type, optional): Data type of the variable. Defaults to
                 that of the storage.
             name (hashable, optional): Name of the variable.
+            method ('expm' or 'cayley'): Parametrisation. Method of
+                parametrisation. Defaults to 'expm'.
 
         Returns:
             tensor: Variable.
@@ -422,19 +425,35 @@ class Vars(Provider):
                    init=None,
                    shape=None,
                    dtype=None,
-                   name=None):
+                   name=None,
+                   method='expm'):
         init, shape = _check_init_shape(init, shape)
         _check_matrix_shape(shape)
+
+        # Check that the method is allowed.
+        if method not in {'cayley', 'expm'}:
+            raise ValueError(f'Unknown parametrisation "{method}".')
 
         def transform(x):
             tril = B.vec_to_tril(x)
             skew = tril - B.transpose(tril)
-            eye = B.eye(skew)
-            return B.solve(eye + skew, eye - skew)
+
+            if method == 'expm':
+                return B.expm(skew)
+            else:
+                # Method must be "cayley".
+                eye = B.eye(skew)
+                return B.solve(eye + skew, eye - skew)
 
         def inverse_transform(x):
-            eye = B.eye(x)
-            return B.tril_to_vec(B.solve(eye + x, eye - x))
+            if method == 'expm':
+                skew = B.logm(x)
+            else:
+                # Method must be "cayley".
+                eye = B.eye(x)
+                skew = B.solve(eye + x, eye - x)
+
+            return B.tril_to_vec(skew)
 
         def generate_init(shape, dtype):
             mat = B.randn(dtype, *shape)

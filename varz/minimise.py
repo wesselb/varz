@@ -1,4 +1,5 @@
 import logging
+import traceback
 
 import lab as B
 import numpy as np
@@ -223,8 +224,8 @@ def exception(x, e):
     Returns:
         tuple: Tuple containing NaN and NaNs for the gradient.
     """
-    log.warning('Caught exception during function evaluation: '
-                '"{}". Returning NaN.'.format(e))
+    with out.Section('Caught exception during function evaluation'):
+        out.out(traceback.format_exc().strip())
     grad_nan = np.empty(x.shape)
     grad_nan[:] = np.nan
     return np.nan, grad_nan
