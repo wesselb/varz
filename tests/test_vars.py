@@ -134,6 +134,13 @@ def test_bounded_assignment(vs):
     allclose(vs['x'], 3)
 
 
+def test_bounded_monotonic(vs):
+    vs.bnd(1, lower=0, upper=10)
+    vs.bnd(2, lower=0, upper=10)
+    vs.bnd(3, lower=0, upper=10)
+    assert vs.vars[0] < vs.vars[1] < vs.vars[2]
+
+
 def test_lower_triangular(vs_source):
     for _ in range(10):
         assert B.shape(vs_source.tril(shape=(5, 5))) == (5, 5)
