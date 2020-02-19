@@ -1,5 +1,6 @@
 import logging
 import traceback
+from functools import wraps
 
 import lab as B
 import numpy as np
@@ -81,12 +82,13 @@ def make_l_bfgs_b(wrap_f):
         function: `minimise_l_bfgs_b`.
     """
 
-    def minimise_l_bfgs_b(f,
-                          vs,
-                          f_calls=10000,
-                          iters=1000,
-                          trace=False,
-                          names=None):
+    @wraps(minimise_l_bfgs_b)
+    def _minimise_l_bfgs_b(f,
+                           vs,
+                           f_calls=10000,
+                           iters=1000,
+                           trace=False,
+                           names=None):
         names = [] if names is None else names
 
         # Run function once to ensure that all variables are initialised and
@@ -132,7 +134,7 @@ def make_l_bfgs_b(wrap_f):
 
         return val_opt  # Return optimal value.
 
-    return minimise_l_bfgs_b
+    return _minimise_l_bfgs_b
 
 
 def make_adam(wrap_f):
@@ -145,15 +147,16 @@ def make_adam(wrap_f):
         function: `minimise_adam`.
     """
 
-    def minimise_adam(f,
-                      vs,
-                      iters=1000,
-                      rate=1e-3,
-                      beta1=0.9,
-                      beta2=0.999,
-                      epsilon=1e-8,
-                      trace=False,
-                      names=None):
+    @wraps(minimise_adam)
+    def _minimise_adam(f,
+                       vs,
+                       iters=1000,
+                       rate=1e-3,
+                       beta1=0.9,
+                       beta2=0.999,
+                       epsilon=1e-8,
+                       trace=False,
+                       names=None):
         names = [] if names is None else names
 
         # Run function once to ensure that all variables are initialised and
@@ -210,7 +213,7 @@ def make_adam(wrap_f):
 
         return obj_value  # Return last objective value.
 
-    return minimise_adam
+    return _minimise_adam
 
 
 def exception(x, e):

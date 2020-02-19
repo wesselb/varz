@@ -24,6 +24,10 @@ def minimise_method(request):
     yield request.param
 
 
+def test_docstrings_set(minimise_method):
+    assert minimise_method.__doc__ is not None
+
+
 def test_minimise(minimise_method):
     dtype, minimise, kw_args = minimise_method
     vs = Vars(dtype=dtype)
