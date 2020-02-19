@@ -346,10 +346,10 @@ class Vars(Provider):
                 dtype=None,
                 name=None):
         def transform(x):
-            return lower + (upper - lower) / (1 + B.exp(x))
+            return lower + (upper - lower) / (1 + B.exp(-x))
 
         def inverse_transform(x):
-            return B.log(upper - x) - B.log(x - lower)
+            return B.log(x - lower) - B.log(upper - x)
 
         def generate_init(shape, dtype):
             return lower + B.rand(dtype, *shape) * (upper - lower)
