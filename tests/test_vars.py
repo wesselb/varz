@@ -319,8 +319,8 @@ def test_source():
     vs = Vars(np.float32, source=np.ones(10))
 
     assert vs.get() == 1.
-    approx(vs.pos(shape=(5,)), np.exp(np.ones(5)))
-    approx(vs.pos(), np.exp(1.))
+    approx(vs.pos(shape=(5,)), np.exp(np.ones(5, dtype=np.float32)))
+    approx(vs.pos(), np.exp(np.float32(1.)))
     with pytest.raises(ValueError):
         vs.pos(shape=(5,))
 
