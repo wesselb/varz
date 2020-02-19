@@ -253,11 +253,18 @@ def test_get_set_vector(dtype):
     assert np.all(vs['b'] == np.array([['3', '4'], ['5', '6']]))
 
 
-def test_differentiable_assignment(vs):
-    # Differentiably assigning new values should allow for anything.
-    vs.get(name='x')
-    vs.assign('x', 'value', differentiable=True)
-    assert vs['x'] == 'value'
+@pytest.mark.parametrize('dtype', [np.int32, np.int64, np.float32, np.float64])
+def test_differentiable_assignment(vs, dtype):
+    x = B.cast(dtype, B.ones(1))
+
+    vs.unbounded(name='x')
+    vs.assign('x', x, differentiable=True)
+    assert vs['x'] == x
+
+    # If the data type is right, differentiable assignment should set the
+    # latent variable to the input exactly.
+    if x.dtype == vs.dtype:
+        assert vs.vars[0] is x
 
 
 def test_copy_torch():

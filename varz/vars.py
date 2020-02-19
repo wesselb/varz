@@ -486,8 +486,10 @@ class Vars(Provider):
         """
         index = self.name_to_index[name]
         if differentiable:
-            # Do a differentiable assignment.
-            self.vars[index] = value
+            # Do a differentiable assignment, but ensure that the data type is
+            # right.
+            dtype = B.dtype(self.vars[index])
+            self.vars[index] = B.cast(dtype, value)
             return value
         else:
             # Overwrite data.
