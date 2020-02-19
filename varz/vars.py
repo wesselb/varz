@@ -166,7 +166,7 @@ class Provider(metaclass=Referentiable(ABCMeta)):
                    shape=None,
                    dtype=None,
                    name=None,
-                   method='expm'):  # pragma: no cover
+                   method='svd'):  # pragma: no cover
         """Get an orthogonal matrix.
 
         Args:
@@ -175,8 +175,8 @@ class Provider(metaclass=Referentiable(ABCMeta)):
             dtype (data type, optional): Data type of the variable. Defaults to
                 that of the storage.
             name (hashable, optional): Name of the variable.
-            method ('expm' or 'cayley'): Parametrisation. Method of
-                parametrisation. Defaults to 'expm'.
+            method ('svd', 'expm' or 'cayley'): Parametrisation. Method of
+                parametrisation. Defaults to 'svd'.
 
         Returns:
             tensor: Variable.
@@ -199,14 +199,16 @@ class Provider(metaclass=Referentiable(ABCMeta)):
 
 
 @_dispatch(object)
-def _check_matrix_shape(shape):
+def _check_matrix_shape(shape, square=True):
     raise ValueError(f'Object {shape} is not a shape.')
 
 
 @_dispatch(tuple)
-def _check_matrix_shape(shape):
-    if len(shape) != 2 or shape[0] != shape[1]:
-        raise ValueError(f'Shape {shape} must be the shape of a square matrix.')
+def _check_matrix_shape(shape, square=True):
+    if len(shape) != 2:
+        raise ValueError(f'Shape {shape} must be the shape of a matrix.')
+    if square and shape[0] != shape[1]:
+        raise ValueError(f'Shape {shape} must be square.')
 
 
 def _check_init_shape(init, shape):
@@ -247,6 +249,12 @@ class Vars(Provider):
         # Packing:
         self.vector_packer = None
 
+    def _resolve_dtype(self, dtype):
+        if dtype is None:
+            return self.dtype
+        else:
+            return dtype
+
     def _get_var(self,
                  transform,
                  inverse_transform,
@@ -266,7 +274,7 @@ class Vars(Provider):
         self._get_vars_cache.clear()
 
         # Resolve data type.
-        dtype = self.dtype if dtype is None else dtype
+        dtype = self._resolve_dtype(dtype)
 
         # If no source is provided, get the latent from from the provided
         # initialiser.
@@ -371,6 +379,9 @@ class Vars(Provider):
         init, shape = _check_init_shape(init, shape)
         _check_matrix_shape(shape)
 
+        # Result must be square. Get a side.
+        side = shape[0]
+
         def transform(x):
             return B.vec_to_tril(x)
 
@@ -381,7 +392,7 @@ class Vars(Provider):
             mat = B.randn(dtype, *shape)
             return transform(B.tril_to_vec(mat))
 
-        shape_latent = (int(shape[0] * (shape[0] + 1) / 2),)
+        shape_latent = (int(side * (side + 1) / 2),)
         return self._get_var(transform=transform,
                              inverse_transform=inverse_transform,
                              init=init,
@@ -399,19 +410,25 @@ class Vars(Provider):
         init, shape = _check_init_shape(init, shape)
         _check_matrix_shape(shape)
 
+        # Result must be square. Get a side.
+        side = shape[0]
+
         def transform(x):
-            chol = B.vec_to_tril(x)
+            log_diag = x[:side]
+            chol = B.vec_to_tril(x[side:], offset=-1) + \
+                   B.diag(B.exp(log_diag))
             return B.matmul(chol, chol, tr_b=True)
 
         def inverse_transform(x):
             chol = B.cholesky(B.reg(x))
-            return B.tril_to_vec(chol)
+            return B.concat(B.log(B.diag(chol)),
+                            B.tril_to_vec(chol, offset=-1))
 
         def generate_init(shape, dtype):
             mat = B.randn(dtype, *shape)
-            return transform(B.tril_to_vec(mat))
+            return B.matmul(mat, mat, tr_b=True)
 
-        shape_latent = (int(shape[0] * (shape[0] + 1) / 2),)
+        shape_latent = (int(side * (side + 1) / 2),)
         return self._get_var(transform=transform,
                              inverse_transform=inverse_transform,
                              init=init,
@@ -426,40 +443,71 @@ class Vars(Provider):
                    shape=None,
                    dtype=None,
                    name=None,
-                   method='expm'):
+                   method='svd'):
         init, shape = _check_init_shape(init, shape)
-        _check_matrix_shape(shape)
 
-        # Check that the method is allowed.
-        if method not in {'cayley', 'expm'}:
-            raise ValueError(f'Unknown parametrisation "{method}".')
+        if method == 'svd':
+            _check_matrix_shape(shape, square=False)
+            n, m = shape
+            shape_latent = (n, m)
 
-        def transform(x):
-            tril = B.vec_to_tril(x)
-            skew = tril - B.transpose(tril)
+            # Fix singular values.
+            sing_vals = B.linspace(self._resolve_dtype(dtype), 1, 2, min(n, m))
 
-            if method == 'expm':
+            def transform(x):
+                u, s, v = B.svd(x)
+                return B.matmul(u, v, tr_b=True)
+
+            def inverse_transform(x):
+                if n >= m:
+                    return x * sing_vals[None, :]
+                else:
+                    return x * sing_vals[:, None]
+
+            def generate_init(shape, dtype):
+                mat = B.randn(dtype, *shape)
+                return transform(mat)
+
+        elif method == 'expm':
+            _check_matrix_shape(shape)
+            side = shape[0]
+            shape_latent = (int(side * (side + 1) / 2 - side),)
+
+            def transform(x):
+                tril = B.vec_to_tril(x, offset=-1)
+                skew = tril - B.transpose(tril)
                 return B.expm(skew)
-            else:
-                # Method must be "cayley".
+
+            def inverse_transform(x):
+                return B.tril_to_vec(B.logm(x), offset=-1)
+
+            def generate_init(shape, dtype):
+                mat = B.randn(dtype, *shape)
+                return transform(B.tril_to_vec(mat, offset=-1))
+
+        elif method == 'cayley':
+            _check_matrix_shape(shape)
+            side = shape[0]
+            shape_latent = (int(side * (side + 1) / 2 - side),)
+
+            def transform(x):
+                tril = B.vec_to_tril(x, offset=-1)
+                skew = tril - B.transpose(tril)
                 eye = B.eye(skew)
                 return B.solve(eye + skew, eye - skew)
 
-        def inverse_transform(x):
-            if method == 'expm':
-                skew = B.logm(x)
-            else:
-                # Method must be "cayley".
+            def inverse_transform(x):
                 eye = B.eye(x)
                 skew = B.solve(eye + x, eye - x)
+                return B.tril_to_vec(skew, offset=-1)
 
-            return B.tril_to_vec(skew)
+            def generate_init(shape, dtype):
+                mat = B.randn(dtype, *shape)
+                return transform(B.tril_to_vec(mat, offset=-1))
 
-        def generate_init(shape, dtype):
-            mat = B.randn(dtype, *shape)
-            return transform(B.tril_to_vec(mat))
+        else:
+            raise ValueError(f'Unknown parametrisation "{method}".')
 
-        shape_latent = (int(shape[0] * (shape[0] + 1) / 2),)
         return self._get_var(transform=transform,
                              inverse_transform=inverse_transform,
                              init=init,

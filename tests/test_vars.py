@@ -93,6 +93,10 @@ def test_unbounded_init(vs):
     vs.get(1, name='x')
     allclose(vs['x'], 1)
 
+    # Test that explicit data type can be given. This should work the same
+    # for all variable getters, so we only test it once.
+    assert B.dtype(vs.get(1, name='y', dtype=int)) == int
+
 
 def test_unbounded_assignment(vs):
     vs.get(1, name='x')
@@ -154,12 +158,11 @@ def test_lower_triangular_init(vs):
     vs.tril(x, name='x')
     allclose(vs['x'], x)
 
+
+@pytest.mark.parametrize('shape', [None, 5, (5,), (5, 6)])
+def test_lower_triangular_shape(vs, shape):
     with pytest.raises(ValueError):
-        vs.tril()
-    with pytest.raises(ValueError):
-        vs.tril(shape=5)
-    with pytest.raises(ValueError):
-        vs.tril(shape=(5, 6))
+        vs.tril(shape=shape)
 
 
 def test_lower_triangular_assignment(vs):
@@ -183,12 +186,11 @@ def test_positive_definite_init(vs):
     vs.pd(x, name='x')
     allclose(vs['x'], x)
 
+
+@pytest.mark.parametrize('shape', [None, 5, (5,), (5, 6)])
+def test_positive_definite_shape(vs, shape):
     with pytest.raises(ValueError):
-        vs.pd()
-    with pytest.raises(ValueError):
-        vs.pd(shape=5)
-    with pytest.raises(ValueError):
-        vs.pd(shape=(5, 6))
+        vs.pd(shape=shape)
 
 
 def test_positive_definite_assignment(vs):
@@ -199,7 +201,7 @@ def test_positive_definite_assignment(vs):
     allclose(vs['x'], x)
 
 
-@pytest.mark.parametrize('method', ['expm', 'cayley'])
+@pytest.mark.parametrize('method', ['svd', 'expm', 'cayley'])
 def test_orthogonal(vs_source, method):
     for i in range(10):
         assert B.shape(vs_source.orth(shape=(5, 5), method=method)) == (5, 5)
@@ -207,25 +209,43 @@ def test_orthogonal(vs_source, method):
         assert_orthogonal(vs_source.orthogonal(shape=(5, 5), method=method))
 
 
-def test_orthogonal_init(vs):
-    x = vs.orth(shape=(5, 5))
-
-    vs.orth(x, name='x')
-    allclose(vs['x'], x)
-
+def test_orthogonal_method(vs_source):
     with pytest.raises(ValueError):
-        vs.orth()
-    with pytest.raises(ValueError):
-        vs.orth(shape=5)
-    with pytest.raises(ValueError):
-        vs.orth(shape=(5, 6))
-    with pytest.raises(ValueError):
-        vs.orth(shape=(5, 5), method='bla')
+        vs_source.orth(shape=(5, 5), method='bla')
 
 
 @pytest.mark.parametrize('method', ['expm', 'cayley'])
+def test_orthogonal_init(vs, method):
+    x = vs.orth(shape=(5, 5), method=method)
+
+    vs.orth(x, name='x', method=method)
+    allclose(vs['x'], x)
+
+
+@pytest.mark.parametrize('shape', [(5, 5), (3, 7), (7, 3)])
+def test_orthogonal_init_svd(vs, shape):
+    x = vs.orth(shape=shape, method='svd')
+
+    vs.orth(x, name='x', method='svd')
+    allclose(vs['x'], x)
+
+
+@pytest.mark.parametrize('method', ['expm', 'cayley'])
+@pytest.mark.parametrize('shape', [None, 5, (5,), (5, 6)])
+def test_orthogonal_shape(vs, shape, method):
+    with pytest.raises(ValueError):
+        vs.orth(shape=shape, method=method)
+
+
+@pytest.mark.parametrize('shape', [None, 5, (5,)])
+def test_orthogonal_shape_svd(vs, shape):
+    with pytest.raises(ValueError):
+        vs.orth(shape=shape, method='svd')
+
+
+@pytest.mark.parametrize('method', ['svd', 'expm', 'cayley'])
 def test_orthogonal_assignment(vs, method):
-    x = vs.orth(shape=(5, 5))
+    x = vs.orth(shape=(5, 5), method=method)
 
     vs.orth(shape=(5, 5), name='x', method=method)
     vs.assign('x', x)

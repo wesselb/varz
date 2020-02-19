@@ -24,7 +24,7 @@ def minimise_method(request):
     yield request.param
 
 
-def test_docstrings_set(minimise_method):
+def test_docstring(minimise_method):
     assert minimise_method.__doc__ is not None
 
 
