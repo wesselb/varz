@@ -95,7 +95,7 @@ def test_unbounded_init(vs):
 
     # Test that explicit data type can be given. This should work the same
     # for all variable getters, so we only test it once.
-    assert B.dtype(vs.get(1, name='y', dtype=int)) == int
+    assert B.dtype(vs.get(1, name='y', dtype=int)) == np.int64
 
 
 def test_unbounded_assignment(vs):
