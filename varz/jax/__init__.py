@@ -1,8 +1,10 @@
 import jax
+
 # noinspection PyUnresolvedReferences
 import lab.jax
 
 from .minimise import *
+
 # noinspection PyUnresolvedReferences
 from .. import *
 

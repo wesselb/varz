@@ -4,7 +4,7 @@ import torch
 
 from ..minimise import make_l_bfgs_b, make_adam, exception
 
-__all__ = ['minimise_l_bfgs_b', 'minimise_adam']
+__all__ = ["minimise_l_bfgs_b", "minimise_adam"]
 
 log = logging.getLogger(__name__)
 

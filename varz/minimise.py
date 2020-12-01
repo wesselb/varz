@@ -8,19 +8,16 @@ import wbml.out as out
 from plum import Dispatcher
 from scipy.optimize import fmin_l_bfgs_b
 
-__all__ = ['minimise_l_bfgs_b', 'minimise_adam']
+__all__ = ["minimise_l_bfgs_b", "minimise_adam"]
 
 log = logging.getLogger(__name__)
 
 _dispatch = Dispatcher()
 
 
-def minimise_l_bfgs_b(f,
-                      vs,
-                      f_calls=10000,
-                      iters=1000,
-                      trace=False,
-                      names=None):  # pragma: no cover
+def minimise_l_bfgs_b(
+    f, vs, f_calls=10000, iters=1000, trace=False, names=None
+):  # pragma: no cover
     """Minimise a function with L-BFGS-B.
 
     Args:
@@ -37,18 +34,20 @@ def minimise_l_bfgs_b(f,
     Returns:
         float: Final objective function value.
     """
-    raise RuntimeError('Call a backend-specific optimiser instead.')
+    raise RuntimeError("Call a backend-specific optimiser instead.")
 
 
-def minimise_adam(f,
-                  vs,
-                  iters=1000,
-                  rate=1e-3,
-                  beta1=0.9,
-                  beta2=0.999,
-                  epsilon=1e-8,
-                  trace=False,
-                  names=None):  # pragma: no cover
+def minimise_adam(
+    f,
+    vs,
+    iters=1000,
+    rate=1e-3,
+    beta1=0.9,
+    beta2=0.999,
+    epsilon=1e-8,
+    trace=False,
+    names=None,
+):  # pragma: no cover
     """Minimise a function with Adam.
 
     Args:
@@ -69,7 +68,7 @@ def minimise_adam(f,
     Returns:
         float: Final objective function value.
     """
-    raise RuntimeError('Call a backend-specific optimiser instead.')
+    raise RuntimeError("Call a backend-specific optimiser instead.")
 
 
 def make_l_bfgs_b(wrap_f):
@@ -83,12 +82,7 @@ def make_l_bfgs_b(wrap_f):
     """
 
     @wraps(minimise_l_bfgs_b)
-    def _minimise_l_bfgs_b(f,
-                           vs,
-                           f_calls=10000,
-                           iters=1000,
-                           trace=False,
-                           names=None):
+    def _minimise_l_bfgs_b(f, vs, f_calls=10000, iters=1000, trace=False, names=None):
         names = [] if names is None else names
 
         # Run function once to ensure that all variables are initialised and
@@ -108,24 +102,28 @@ def make_l_bfgs_b(wrap_f):
 
         # Perform optimisation routine.
         def perform_minimisation(callback_=lambda _: None):
-            return fmin_l_bfgs_b(func=f_wrapped,
-                                 x0=x0,
-                                 maxiter=iters,
-                                 maxfun=f_calls,
-                                 callback=callback_,
-                                 disp=0)
+            return fmin_l_bfgs_b(
+                func=f_wrapped,
+                x0=x0,
+                maxiter=iters,
+                maxfun=f_calls,
+                callback=callback_,
+                disp=0,
+            )
 
         if trace:
             # Print progress during minimisation.
-            with out.Progress(name='Minimisation of "{}"'.format(f.__name__),
-                              total=iters) as progress:
+            with out.Progress(
+                name='Minimisation of "{}"'.format(f.__name__), total=iters
+            ) as progress:
+
                 def callback(_):
-                    progress({'Objective value': np.min(f_vals)})
+                    progress({"Objective value": np.min(f_vals)})
 
                 x_opt, val_opt, info = perform_minimisation(callback)
 
-            with out.Section('Termination message'):
-                out.out(info['task'].decode('utf-8'))
+            with out.Section("Termination message"):
+                out.out(info["task"].decode("utf-8"))
         else:
             # Don't print progress; simply perform minimisation.
             x_opt, val_opt, info = perform_minimisation()
@@ -148,15 +146,17 @@ def make_adam(wrap_f):
     """
 
     @wraps(minimise_adam)
-    def _minimise_adam(f,
-                       vs,
-                       iters=1000,
-                       rate=1e-3,
-                       beta1=0.9,
-                       beta2=0.999,
-                       epsilon=1e-8,
-                       trace=False,
-                       names=None):
+    def _minimise_adam(
+        f,
+        vs,
+        iters=1000,
+        rate=1e-3,
+        beta1=0.9,
+        beta2=0.999,
+        epsilon=1e-8,
+        trace=False,
+        names=None,
+    ):
         names = [] if names is None else names
 
         # Run function once to ensure that all variables are initialised and
@@ -194,16 +194,18 @@ def make_adam(wrap_f):
                 v_corr = v / (1 - beta2 ** (i + 1))
 
                 # Perform update.
-                x = x - rate * m_corr / (v_corr ** .5 + epsilon)
+                x = x - rate * m_corr / (v_corr ** 0.5 + epsilon)
 
             return x, obj_value
 
         if trace:
             # Print progress during minimisation.
-            with out.Progress(name='Minimisation of "{}"'.format(f.__name__),
-                              total=iters) as progress:
+            with out.Progress(
+                name='Minimisation of "{}"'.format(f.__name__), total=iters
+            ) as progress:
+
                 def callback(obj_value):
-                    progress({'Objective value': obj_value})
+                    progress({"Objective value": obj_value})
 
                 x_opt, obj_value = perform_minimisation(callback)
         else:
@@ -227,7 +229,7 @@ def exception(x, e):
     Returns:
         tuple: Tuple containing NaN and NaNs for the gradient.
     """
-    with out.Section('Caught exception during function evaluation'):
+    with out.Section("Caught exception during function evaluation"):
         out.out(traceback.format_exc().strip())
     grad_nan = np.empty(x.shape)
     grad_nan[:] = np.nan

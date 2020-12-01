@@ -11,7 +11,7 @@ from plum import Dispatcher, Self, Referentiable
 
 from .util import Packer, match, lazy_tf as tf, lazy_torch as torch
 
-__all__ = ['Provider', 'Vars']
+__all__ = ["Provider", "Vars"]
 
 log = logging.getLogger(__name__)
 
@@ -39,11 +39,7 @@ def _assign(x, value):
 
 class Provider(metaclass=Referentiable(ABCMeta)):
     @abstractmethod
-    def unbounded(self,
-                  init=None,
-                  shape=(),
-                  dtype=None,
-                  name=None):  # pragma: no cover
+    def unbounded(self, init=None, shape=(), dtype=None, name=None):  # pragma: no cover
         """Get an unbounded variable.
 
         Args:
@@ -63,11 +59,7 @@ class Provider(metaclass=Referentiable(ABCMeta)):
         return self.unbounded(*args, **kw_args)
 
     @abstractmethod
-    def positive(self,
-                 init=None,
-                 shape=(),
-                 dtype=None,
-                 name=None):  # pragma: no cover
+    def positive(self, init=None, shape=(), dtype=None, name=None):  # pragma: no cover
         """Get a positive variable.
 
         Args:
@@ -87,13 +79,9 @@ class Provider(metaclass=Referentiable(ABCMeta)):
         return self.positive(*args, **kw_args)
 
     @abstractmethod
-    def bounded(self,
-                init=None,
-                lower=1e-4,
-                upper=1e4,
-                shape=(),
-                dtype=None,
-                name=None):  # pragma: no cover
+    def bounded(
+        self, init=None, lower=1e-4, upper=1e4, shape=(), dtype=None, name=None
+    ):  # pragma: no cover
         """Get a bounded variable.
 
         Args:
@@ -115,11 +103,9 @@ class Provider(metaclass=Referentiable(ABCMeta)):
         return self.bounded(*args, **kw_args)
 
     @abstractmethod
-    def lower_triangular(self,
-                         init=None,
-                         shape=None,
-                         dtype=None,
-                         name=None):  # pragma: no cover
+    def lower_triangular(
+        self, init=None, shape=None, dtype=None, name=None
+    ):  # pragma: no cover
         """Get a lower-triangular matrix.
 
         Args:
@@ -138,11 +124,9 @@ class Provider(metaclass=Referentiable(ABCMeta)):
         return self.lower_triangular(*args, **kw_args)
 
     @abstractmethod
-    def positive_definite(self,
-                          init=None,
-                          shape=None,
-                          dtype=None,
-                          name=None):  # pragma: no cover
+    def positive_definite(
+        self, init=None, shape=None, dtype=None, name=None
+    ):  # pragma: no cover
         """Get a positive-definite matrix.
 
         Args:
@@ -161,12 +145,9 @@ class Provider(metaclass=Referentiable(ABCMeta)):
         return self.positive_definite(*args, **kw_args)
 
     @abstractmethod
-    def orthogonal(self,
-                   init=None,
-                   shape=None,
-                   dtype=None,
-                   name=None,
-                   method='svd'):  # pragma: no cover
+    def orthogonal(
+        self, init=None, shape=None, dtype=None, name=None, method="svd"
+    ):  # pragma: no cover
         """Get an orthogonal matrix.
 
         Args:
@@ -200,21 +181,23 @@ class Provider(metaclass=Referentiable(ABCMeta)):
 
 @_dispatch(object)
 def _check_matrix_shape(shape, square=True):
-    raise ValueError(f'Object {shape} is not a shape.')
+    raise ValueError(f"Object {shape} is not a shape.")
 
 
 @_dispatch(tuple)
 def _check_matrix_shape(shape, square=True):
     if len(shape) != 2:
-        raise ValueError(f'Shape {shape} must be the shape of a matrix.')
+        raise ValueError(f"Shape {shape} must be the shape of a matrix.")
     if square and shape[0] != shape[1]:
-        raise ValueError(f'Shape {shape} must be square.')
+        raise ValueError(f"Shape {shape} must be square.")
 
 
 def _check_init_shape(init, shape):
     if init is None and shape is None:
-        raise ValueError(f'The shape must be given to automatically initialise '
-                         f'a matrix variable.')
+        raise ValueError(
+            f"The shape must be given to automatically initialise "
+            f"a matrix variable."
+        )
     if shape is None:
         shape = B.shape(init)
     return init, shape
@@ -228,6 +211,7 @@ class Vars(Provider):
         source (tensor, optional): Tensor to source variables from. Defaults to
             not being used.
     """
+
     _dispatch = Dispatcher(in_class=Self)
 
     def __init__(self, dtype, source=None):
@@ -255,15 +239,17 @@ class Vars(Provider):
         else:
             return dtype
 
-    def _get_var(self,
-                 transform,
-                 inverse_transform,
-                 init,
-                 generate_init,
-                 shape,
-                 shape_latent,
-                 dtype,
-                 name):
+    def _get_var(
+        self,
+        transform,
+        inverse_transform,
+        init,
+        generate_init,
+        shape,
+        shape_latent,
+        dtype,
+        name,
+    ):
         # If the name already exists, return that variable.
         try:
             return self[name]
@@ -298,8 +284,7 @@ class Vars(Provider):
         else:
             # Get the latent variable from the source.
             length = reduce(mul, shape_latent, 1)
-            latent_flat = \
-                self.source[self.source_index:self.source_index + length]
+            latent_flat = self.source[self.source_index : self.source_index + length]
             self.source_index += length
 
             # Cast to the right data type.
@@ -324,35 +309,35 @@ class Vars(Provider):
         def generate_init(shape, dtype):
             return B.randn(dtype, *shape)
 
-        return self._get_var(transform=lambda x: x,
-                             inverse_transform=lambda x: x,
-                             init=init,
-                             generate_init=generate_init,
-                             shape=shape,
-                             shape_latent=shape,
-                             dtype=dtype,
-                             name=name)
+        return self._get_var(
+            transform=lambda x: x,
+            inverse_transform=lambda x: x,
+            init=init,
+            generate_init=generate_init,
+            shape=shape,
+            shape_latent=shape,
+            dtype=dtype,
+            name=name,
+        )
 
     def positive(self, init=None, shape=(), dtype=None, name=None):
         def generate_init(shape, dtype):
             return B.rand(dtype, *shape)
 
-        return self._get_var(transform=lambda x: B.exp(x),
-                             inverse_transform=lambda x: B.log(x),
-                             init=init,
-                             generate_init=generate_init,
-                             shape=shape,
-                             shape_latent=shape,
-                             dtype=dtype,
-                             name=name)
+        return self._get_var(
+            transform=lambda x: B.exp(x),
+            inverse_transform=lambda x: B.log(x),
+            init=init,
+            generate_init=generate_init,
+            shape=shape,
+            shape_latent=shape,
+            dtype=dtype,
+            name=name,
+        )
 
-    def bounded(self,
-                init=None,
-                lower=1e-4,
-                upper=1e4,
-                shape=(),
-                dtype=None,
-                name=None):
+    def bounded(
+        self, init=None, lower=1e-4, upper=1e4, shape=(), dtype=None, name=None
+    ):
         def transform(x):
             return lower + (upper - lower) / (1 + B.exp(-x))
 
@@ -362,20 +347,18 @@ class Vars(Provider):
         def generate_init(shape, dtype):
             return lower + B.rand(dtype, *shape) * (upper - lower)
 
-        return self._get_var(transform=transform,
-                             inverse_transform=inverse_transform,
-                             init=init,
-                             generate_init=generate_init,
-                             shape=shape,
-                             shape_latent=shape,
-                             dtype=dtype,
-                             name=name)
+        return self._get_var(
+            transform=transform,
+            inverse_transform=inverse_transform,
+            init=init,
+            generate_init=generate_init,
+            shape=shape,
+            shape_latent=shape,
+            dtype=dtype,
+            name=name,
+        )
 
-    def lower_triangular(self,
-                         init=None,
-                         shape=None,
-                         dtype=None,
-                         name=None):
+    def lower_triangular(self, init=None, shape=None, dtype=None, name=None):
         init, shape = _check_init_shape(init, shape)
         _check_matrix_shape(shape)
 
@@ -393,20 +376,18 @@ class Vars(Provider):
             return transform(B.tril_to_vec(mat))
 
         shape_latent = (int(side * (side + 1) / 2),)
-        return self._get_var(transform=transform,
-                             inverse_transform=inverse_transform,
-                             init=init,
-                             generate_init=generate_init,
-                             shape=shape,
-                             shape_latent=shape_latent,
-                             dtype=dtype,
-                             name=name)
+        return self._get_var(
+            transform=transform,
+            inverse_transform=inverse_transform,
+            init=init,
+            generate_init=generate_init,
+            shape=shape,
+            shape_latent=shape_latent,
+            dtype=dtype,
+            name=name,
+        )
 
-    def positive_definite(self,
-                          init=None,
-                          shape=None,
-                          dtype=None,
-                          name=None):
+    def positive_definite(self, init=None, shape=None, dtype=None, name=None):
         init, shape = _check_init_shape(init, shape)
         _check_matrix_shape(shape)
 
@@ -415,38 +396,33 @@ class Vars(Provider):
 
         def transform(x):
             log_diag = x[:side]
-            chol = B.vec_to_tril(x[side:], offset=-1) + \
-                   B.diag(B.exp(log_diag))
+            chol = B.vec_to_tril(x[side:], offset=-1) + B.diag(B.exp(log_diag))
             return B.matmul(chol, chol, tr_b=True)
 
         def inverse_transform(x):
             chol = B.cholesky(B.reg(x))
-            return B.concat(B.log(B.diag(chol)),
-                            B.tril_to_vec(chol, offset=-1))
+            return B.concat(B.log(B.diag(chol)), B.tril_to_vec(chol, offset=-1))
 
         def generate_init(shape, dtype):
             mat = B.randn(dtype, *shape)
             return B.matmul(mat, mat, tr_b=True)
 
         shape_latent = (int(side * (side + 1) / 2),)
-        return self._get_var(transform=transform,
-                             inverse_transform=inverse_transform,
-                             init=init,
-                             generate_init=generate_init,
-                             shape=shape,
-                             shape_latent=shape_latent,
-                             dtype=dtype,
-                             name=name)
+        return self._get_var(
+            transform=transform,
+            inverse_transform=inverse_transform,
+            init=init,
+            generate_init=generate_init,
+            shape=shape,
+            shape_latent=shape_latent,
+            dtype=dtype,
+            name=name,
+        )
 
-    def orthogonal(self,
-                   init=None,
-                   shape=None,
-                   dtype=None,
-                   name=None,
-                   method='svd'):
+    def orthogonal(self, init=None, shape=None, dtype=None, name=None, method="svd"):
         init, shape = _check_init_shape(init, shape)
 
-        if method == 'svd':
+        if method == "svd":
             _check_matrix_shape(shape, square=False)
             n, m = shape
             shape_latent = (n, m)
@@ -468,7 +444,7 @@ class Vars(Provider):
                 mat = B.randn(dtype, *shape)
                 return transform(mat)
 
-        elif method == 'expm':
+        elif method == "expm":
             _check_matrix_shape(shape)
             side = shape[0]
             shape_latent = (int(side * (side + 1) / 2 - side),)
@@ -485,7 +461,7 @@ class Vars(Provider):
                 mat = B.randn(dtype, *shape)
                 return transform(B.tril_to_vec(mat, offset=-1))
 
-        elif method == 'cayley':
+        elif method == "cayley":
             _check_matrix_shape(shape)
             side = shape[0]
             shape_latent = (int(side * (side + 1) / 2 - side),)
@@ -508,14 +484,16 @@ class Vars(Provider):
         else:
             raise ValueError(f'Unknown parametrisation "{method}".')
 
-        return self._get_var(transform=transform,
-                             inverse_transform=inverse_transform,
-                             init=init,
-                             generate_init=generate_init,
-                             shape=shape,
-                             shape_latent=shape_latent,
-                             dtype=dtype,
-                             name=name)
+        return self._get_var(
+            transform=transform,
+            inverse_transform=inverse_transform,
+            init=init,
+            generate_init=generate_init,
+            shape=shape,
+            shape_latent=shape_latent,
+            dtype=dtype,
+            name=name,
+        )
 
     def __getitem__(self, name):
         index = self.name_to_index[name]
@@ -541,8 +519,7 @@ class Vars(Provider):
             return value
         else:
             # Overwrite data.
-            return _assign(self.vars[index],
-                           self.inverse_transforms[index](value))
+            return _assign(self.vars[index], self.inverse_transforms[index](value))
 
     def copy(self, detach=False):
         """Create a copy of the variable manager that shares the variables.
@@ -598,13 +575,13 @@ class Vars(Provider):
         """
         # If nothing is specified, return all latent variables.
         if len(names) == 0:
-            if kw_args.get('indices', False):
+            if kw_args.get("indices", False):
                 return list(range(len(self.vars)))
             else:
                 return self.vars
 
         # Attempt to use cache.
-        cache_key = (names, kw_args.get('indices', False))
+        cache_key = (names, kw_args.get("indices", False))
         try:
             return self._get_vars_cache[cache_key]
         except KeyError:
@@ -621,10 +598,10 @@ class Vars(Provider):
 
             # Check that there was a match.
             if not a_match:
-                raise ValueError('No variable matching "{}".'.format(name))
+                raise ValueError(f'No variable matching "{name}".')
 
         # Return indices if asked for. Otherwise, return variables.
-        if kw_args.get('indices', False):
+        if kw_args.get("indices", False):
             res = sorted(indices)
         else:
             res = [self.vars[i] for i in sorted(indices)]
@@ -664,10 +641,9 @@ class Vars(Provider):
         """
         values = self.vector_packer.unpack(values)
 
-        if kw_args.get('differentiable', False):
+        if kw_args.get("differentiable", False):
             # Do a differentiable assignment.
-            for index, value in zip(self.get_vars(*names, indices=True),
-                                    values):
+            for index, value in zip(self.get_vars(*names, indices=True), values):
                 self.vars[index] = value
             return values
         else:

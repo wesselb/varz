@@ -11,26 +11,27 @@ def test_initialiser(vs):
     init = Initialiser()
 
     # Initialise two variables.
-    vs.get(1., name='a')
-    vs.pos(2., name='b')
+    vs.get(1.0, name="a")
+    vs.pos(2.0, name="b")
 
     # Define some initialisations.
-    init.assign('a', [-3., 4.])
-    init.assign('b', [5., 6.])
+    init.assign("a", [-3.0, 4.0])
+    init.assign("b", [5.0, 6.0])
     inits = init.generate(vs)
 
     # Test the initialisations.
-    for initialiser, values in zip(inits, product([-3., 4.], [5., 6.])):
+    for initialiser, values in zip(inits, product([-3.0, 4.0], [5.0, 6.0])):
         initialiser()
-        assert vs['a'] == values[0]
-        allclose(vs['b'], values[1])
+        assert vs["a"] == values[0]
+        allclose(vs["b"], values[1])
 
 
 def test_packer():
     a, b, c = B.randn(5, 10), B.randn(20), B.randn(5, 1, 15)
 
-    for packer, args in zip([Packer(a, b, c), Packer([a, b, c])],
-                            [(a, b, c), ((a, b, c),)]):
+    for packer, args in zip(
+        [Packer(a, b, c), Packer([a, b, c])], [(a, b, c), ((a, b, c),)]
+    ):
         # Test packing.
         packed = packer.pack(*args)
         assert B.rank(packed) == 1

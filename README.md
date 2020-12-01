@@ -1,11 +1,11 @@
 # [Varz](http://github.com/wesselb/varz)
 
-[![Build](https://travis-ci.org/wesselb/varz.svg?branch=master)](https://travis-ci.org/wesselb/varz)
+[![CI](https://github.com/wesselb/varz/workflows/CI/badge.svg?branch=master)](https://github.com/wesselb/varz/actions?query=workflow%3ACI)
 [![Coverage Status](https://coveralls.io/repos/github/wesselb/varz/badge.svg?branch=master&service=github)](https://coveralls.io/github/wesselb/varz?branch=master)
 [![Latest Docs](https://img.shields.io/badge/docs-latest-blue.svg)](https://wesselb.github.io/varz)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-Painless optimisation of constrained variables in AutoGrad, TensorFlow, and
-PyTorch
+Painless optimisation of constrained variables in AutoGrad, TensorFlow, PyTorch, and Jax
 
 * [Requirements and Installation](#requirements-and-installation)
 * [Manual](#manual)
@@ -21,6 +21,7 @@ PyTorch
     - [AutoGrad](#autograd)
     - [TensorFlow](#tensorflow)
     - [PyTorch](#pytorch)
+    - [Jax](#jax)
     
 ## Requirements and Installation
 
@@ -454,14 +455,14 @@ algorithm.
 import autograd.numpy as np
 from varz.autograd import Vars, minimise_l_bfgs_b
 
-target = 5. 
+target = 5.0 
 
 
 def objective(vs):
     # Get a variable named "x", which must be positive, initialised to 10.
-    x = vs.pos(10., name='x')  
+    x = vs.pos(10.0, name='x')  
     
-    return (x ** .5 - target) ** 2  
+    return (x ** 0.5 - target) ** 2  
 ```
 
 ```python
@@ -480,14 +481,14 @@ def objective(vs):
 import tensorflow as tf
 from varz.tensorflow import Vars, minimise_l_bfgs_b
 
-target = 5.
+target = 5.0
 
 
 def objective(vs):
     # Get a variable named "x", which must be positive, initialised to 10.
-    x = vs.pos(10., name='x')  
+    x = vs.pos(10.0, name='x')  
     
-    return (x ** .5 - target) ** 2  
+    return (x ** 0.5 - target) ** 2  
 ```
 
 ```python
@@ -506,14 +507,14 @@ def objective(vs):
 import torch
 from varz.torch import Vars, minimise_l_bfgs_b
 
-target = torch.tensor(5., dtype=torch.float64)
+target = torch.tensor(5.0, dtype=torch.float64)
 
 
 def objective(vs):
     # Get a variable named "x", which must be positive, initialised to 10.
-    x = vs.pos(10., name='x')  
+    x = vs.pos(10.0, name='x')  
     
-    return (x ** .5 - target) ** 2  
+    return (x ** 0.5 - target) ** 2  
 ```
 
 ```python
@@ -525,4 +526,31 @@ array(3.17785951e-19)  # Final objective function value.
 >>> vs['x'] - target ** 2
 tensor(-5.6373e-09, dtype=torch.float64)
 ```
+
+### Jax
+
+```python
+import jax.numpy as jnp
+from varz.jax import Vars, minimise_l_bfgs_b
+
+target = 5.0
+
+
+def objective(vs):
+    # Get a variable named "x", which must be positive, initialised to 10.
+    x = vs.pos(10.0, name='x')  
+    
+    return (x ** 0.5 - target) ** 2  
+```
+
+```python
+>>> vs = Vars(jnp.float64)
+
+>>> minimise_l_bfgs_b(objective, vs)
+array(3.17785951e-19)  # Final objective function value.
+
+>>> vs['x'] - target ** 2
+-5.637250666268301e-09
+```
+
 

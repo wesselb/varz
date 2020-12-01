@@ -9,23 +9,22 @@ from plum import Dispatcher
 from wbml import out as out
 from varz import Vars
 
-__all__ = ['Value',
-           'allclose',
-           'approx',
-
-           # Numerical checks:
-           'assert_lower_triangular',
-           'assert_positive_definite',
-           'assert_orthogonal',
-
-           # Fixtures:
-           'dtype',
-           'vs',
-           'vs_source',
-
-           # Mocks:
-           'KV',
-           'OutStream']
+__all__ = [
+    "Value",
+    "allclose",
+    "approx",
+    # Numerical checks:
+    "assert_lower_triangular",
+    "assert_positive_definite",
+    "assert_orthogonal",
+    # Fixtures:
+    "dtype",
+    "vs",
+    "vs_source",
+    # Mocks:
+    "KV",
+    "OutStream",
+]
 
 _dispatch = Dispatcher()
 
@@ -59,6 +58,7 @@ def allclose(x, y):
 
 # Numerical checks:
 
+
 def assert_lower_triangular(x):
     """Assert that a matrix is lower triangular."""
     # Check that matrix is square.
@@ -85,6 +85,7 @@ def assert_orthogonal(x):
 
 
 # Fixtures:
+
 
 @pytest.fixture(params=[np.float64, torch.float64, tf.float64])
 def dtype(request):
@@ -133,7 +134,7 @@ class OutStream:
     """Mock the streams of `wbml.out`."""
 
     def __init__(self):
-        self.output = ''
+        self.output = ""
 
     def write(self, msg):
         self.output += msg

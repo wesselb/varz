@@ -5,14 +5,16 @@ from inspect import isfunction
 
 from .vars import Provider
 
-__all__ = ['sequential',
-           'Unbounded',
-           'Positive',
-           'Bounded',
-           'LowerTriangular',
-           'PositiveDefinite',
-           'Orthogonal',
-           'parametrised']
+__all__ = [
+    "sequential",
+    "Unbounded",
+    "Positive",
+    "Bounded",
+    "LowerTriangular",
+    "PositiveDefinite",
+    "Orthogonal",
+    "parametrised",
+]
 
 
 class Sequential(Provider):
@@ -31,8 +33,8 @@ class Sequential(Provider):
         self.count = 0
 
     def _get_var(self, getter, args, kw_args):
-        if 'name' not in kw_args:
-            kw_args['name'] = f'{self.prefix}{self.count}'
+        if "name" not in kw_args:
+            kw_args["name"] = f"{self.prefix}{self.count}"
             self.count += 1
         return getter(*args, **kw_args)
 
@@ -85,10 +87,10 @@ def _extract_prefix_and_f(prefix_or_f):
     """
     if prefix_or_f is None:
         # Not used as decorator and prefix is left unspecified.
-        return '', None
+        return "", None
     elif isfunction(prefix_or_f):
         # Used as a decorator.
-        return '', prefix_or_f
+        return "", prefix_or_f
     else:
         # Not used as decorator and prefix is specified.
         return prefix_or_f, None
@@ -132,20 +134,16 @@ class VariableType(metaclass=ABCMeta):
         kw_args = dict(self.kw_args)
 
         # Set initial value.
-        if (
-                init is not None and
-                'init' in kw_args and
-                kw_args['init'] is not None
-        ):
-            raise ValueError(f'Initial value doubly specified: '
-                             f'"{init}" and "{kw_args["init"]}".')
-        kw_args['init'] = init
+        if init is not None and "init" in kw_args and kw_args["init"] is not None:
+            raise ValueError(
+                f'Initial value doubly specified: "{init}" and "{kw_args["init"]}".'
+            )
+        kw_args["init"] = init
 
         # Set name.
-        if 'name' in kw_args and kw_args['name'] is not None:
-            raise ValueError(f'Name doubly specified: '
-                             f'{name} and {kw_args["name"]}.')
-        kw_args['name'] = name
+        if "name" in kw_args and kw_args["name"] is not None:
+            raise ValueError(f'Name doubly specified: {name} and {kw_args["name"]}.')
+        kw_args["name"] = name
 
         return method(*self.args, **kw_args)
 
@@ -225,9 +223,9 @@ def parametrised(prefix=None):
             values = args + tuple(kw_args.values())
             num_containers = sum([isinstance(x, Provider) for x in values])
             if num_containers == 0:
-                raise ValueError('No variable container found.')
+                raise ValueError("No variable container found.")
             elif num_containers > 1:
-                raise ValueError('Multiple variable containers found.')
+                raise ValueError("Multiple variable containers found.")
             else:
                 # There is exactly only variable container. Find it.
                 vs = [x for x in values if isinstance(x, Provider)][0]
@@ -237,8 +235,9 @@ def parametrised(prefix=None):
                 annotation = parameter.annotation
 
                 # Instantiate uninstantiated variable types.
-                if (isinstance(annotation, type) and
-                        issubclass(annotation, VariableType)):
+                if isinstance(annotation, type) and issubclass(
+                    annotation, VariableType
+                ):
                     annotation = annotation()
 
                 if isinstance(annotation, VariableType):
@@ -251,8 +250,9 @@ def parametrised(prefix=None):
                         init = None
 
                     # Store the instantiated variable.
-                    filled_kwargs[name] = \
-                        annotation.instantiate(vs, prefix + name, init)
+                    filled_kwargs[name] = annotation.instantiate(
+                        vs, prefix + name, init
+                    )
 
                 else:
                     # Parameter is a regular parameter. Find it.
@@ -271,18 +271,20 @@ def parametrised(prefix=None):
                             # value. If a default value is not given,
                             # the user did not specify a positional argument.
                             if parameter.default is parameter.empty:
-                                raise ValueError(f'Positional argument '
-                                                 f'"{name}" not given.')
+                                raise ValueError(
+                                    f'Positional argument "{name}" not given.'
+                                )
                             else:
                                 filled_kwargs[name] = parameter.default
 
             # Ensure that everything is parsed.
             if len(args) > 0:
-                raise ValueError(f'{len(args)} positional argument(s) not '
-                                 f'parsed.')
+                raise ValueError(f"{len(args)} positional argument(s) not parsed.")
             if len(kw_args) > 0:
-                raise ValueError(f'{len(kw_args)} keyword argument(s) not '
-                                 f'parsed: {", ".join(kw_args.keys())}.')
+                raise ValueError(
+                    f"{len(kw_args)} keyword argument(s) not "
+                    f'parsed: {", ".join(kw_args.keys())}.'
+                )
 
             return f_(**filled_kwargs)
 

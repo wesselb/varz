@@ -6,7 +6,7 @@ from itertools import product
 import lab as B
 from plum import Referentiable, Dispatcher, Self
 
-__all__ = ['lazy_tf', 'lazy_torch', 'Initialiser', 'Packer', 'match']
+__all__ = ["lazy_tf", "lazy_torch", "Initialiser", "Packer", "match"]
 
 log = logging.getLogger(__name__)
 
@@ -30,8 +30,8 @@ class LazyModule:
         return getattr(self.module, item)
 
 
-lazy_tf = LazyModule('tensorflow')
-lazy_torch = LazyModule('torch')
+lazy_tf = LazyModule("tensorflow")
+lazy_torch = LazyModule("torch")
 
 
 class Initialiser:
@@ -59,8 +59,9 @@ class Initialiser:
             list[function]: List of functions that perform the initialisations.
         """
         names, value_sets = zip(*self._assignments.items())
-        return [_construct_assigner(vs, names, values)
-                for values in product(*value_sets)]
+        return [
+            _construct_assigner(vs, names, values) for values in product(*value_sets)
+        ]
 
 
 def _construct_assigner(vs, names, values):
@@ -76,6 +77,7 @@ class Packer(metaclass=Referentiable):
     Args:
         *objs (tensor): Objects to pack.
     """
+
     _dispatch = Dispatcher(in_class=Self)
 
     @_dispatch([object])
@@ -114,7 +116,7 @@ class Packer(metaclass=Referentiable):
         """
         i, outs = 0, []
         for shape, length in zip(self._shapes, self._lengths):
-            outs.append(B.reshape(package[i:i + length], *shape))
+            outs.append(B.reshape(package[i : i + length], *shape))
             i += length
         return outs
 
@@ -129,5 +131,5 @@ def match(pattern, target):
 
     bool: `True` if `pattern` matches `target`.
     """
-    pattern = ''.join('.*' if c == '*' else re.escape(c) for c in pattern)
-    return bool(re.match('^' + pattern + '$', target))
+    pattern = "".join(".*" if c == "*" else re.escape(c) for c in pattern)
+    return bool(re.match("^" + pattern + "$", target))

@@ -1,16 +1,15 @@
-import jax
 import jax.numpy as jnp
 import lab as B
 import numpy as np
 import pytest
 import tensorflow as tf
 import torch
+
 import varz.autograd
+import varz.jax
 import varz.tensorflow
 import varz.torch
-import varz.jax
 from varz import Vars
-
 from .util import approx, Value, OutStream
 
 

@@ -4,7 +4,7 @@ import tensorflow as tf
 
 from ..minimise import make_l_bfgs_b, make_adam, exception
 
-__all__ = ['minimise_l_bfgs_b', 'minimise_adam']
+__all__ = ["minimise_l_bfgs_b", "minimise_adam"]
 
 log = logging.getLogger(__name__)
 
@@ -22,8 +22,9 @@ def _wrap_f(vs, names, f):
             with tf.GradientTape() as t:
                 t.watch(vs.get_vars(*names))
                 obj_value = f(vs)
-                grads = t.gradient(obj_value, vs.get_vars(*names),
-                                   unconnected_gradients='zero')
+                grads = t.gradient(
+                    obj_value, vs.get_vars(*names), unconnected_gradients="zero"
+                )
         except Exception as e:
             return exception(x, e)
 

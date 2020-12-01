@@ -8,15 +8,16 @@ from varz import (
     LowerTriangular,
     PositiveDefinite,
     Orthogonal,
-    parametrised
+    parametrised,
 )
 from varz.spec import _extract_prefix_and_f
+
 # noinspection PyUnresolvedReferences
 from .util import (
     vs,
     assert_lower_triangular,
     assert_positive_definite,
-    assert_orthogonal
+    assert_orthogonal,
 )
 
 
@@ -24,23 +25,27 @@ def test_extract_prefix_and_f():
     def f():
         pass
 
-    assert _extract_prefix_and_f(None) == ('', None)
-    assert _extract_prefix_and_f(f) == ('', f)
-    assert _extract_prefix_and_f('test') == ('test', None)
+    assert _extract_prefix_and_f(None) == ("", None)
+    assert _extract_prefix_and_f(f) == ("", f)
+    assert _extract_prefix_and_f("test") == ("test", None)
 
 
-@pytest.mark.parametrize('decorator, names',
-                         [(sequential, ['z', '0', '1', '2']),
-                          (sequential(), ['z', '0', '1', '2']),
-                          (sequential('x'), ['z', 'x0', 'x1', 'x2'])])
+@pytest.mark.parametrize(
+    "decorator, names",
+    [
+        (sequential, ["z", "0", "1", "2"]),
+        (sequential(), ["z", "0", "1", "2"]),
+        (sequential("x"), ["z", "x0", "x1", "x2"]),
+    ],
+)
 def test_sequential(vs, decorator, names):
-    vs.get(0, name='z')
+    vs.get(0, name="z")
 
     @decorator
     def f(x, vs_, y):
         assert x == 1
         assert y == 2
-        return vs_['z'], vs_.get(), vs_.pos(), vs_.bnd(lower=10, upper=11)
+        return vs_["z"], vs_.get(), vs_.pos(), vs_.bnd(lower=10, upper=11)
 
     # Test that the same variables are retrieved.
     assert f(1, vs, 2) == f(1, vs, 2)
@@ -102,25 +107,35 @@ def test_sequential_orthogonal(vs):
     assert_orthogonal(f(vs))
 
 
-@pytest.mark.parametrize('decorator, types, names',
-                         [(parametrised,
-                           [Unbounded, Positive, Bounded(lower=10, upper=11)],
-                           ['w', 'x', 'y', 'z']),
-                          (parametrised(),
-                           [Unbounded, Positive, Bounded(lower=10, upper=11)],
-                           ['w', 'x', 'y', 'z']),
-                          (parametrised('var_'),
-                           [Unbounded, Positive, Bounded(lower=10, upper=11)],
-                           ['w', 'var_x', 'var_y', 'var_z'])])
+@pytest.mark.parametrize(
+    "decorator, types, names",
+    [
+        (
+            parametrised,
+            [Unbounded, Positive, Bounded(lower=10, upper=11)],
+            ["w", "x", "y", "z"],
+        ),
+        (
+            parametrised(),
+            [Unbounded, Positive, Bounded(lower=10, upper=11)],
+            ["w", "x", "y", "z"],
+        ),
+        (
+            parametrised("var_"),
+            [Unbounded, Positive, Bounded(lower=10, upper=11)],
+            ["w", "var_x", "var_y", "var_z"],
+        ),
+    ],
+)
 def test_parametrised(vs, decorator, types, names):
-    vs.get(0, name='w')
+    vs.get(0, name="w")
 
     @decorator
     def f(a, x: types[0], vs_, y: types[1], b, z: types[2], c=None):
         assert a == 1
         assert b == 2
         assert c is None
-        return vs_['w'], x, y, z
+        return vs_["w"], x, y, z
 
     # Test that the same variables are retrieved
     assert f(1, vs, 2) == f(1, vs, 2)
@@ -187,7 +202,7 @@ def test_parametrised_double_initial_value(vs):
 
 def test_parametrised_double_name(vs):
     @parametrised
-    def f(vs_, x: Unbounded(name='x')):
+    def f(vs_, x: Unbounded(name="x")):
         pass
 
     with pytest.raises(ValueError):
