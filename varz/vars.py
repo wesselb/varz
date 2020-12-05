@@ -557,7 +557,7 @@ class Vars(Provider):
         for var in self.get_vars(*names):
             var.requires_grad_(value)
 
-    def get_vars(self, *names, **kw_args):
+    def get_vars(self, *names, return_indices=False):
         """Get latent variables.
 
         If no arguments are supplied, then all latent variables are retrieved.
@@ -566,7 +566,7 @@ class Vars(Provider):
 
         Args:
             *names (hashable): Get variables by name.
-            indices (bool, optional): Get the indices of the variables instead.
+            return_indices (bool, optional): Get the indices of the variables instead.
                 Defaults to `False`.
 
         Returns:
@@ -575,40 +575,39 @@ class Vars(Provider):
         """
         # If nothing is specified, return all latent variables.
         if len(names) == 0:
-            if kw_args.get("indices", False):
+            if return_indices:
                 return list(range(len(self.vars)))
             else:
                 return self.vars
 
         # Attempt to use cache.
-        cache_key = (names, kw_args.get("indices", False))
         try:
-            return self._get_vars_cache[cache_key]
+            indices = self._get_vars_cache[names]
         except KeyError:
-            pass
+            # Collect indices of matches.
+            indices = set()
+            for name in names:
+                a_match = False
+                for k, v in self.name_to_index.items():
+                    if match(name, k):
+                        indices |= {v}
+                        a_match = True
 
-        # Collect indices of matches.
-        indices = set()
-        for name in names:
-            a_match = False
-            for k, v in self.name_to_index.items():
-                if match(name, k):
-                    indices |= {v}
-                    a_match = True
+                # Check that there was a match.
+                if not a_match:
+                    raise ValueError(f'No variable matching "{name}".')
 
-            # Check that there was a match.
-            if not a_match:
-                raise ValueError(f'No variable matching "{name}".')
+            # Sort the indices for a consistent result.
+            indices = sorted(indices)
+
+            # Store in cache before proceeding.
+            self._get_vars_cache[names] = indices
 
         # Return indices if asked for. Otherwise, return variables.
-        if kw_args.get("indices", False):
-            res = sorted(indices)
+        if return_indices:
+            return indices
         else:
-            res = [self.vars[i] for i in sorted(indices)]
-
-        # Store in cache before returning.
-        self._get_vars_cache[cache_key] = res
-        return res
+            return [self.vars[i] for i in indices]
 
     def get_vector(self, *names):
         """Get all the latent variables stacked in a vector.
@@ -625,7 +624,7 @@ class Vars(Provider):
         self.vector_packer = Packer(*vars)
         return self.vector_packer.pack(*vars)
 
-    def set_vector(self, values, *names, **kw_args):
+    def set_vector(self, values, *names, differentiable=False):
         """Set all the latent variables by values from a vector.
 
         If no arguments are supplied, then all latent variables are retrieved.
@@ -641,9 +640,9 @@ class Vars(Provider):
         """
         values = self.vector_packer.unpack(values)
 
-        if kw_args.get("differentiable", False):
+        if differentiable:
             # Do a differentiable assignment.
-            for index, value in zip(self.get_vars(*names, indices=True), values):
+            for index, value in zip(self.get_vars(*names, return_indices=True), values):
                 self.vars[index] = value
             return values
         else:

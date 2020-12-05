@@ -32,7 +32,7 @@ def test_get_vars():
 
     # Test getting all.
     assert vs.get_vars() == [1, 2, 3, 4]
-    assert vs.get_vars(indices=True) == [0, 1, 2, 3]
+    assert vs.get_vars(return_indices=True) == [0, 1, 2, 3]
 
     # Test that names must exist.
     with pytest.raises(ValueError):
@@ -44,19 +44,19 @@ def test_get_vars():
     assert vs.get_vars("*/c", "a") == [1, 3]
     assert vs.get_vars("*/c", "*/b", "a") == [1, 2, 3]
 
-    assert vs.get_vars("a", indices=True) == [0]
-    assert vs.get_vars("a", "*/b", indices=True) == [0, 1]
-    assert vs.get_vars("*/c", "a", indices=True) == [0, 2]
-    assert vs.get_vars("*/c", "*/b", "a", indices=True) == [0, 1, 2]
+    assert vs.get_vars("a", return_indices=True) == [0]
+    assert vs.get_vars("a", "*/b", return_indices=True) == [0, 1]
+    assert vs.get_vars("*/c", "a", return_indices=True) == [0, 2]
+    assert vs.get_vars("*/c", "*/b", "a", return_indices=True) == [0, 1, 2]
 
     # Test some more queries.
     assert vs.get_vars("1/*") == [2]
     assert vs.get_vars("2/*") == [3, 4]
     assert vs.get_vars("1/*", "2/*") == [2, 3, 4]
 
-    assert vs.get_vars("1/*", indices=True) == [1]
-    assert vs.get_vars("2/*", indices=True) == [2, 3]
-    assert vs.get_vars("1/*", "2/*", indices=True) == [1, 2, 3]
+    assert vs.get_vars("1/*", return_indices=True) == [1]
+    assert vs.get_vars("2/*", return_indices=True) == [2, 3]
+    assert vs.get_vars("1/*", "2/*", return_indices=True) == [1, 2, 3]
 
     # Test even more queries.
     assert vs.get_vars("*/b", "1/*") == [2]
@@ -67,20 +67,20 @@ def test_get_vars():
     assert vs.get_vars("2/*") == [3, 4]
     assert vs.get_vars("1/*", "2/*") == [2, 3, 4]
 
-    assert vs.get_vars("*/b", "1/*", indices=True) == [1]
-    assert vs.get_vars("a", "2/*", indices=True) == [0, 2, 3]
-    assert vs.get_vars("a", "2/d", "2/*", indices=True) == [0, 2, 3]
-    assert vs.get_vars("2/d", "2/c", "a", "1/*", indices=True) == [0, 1, 2, 3]
-    assert vs.get_vars("1/*", indices=True) == [1]
-    assert vs.get_vars("2/*", indices=True) == [2, 3]
-    assert vs.get_vars("1/*", "2/*", indices=True) == [1, 2, 3]
+    assert vs.get_vars("*/b", "1/*", return_indices=True) == [1]
+    assert vs.get_vars("a", "2/*", return_indices=True) == [0, 2, 3]
+    assert vs.get_vars("a", "2/d", "2/*", return_indices=True) == [0, 2, 3]
+    assert vs.get_vars("2/d", "2/c", "a", "1/*", return_indices=True) == [0, 1, 2, 3]
+    assert vs.get_vars("1/*", return_indices=True) == [1]
+    assert vs.get_vars("2/*", return_indices=True) == [2, 3]
+    assert vs.get_vars("1/*", "2/*", return_indices=True) == [1, 2, 3]
 
 
 def test_get_vars_cache_clearing(vs):
     vs.get(name="var_a")
-    assert vs.get_vars("var_*", indices=True) == [0]
+    assert vs.get_vars("var_*", return_indices=True) == [0]
     vs.get(name="var_b")
-    assert vs.get_vars("var_*", indices=True) == [0, 1]
+    assert vs.get_vars("var_*", return_indices=True) == [0, 1]
 
 
 def test_unbounded(vs_source):
