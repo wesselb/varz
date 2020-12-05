@@ -24,11 +24,11 @@ def minimise_l_bfgs_b(
         f (function): Function to optimise.
         vs (:class:`.vars.Vars`): Variable manager.
         f_calls (int, optional): Maximum number of function calls. Defaults to `10000`.
-        iters (:obj:`int`, optional): Maximum number of iterations. Defaults to `1000`.
-        trace (:obj:`bool`, optional): Show trace of optimisation. Defaults to `False`.
-        names (:obj:`list`, optional): List of names of variables to optimise.
+        iters (int, optional): Maximum number of iterations. Defaults to `1000`.
+        trace (bool, optional): Show trace of optimisation. Defaults to `False`.
+        names (list, optional): List of names of variables to optimise.
             Defaults to all variables.
-        jit (:obj:`bool`, optional): Use a JIT if one is available. Defaults to `False`.
+        jit (bool, optional): Use a JIT if one is available. Defaults to `False`.
 
     Returns:
         float: Final objective function value.
@@ -53,17 +53,17 @@ def minimise_adam(
     Args:
         f (function): Function to optimise.
         vs (:class:`.vars.Vars`): Variable manager.
-        iters (:obj:`int`, optional): Maximum number of iterations. Defaults to `1000`.
-        rate (:obj:`float`, optional): Learning rate. Defaults to `1e-3`.
-        beta1 (:obj:`float`, optional): Exponential decay for mean. Defaults to `0.9`.
-        beta2 (:obj:`float`, optional): Exponential decay for second moment. Defaults to
+        iters (int, optional): Maximum number of iterations. Defaults to `1000`.
+        rate (float, optional): Learning rate. Defaults to `1e-3`.
+        beta1 (float, optional): Exponential decay for mean. Defaults to `0.9`.
+        beta2 (float, optional): Exponential decay for second moment. Defaults to
             `0.999`.
-        epsilon (:obj:`float`, optional): Small value to prevent division by zero.
+        epsilon (float, optional): Small value to prevent division by zero.
             Defaults to `1e-8`.
-        trace (:obj:`bool`, optional): Show trace of optimisation. Defaults to `False`.
-        names (:obj:`list`, optional): List of names of variables to optimise.
+        trace (bool, optional): Show trace of optimisation. Defaults to `False`.
+        names (list, optional): List of names of variables to optimise.
             Defaults to all variables.
-        jit (:obj:`bool`, optional): Use a JIT if one is available. Defaults to `False`.
+        jit (bool, optional): Use a JIT if one is available. Defaults to `False`.
 
     Returns:
         float: Final objective function value.
