@@ -42,7 +42,8 @@ from varz import Vars
 To begin with, create a *variable container* of the right data type.
 For use with AutoGrad, use a `np.*` data type;
 for use with PyTorch, use a `torch.*` data type;
-and for use with TensorFlow, use a `tf.*` data type.
+for use with TensorFlow, use a `tf.*` data type;
+and for use with Jax, use a `jnp.*` data type.
 In this example we'll use AutoGrad.
 
 ```python
@@ -380,11 +381,11 @@ y:          2.0
 The following optimisers are available:
 
 ```
-varz.{autograd,tensorflow,torch}.minimise_l_bfgs_b (L-BFGS-B)
-varz.{autograd,tensorflow,torch}.minimise_adam     (Adam)
+varz.{autograd,tensorflow,torch,jax}.minimise_l_bfgs_b (L-BFGS-B)
+varz.{autograd,tensorflow,torch,jax}.minimise_adam     (ADAM)
 ```
 
-The L-BFGS-B algorithm is recommended for deterministic objectives, and Adam
+The L-BFGS-B algorithm is recommended for deterministic objectives and ADAM
 is recommended for stochastic objectives.
 
 See the examples for an illustration how these optimisers can be used.
