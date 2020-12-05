@@ -1,3 +1,5 @@
+import lab.autograd as B
+import numpy as np
 import logging
 
 from autograd import value_and_grad
@@ -9,7 +11,10 @@ __all__ = ["minimise_l_bfgs_b", "minimise_adam"]
 log = logging.getLogger(__name__)
 
 
-def _wrap_f(vs, names, f):
+def _wrap_f(vs, names, f, jit):
+    if jit:
+        raise ValueError("There is no JIT for AutoGrad.")
+
     # Differentiable assignments will overwrite the variables, so make a copy.
     vs_copy = vs.copy()
 
@@ -21,7 +26,9 @@ def _wrap_f(vs, names, f):
         return f(vs_copy)
 
     def f_wrapped(x):
-        # Compute objective function value.
+        x = B.cast(vs.dtype, x)
+
+        # Compute objective function value and gradient.
         try:
             obj_value, grad = value_and_grad(f_vectorised)(x)
         except Exception as e:

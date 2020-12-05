@@ -53,7 +53,7 @@ Now a variable can be created by requesting it, giving it an initial value and
 a name.
  
 ```python
->>> vs.get(np.random.randn(2, 2), name='x')
+>>> vs.get(np.random.randn(2, 2), name="x")
 array([[ 1.04404354, -1.98478763],
        [ 1.14176728, -3.2915562 ]])
 ```
@@ -62,7 +62,7 @@ If the same variable is created again, because a variable with the name `x`
 already exists, the existing variable will be returned.
 
 ```python
->>> vs.get(name='x')
+>>> vs.get(name="x")
 array([[ 1.04404354, -1.98478763],
        [ 1.14176728, -3.2915562 ]])
 ```
@@ -72,18 +72,18 @@ This asserts that a variable with the name `x` already exists and will throw a
 `KeyError` otherwise.
 
 ```python
->>> vs['x']
+>>> vs["x"]
 array([[ 1.04404354, -1.98478763],
        [ 1.14176728, -3.2915562 ]])
        
->>> vs['y']
+>>> vs["y"]
 KeyError: 'y'
 ```
 
 The value of `x` can be changed by assigning it a different value.
 
 ```python
->>> vs.assign('x', np.random.randn(2, 2))
+>>> vs.assign("x", np.random.randn(2, 2))
 array([[ 1.43477728,  0.51006941],
        [-0.74686452, -1.05285767]])
 ```
@@ -93,7 +93,7 @@ For differentiable assignment, which _replaces_ data, set the keyword argument
 `differentiable=True`.
 
 ```python
->>> vs.assign('x', np.random.randn(2, 2), differentiable=True)
+>>> vs.assign("x", np.random.randn(2, 2), differentiable=True)
 array([[ 0.12500578, -0.21510423],
        [-0.61336039,  1.23074066]])
 ```
@@ -121,13 +121,13 @@ Example:
 ```python
 >>> vs = Vars(np.float64)
 
->>> vs.get(1, name='x1')
+>>> vs.get(1, name="x1")
 array(1.)
 
->>> vs.get(2, name='x2')
+>>> vs.get(2, name="x2")
 array(2.)
 
->>> vs.get(3, name='y')
+>>> vs.get(3, name="y")
 array(3.)
 
 >>> vs.names
@@ -146,7 +146,7 @@ y:          3.0
     `Vars.positive` or `Vars.pos`.
 
     ```python
-    >>> vs.pos(name='positive_variable')
+    >>> vs.pos(name="positive_variable")
     0.016925610008314832
     ```
 
@@ -155,7 +155,7 @@ y:          3.0
     `Vars.bounded` or `Vars.bnd`.
 
     ```python
-    >>> vs.bnd(name='bounded_variable', lower=1, upper=2)
+    >>> vs.bnd(name="bounded_variable", lower=1, upper=2)
     1.646772663807718
     ```
   
@@ -165,7 +165,7 @@ y:          3.0
     initialisation or a shape of square matrix must be given.
     
     ```python
-    >>> vs.tril(shape=(2, 2), name='lower_triangular')
+    >>> vs.tril(shape=(2, 2), name="lower_triangular")
     array([[ 2.64204459,  0.        ],
            [-0.14055559, -1.91298679]])
     ```
@@ -176,7 +176,7 @@ y:          3.0
     initialisation or a shape of square matrix must be given.
     
     ```python
-    >>> vs.pd(shape=(2, 2), name='positive_definite')
+    >>> vs.pd(shape=(2, 2), name="positive_definite")
     array([[ 1.64097496, -0.52302151],
            [-0.52302151,  0.32628302]])
     ```
@@ -187,7 +187,7 @@ y:          3.0
     shape of square matrix must be given.
     
     ```python
-    >>> vs.orth(shape=(2, 2), name='orthogonal')
+    >>> vs.orth(shape=(2, 2), name="orthogonal")
     array([[ 0.31290403, -0.94978475],
            [ 0.94978475,  0.31290403]])
     ```
@@ -197,14 +197,14 @@ unconstrained representation* to the desired constrained space.
 The latent variables can be obtained using `Vars.get_vars`.
 
 ```python
->>> vs.get_vars('positive_variable', 'bounded_variable')
+>>> vs.get_vars("positive_variable", "bounded_variable")
 [array(-4.07892742), array(-0.604883)]
 ```
 
 To illustrate the use of wildcards, the following is equivalent:
 
 ```python
->>> vs.get_vars('*_variable')
+>>> vs.get_vars("*_variable")
 [array(-4.07892742), array(-0.604883)]
 ```
 
@@ -214,8 +214,8 @@ To parametrise functions, a common pattern is the following:
 
 ```python
 def objective(vs):
-    x = vs.get(5, name='x')
-    y = vs.get(10, name='y')
+    x = vs.get(5, name="x")
+    y = vs.get(10, name="y")
     
     return (x * y - 5) ** 2 + x ** 2
 ```
@@ -348,7 +348,7 @@ from varz import parametrised, Unbounded, Bounded
 
 @parametrised
 def objective(vs, x: Unbounded, y: Bounded(lower=1, upper=3) = 2, option=None):
-    print('Option:', option)
+    print("Option:", option)
     return (x * y - 5) ** 2 + x ** 2
 ```
 
@@ -359,11 +359,11 @@ def objective(vs, x: Unbounded, y: Bounded(lower=1, upper=3) = 2, option=None):
 Option: None
 9.757481795615316
 
->>> objective(vs, 'other')
+>>> objective(vs, "other")
 Option: other
 9.757481795615316
 
->>> objective(vs, option='other')
+>>> objective(vs, option="other")
 Option: other
 9.757481795615316
 
@@ -405,7 +405,7 @@ variables as a single vector, e.g. when feeding them to an optimiser.
 This can be achieved with `Vars.get_vector`.
 
 ```python
->>> vs.get_vector('x', '*_variable')
+>>> vs.get_vector("x", "*_variable")
 array([ 0.12500578, -0.21510423, -0.61336039,  1.23074066, -4.07892742,
        -0.604883  ])
 ```
@@ -414,11 +414,11 @@ Similarly, to update the latent representation of a collection of variables,
 `Vars.set_vector` can be used.
 
 ```python
->>> vs.set_vector(np.ones(6), 'x', '*_variable')
+>>> vs.set_vector(np.ones(6), "x", "*_variable")
 [array([[1., 1.],
         [1., 1.]]), array(1.), array(1.)]
 
->>> vs.get_vector('x', '*_variable')
+>>> vs.get_vector("x", "*_variable")
 array([1., 1., 1., 1., 1., 1.])
 ```
 
@@ -460,8 +460,7 @@ target = 5.0
 
 def objective(vs):
     # Get a variable named "x", which must be positive, initialised to 10.
-    x = vs.pos(10.0, name='x')  
-    
+    x = vs.pos(10.0, name="x")  
     return (x ** 0.5 - target) ** 2  
 ```
 
@@ -486,8 +485,7 @@ target = 5.0
 
 def objective(vs):
     # Get a variable named "x", which must be positive, initialised to 10.
-    x = vs.pos(10.0, name='x')  
-    
+    x = vs.pos(10.0, name="x")  
     return (x ** 0.5 - target) ** 2  
 ```
 
@@ -499,6 +497,11 @@ def objective(vs):
 
 >>> vs['x'] - target ** 2
 <tf.Tensor: id=562, shape=(), dtype=float64, numpy=-5.637250666268301e-09>
+
+>>> vs = Vars(tf.float64)
+
+>>> minimise_l_bfgs_b(objective, vs, jit=True)  # Speed up optimisation with TF's JIT!
+3.17785950743424e-19
 ```
 
 ### PyTorch
@@ -512,19 +515,23 @@ target = torch.tensor(5.0, dtype=torch.float64)
 
 def objective(vs):
     # Get a variable named "x", which must be positive, initialised to 10.
-    x = vs.pos(10.0, name='x')  
-    
+    x = vs.pos(10.0, name="x")  
     return (x ** 0.5 - target) ** 2  
 ```
 
 ```python
 >>> vs = Vars(torch.float64)
 
->>> minimise_l_bfgs_b(lambda v: objective(v['x']), vs, names=['x'])
+>>> minimise_l_bfgs_b(objective, vs)
 array(3.17785951e-19)  # Final objective function value.
 
->>> vs['x'] - target ** 2
+>>> vs["x"] - target ** 2
 tensor(-5.6373e-09, dtype=torch.float64)
+
+>>> vs = Vars(torch.float64)
+
+>>> minimise_l_bfgs_b(objective, vs, jit=True)  # Speed up optimisation with PyTorch's JIT!
+array(3.17785951e-19)
 ```
 
 ### Jax
@@ -538,8 +545,7 @@ target = 5.0
 
 def objective(vs):
     # Get a variable named "x", which must be positive, initialised to 10.
-    x = vs.pos(10.0, name='x')  
-    
+    x = vs.pos(10.0, name="x")  
     return (x ** 0.5 - target) ** 2  
 ```
 
@@ -549,8 +555,13 @@ def objective(vs):
 >>> minimise_l_bfgs_b(objective, vs)
 array(3.17785951e-19)  # Final objective function value.
 
->>> vs['x'] - target ** 2
+>>> vs["x"] - target ** 2
 -5.637250666268301e-09
+
+>>> vs = Vars(jnp.float64)
+
+>>> minimise_l_bfgs_b(objective, vs, jit=True)  # Speed up optimisation with Jax's JIT!
+array(3.17785951e-19)
 ```
 
 

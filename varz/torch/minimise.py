@@ -1,6 +1,8 @@
 import logging
 
+import lab as B
 import torch
+import torch.autograd as autograd
 
 from ..minimise import make_l_bfgs_b, make_adam, exception
 
@@ -9,28 +11,38 @@ __all__ = ["minimise_l_bfgs_b", "minimise_adam"]
 log = logging.getLogger(__name__)
 
 
-def _wrap_f(vs, names, f):
-    # Differentiable assignments will overwrite the variables, so make a copy
-    # with detached variables.
+def _wrap_f(vs, names, f, jit):
+    # Differentiable assignments will overwrite the variables, so make a copy with
+    # detached variables.
     vs_copy = vs.copy(detach=True)
 
     # Keep track of function evaluations.
     f_evals = []
 
+    def f_vectorised(x):
+        vs_copy.set_vector(x, *names, differentiable=True)
+        if jit:
+            with B.lazy_shapes:
+                return f(vs_copy)
+        else:
+            return f(vs_copy)
+
+    if jit:
+        f_vectorised = torch.jit.trace(f_vectorised, vs_copy.get_vector(*names))
+
     def f_wrapped(x):
-        x_torch = torch.tensor(x, requires_grad=True)
+        x_torch = B.cast(vs.dtype, x)
+        x_torch.requires_grad_(True)
 
-        # Compute objective function value.
+        # Compute objective function value and gradient.
         try:
-            vs_copy.set_vector(x_torch, *names, differentiable=True)
-            obj_value = f(vs_copy)
-            obj_value.backward()
-            obj_value = obj_value.detach_().numpy()
+            obj_value = f_vectorised(x_torch)
+            grad = autograd.grad(obj_value, x_torch)[0]
         except Exception as e:
-            return exception(x, e)
+            return exception(x_torch, e)
 
-        # Extract gradient.
-        grad = x_torch.grad.detach_().numpy()
+        # Convert to NumPy.
+        obj_value, grad = B.to_numpy(obj_value, grad)
 
         f_evals.append(obj_value)
         return obj_value, grad

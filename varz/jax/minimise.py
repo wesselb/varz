@@ -1,8 +1,9 @@
-import numpy as np
 import logging
 
+import jax
+import lab.jax as B
+import numpy as np
 from jax import value_and_grad
-import lab as B
 
 from ..minimise import make_l_bfgs_b, make_adam, exception
 
@@ -11,7 +12,7 @@ __all__ = ["minimise_l_bfgs_b", "minimise_adam"]
 log = logging.getLogger(__name__)
 
 
-def _wrap_f(vs, names, f):
+def _wrap_f(vs, names, f, jit):
     # Differentiable assignments will overwrite the variables, so make a copy.
     vs_copy = vs.copy()
 
@@ -22,15 +23,24 @@ def _wrap_f(vs, names, f):
         vs_copy.set_vector(x, *names, differentiable=True)
         return f(vs_copy)
 
+    if jit:
+        f_vectorised = jax.jit(f_vectorised)
+
     def f_wrapped(x):
-        # Compute objective function value.
+        x = B.cast(vs.dtype, x)
+
+        # Compute objective function value and gradient.
         try:
-            obj_value, grad = B.to_numpy(value_and_grad(f_vectorised)(x))
-            # The gradient may not have the right memory layout, which sometimes cannot
-            # be adjusted. We therefore make a copy, which can be freely manipulated.
-            grad = np.array(grad)
+            obj_value, grad = value_and_grad(f_vectorised)(x)
         except Exception as e:
             return exception(x, e)
+
+        # Convert to NumPy.
+        obj_value, grad = B.to_numpy(obj_value, grad)
+
+        # The gradient may not have the right memory layout, which sometimes cannot
+        # be adjusted. We therefore make a copy, which can always be freely manipulated.
+        grad = np.array(grad)
 
         f_evals.append(obj_value)
         return obj_value, grad

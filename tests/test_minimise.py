@@ -16,14 +16,22 @@ from .util import approx, Value, OutStream
 @pytest.fixture(
     params=[
         (np.float64, varz.autograd.minimise_l_bfgs_b, {}),
-        (torch.float64, varz.torch.minimise_l_bfgs_b, {}),
-        (tf.float64, varz.tensorflow.minimise_l_bfgs_b, {}),
-        (jnp.float64, varz.jax.minimise_l_bfgs_b, {}),
         (np.float64, varz.autograd.minimise_adam, {"rate": 1e-1}),
-        (torch.float64, varz.torch.minimise_adam, {"rate": 1e-1}),
-        (tf.float64, varz.tensorflow.minimise_adam, {"rate": 1e-1}),
-        (jnp.float64, varz.jax.minimise_adam, {"rate": 1e-1}),
     ]
+    + sum(
+        [
+            [
+                (tf.float64, varz.tensorflow.minimise_l_bfgs_b, {"jit": jit}),
+                (tf.float64, varz.tensorflow.minimise_adam, {"rate": 1e-1, "jit": jit}),
+                (torch.float64, varz.torch.minimise_l_bfgs_b, {"jit": jit}),
+                (torch.float64, varz.torch.minimise_adam, {"rate": 1e-1, "jit": jit}),
+                (jnp.float64, varz.jax.minimise_l_bfgs_b, {"jit": jit}),
+                (jnp.float64, varz.jax.minimise_adam, {"rate": 1e-1, "jit": jit}),
+            ]
+            for jit in [False, True]
+        ],
+        [],
+    )
 )
 def minimise_method(request):
     yield request.param
@@ -31,6 +39,18 @@ def minimise_method(request):
 
 def test_docstring(minimise_method):
     assert minimise_method.__doc__ is not None
+
+
+def test_no_jit_autograd():
+    vs = Vars(dtype=np.float64)
+
+    def f(vs_):
+        return vs_.get(name="x")
+
+    with pytest.raises(ValueError):
+        varz.autograd.minimise_l_bfgs_b(f, vs, jit=True)
+    with pytest.raises(ValueError):
+        varz.autograd.minimise_adam(f, vs, jit=True)
 
 
 def test_minimise(minimise_method):
@@ -64,6 +84,10 @@ def test_minimise_disconnected_gradient(minimise_method):
 def test_minimise_exception(minimise_method):
     dtype, minimise, kw_args = minimise_method
     vs = Vars(dtype=dtype)
+
+    # Skip this tests when the JIT is used, because tracing may then fail.
+    if "jit" in kw_args and kw_args["jit"]:
+        return
 
     first_call = Value(True)
 
