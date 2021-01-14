@@ -145,6 +145,11 @@ def test_bounded_monotonic(vs):
     assert vs.vars[0] < vs.vars[1] < vs.vars[2]
 
 
+def test_shape_init_ambiguity(vs):
+    with pytest.raises(ValueError):
+        vs.get(np.ones(1), shape=())
+
+
 def test_lower_triangular(vs_source):
     for _ in range(10):
         assert B.shape(vs_source.tril(shape=(5, 5))) == (5, 5)

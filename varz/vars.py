@@ -44,15 +44,14 @@ def _assign(x, value):
 
 class Provider(metaclass=Referentiable(ABCMeta)):
     @abstractmethod
-    def unbounded(self, init=None, shape=(), dtype=None, name=None):  # pragma: no cover
+    def unbounded(self, init=None, shape=None, dtype=None, name=None):  # pragma: no cover
         """Get an unbounded variable.
 
         Args:
             init (tensor, optional): Initialisation of the variable.
-            shape (tuple[int], optional): Shape of the variable. Defaults to
-                scalar.
-            dtype (data type, optional): Data type of the variable. Defaults to
-                that of the storage.
+            shape (tuple[int], optional): Shape of the variable. Defaults to scalar.
+            dtype (data type, optional): Data type of the variable. Defaults to that
+                of the storage.
             name (str, optional): Name of the variable.
 
         Returns:
@@ -64,15 +63,14 @@ class Provider(metaclass=Referentiable(ABCMeta)):
         return self.unbounded(*args, **kw_args)
 
     @abstractmethod
-    def positive(self, init=None, shape=(), dtype=None, name=None):  # pragma: no cover
+    def positive(self, init=None, shape=None, dtype=None, name=None):  # pragma: no cover
         """Get a positive variable.
 
         Args:
             init (tensor, optional): Initialisation of the variable.
-            shape (tuple[int], optional): Shape of the variable. Defaults to
-                scalar.
-            dtype (data type, optional): Data type of the variable. Defaults to
-                that of the storage.
+            shape (tuple[int], optional): Shape of the variable. Defaults to scalar.
+            dtype (data type, optional): Data type of the variable. Defaults to that
+                of the storage.
             name (str, optional): Name of the variable.
 
         Returns:
@@ -85,7 +83,7 @@ class Provider(metaclass=Referentiable(ABCMeta)):
 
     @abstractmethod
     def bounded(
-        self, init=None, lower=1e-4, upper=1e4, shape=(), dtype=None, name=None
+        self, init=None, lower=1e-4, upper=1e4, shape=None, dtype=None, name=None
     ):  # pragma: no cover
         """Get a bounded variable.
 
@@ -93,10 +91,9 @@ class Provider(metaclass=Referentiable(ABCMeta)):
             init (tensor, optional): Initialisation of the variable.
             lower (tensor, optional): Lower bound. Defaults to `1e-4`.
             upper (tensor, optional): Upper bound. Defaults to `1e4`.
-            shape (tuple[int], optional): Shape of the variable. Defaults to
-                scalar.
-            dtype (data type, optional): Data type of the variable. Defaults to
-                that of the storage.
+            shape (tuple[int], optional): Shape of the variable. Defaults to scalar.
+            dtype (data type, optional): Data type of the variable. Defaults to that
+                of the storage.
             name (hashable, optional): Name of the variable.
 
         Returns:
@@ -275,7 +272,11 @@ class Vars(Provider):
                 init = generate_init(shape=shape, dtype=dtype)
             else:
                 init = B.cast(dtype, init)
-                # TODO: Take into account shape here!
+                if shape is not None and shape != B.shape(init):
+                    raise ValueError(
+                        f"Shape of initial value {B.shape(init)} is not equal to the "
+                        f"desired shape {shape}."
+                    )
 
             # Construct optimisable variable.
             latent = inverse_transform(init)
@@ -313,7 +314,11 @@ class Vars(Provider):
         # Generate the variable and return.
         return transform(latent)
 
-    def unbounded(self, init=None, shape=(), dtype=None, name=None):
+    def unbounded(self, init=None, shape=None, dtype=None, name=None):
+        # If nothing is specific, generate a scalar.
+        if init is None and shape is None:
+            shape = ()
+
         def generate_init(shape, dtype):
             return B.randn(dtype, *shape)
 
@@ -328,7 +333,11 @@ class Vars(Provider):
             name=name,
         )
 
-    def positive(self, init=None, shape=(), dtype=None, name=None):
+    def positive(self, init=None, shape=None, dtype=None, name=None):
+        # If nothing is specific, generate a scalar.
+        if init is None and shape is None:
+            shape = ()
+
         def generate_init(shape, dtype):
             return B.rand(dtype, *shape)
 
@@ -344,8 +353,12 @@ class Vars(Provider):
         )
 
     def bounded(
-        self, init=None, lower=1e-4, upper=1e4, shape=(), dtype=None, name=None
+        self, init=None, lower=1e-4, upper=1e4, shape=None, dtype=None, name=None
     ):
+        # If nothing is specific, generate a scalar.
+        if init is None and shape is None:
+            shape = ()
+
         def transform(x):
             return lower + (upper - lower) / (1 + B.exp(-x))
 
