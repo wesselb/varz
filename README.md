@@ -5,7 +5,7 @@
 [![Latest Docs](https://img.shields.io/badge/docs-latest-blue.svg)](https://wesselb.github.io/varz)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-Painless optimisation of constrained variables in AutoGrad, TensorFlow, PyTorch, and Jax
+Painless optimisation of constrained variables in AutoGrad, TensorFlow, PyTorch, and JAX
 
 * [Requirements and Installation](#requirements-and-installation)
 * [Manual](#manual)
@@ -21,7 +21,7 @@ Painless optimisation of constrained variables in AutoGrad, TensorFlow, PyTorch,
     - [AutoGrad](#autograd)
     - [TensorFlow](#tensorflow)
     - [PyTorch](#pytorch)
-    - [Jax](#jax)
+    - [JAX](#jax)
     
 ## Requirements and Installation
 
@@ -43,7 +43,7 @@ To begin with, create a *variable container* of the right data type.
 For use with AutoGrad, use a `np.*` data type;
 for use with PyTorch, use a `torch.*` data type;
 for use with TensorFlow, use a `tf.*` data type;
-and for use with Jax, use a `jnp.*` data type.
+and for use with JAX, use a `jnp.*` data type.
 In this example we'll use AutoGrad.
 
 ```python
@@ -535,7 +535,7 @@ tensor(-5.6373e-09, dtype=torch.float64)
 array(3.17785951e-19)
 ```
 
-### Jax
+### JAX
 
 ```python
 import jax.numpy as jnp
