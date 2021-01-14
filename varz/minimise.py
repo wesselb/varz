@@ -5,7 +5,7 @@ from functools import wraps
 import lab as B
 import numpy as np
 import wbml.out as out
-from plum import Dispatcher
+from plum import Dispatcher, convert
 from scipy.optimize import fmin_l_bfgs_b
 
 __all__ = ["minimise_l_bfgs_b", "minimise_adam"]
@@ -125,7 +125,7 @@ def make_l_bfgs_b(wrap_f):
                 x_opt, val_opt, info = perform_minimisation(callback)
 
             with out.Section("Termination message"):
-                out.out(info["task"].decode("utf-8"))
+                out.out(convert(info["task"], str))
         else:
             # Don't print progress; simply perform minimisation.
             x_opt, val_opt, info = perform_minimisation()
