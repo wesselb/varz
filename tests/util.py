@@ -34,26 +34,12 @@ class Value:
         self.val = val
 
 
-@_dispatch({B.Number, B.NP, list})
-def _to_numpy(x):
-    return x
-
-
-@_dispatch({B.Torch, B.TF})
-def _to_numpy(x):
-    return x.numpy()
-
-
 def approx(x, y, digits=7):
-    x = _to_numpy(x)
-    y = _to_numpy(y)
-    assert_array_almost_equal(x, y, decimal=digits)
+    assert_array_almost_equal(*B.to_numpy(x, y), decimal=digits)
 
 
 def allclose(x, y):
-    x = _to_numpy(x)
-    y = _to_numpy(y)
-    assert_allclose(x, y)
+    assert_allclose(*B.to_numpy(x, y))
 
 
 # Numerical checks:
