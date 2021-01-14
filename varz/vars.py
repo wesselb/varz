@@ -9,7 +9,7 @@ import numpy as np
 import wbml.out
 from plum import Dispatcher, Self, Referentiable
 
-from .util import Packer, match, lazy_tf as tf, lazy_torch as torch
+from .util import Packer, match, lazy_tf as tf, lazy_torch as torch, lazy_jnp as jnp
 
 __all__ = ["Provider", "Vars"]
 
@@ -35,6 +35,11 @@ def _assign(x, value):
         value = torch.tensor(value, dtype=x.dtype)
     x.data.copy_(value)
     return x
+
+
+@_dispatch(B.JAXNumeric, B.Numeric)
+def _assign(x, value):
+    return jnp.array(value, dtype=x.dtype)
 
 
 class Provider(metaclass=Referentiable(ABCMeta)):
@@ -270,6 +275,7 @@ class Vars(Provider):
                 init = generate_init(shape=shape, dtype=dtype)
             else:
                 init = B.cast(dtype, init)
+                # TODO: Take into account shape here!
 
             # Construct optimisable variable.
             latent = inverse_transform(init)
@@ -277,6 +283,8 @@ class Vars(Provider):
                 latent = tf.Variable(latent)
             elif isinstance(self.dtype, B.TorchDType):
                 pass  # All is good in this case.
+            elif isinstance(self.dtype, B.JAXDType):
+                latent = jnp.array(latent)
             else:
                 # Must be a NumPy data type.
                 assert isinstance(self.dtype, B.NPDType)
@@ -519,7 +527,10 @@ class Vars(Provider):
             return value
         else:
             # Overwrite data.
-            return _assign(self.vars[index], self.inverse_transforms[index](value))
+            self.vars[index] = _assign(
+                self.vars[index], self.inverse_transforms[index](value)
+            )
+            return self.vars[index]
 
     def copy(self, detach=False):
         """Create a copy of the variable manager that shares the variables.
@@ -648,8 +659,9 @@ class Vars(Provider):
         else:
             # Overwrite data.
             assignments = []
-            for var, value in zip(self.get_vars(*names), values):
-                assignments.append(_assign(var, value))
+            for index, value in zip(self.get_vars(*names, return_indices=True), values):
+                self.vars[index] = _assign(self.vars[index], value)
+                assignments.append(self.vars[index])
             return assignments
 
     @property

@@ -6,7 +6,7 @@ from itertools import product
 import lab as B
 from plum import Referentiable, Dispatcher, Self
 
-__all__ = ["lazy_tf", "lazy_torch", "Initialiser", "Packer", "match"]
+__all__ = ["lazy_tf", "lazy_torch", "lazy_jnp", "Initialiser", "Packer", "match"]
 
 log = logging.getLogger(__name__)
 
@@ -32,6 +32,7 @@ class LazyModule:
 
 lazy_tf = LazyModule("tensorflow")
 lazy_torch = LazyModule("torch")
+lazy_jnp = LazyModule("jax.numpy")
 
 
 class Initialiser:
