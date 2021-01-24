@@ -24,14 +24,16 @@ def _wrap_f(vs, names, f, jit):
         return f(vs_copy)
 
     if jit:
-        f_vectorised = jax.jit(f_vectorised)
+        f_value_and_grad = jax.jit(value_and_grad(f_vectorised))
+    else:
+        f_value_and_grad = value_and_grad(f_vectorised)
 
     def f_wrapped(x):
         x = B.cast(vs.dtype, x)
 
         # Compute objective function value and gradient.
         try:
-            obj_value, grad = value_and_grad(f_vectorised)(x)
+            obj_value, grad = f_value_and_grad(x)
         except Exception as e:
             return exception(x, e)
 

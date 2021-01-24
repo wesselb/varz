@@ -21,18 +21,22 @@ def _wrap_f(vs, names, f, jit):
         vs_copy.set_vector(x, *names, differentiable=True)
         return f(vs_copy)
 
+    def f_value_and_grad(x):
+        with tf.GradientTape() as t:
+            t.watch(x)
+            obj_value = f_vectorised(x)
+            grad = t.gradient(obj_value, x, unconnected_gradients="zero")
+        return obj_value, grad
+
     if jit:
-        f_vectorised = tf.function(f_vectorised, autograph=False)
+        f_value_and_grad = tf.function(f_value_and_grad, autograph=False)
 
     def f_wrapped(x):
-        x_tf = B.cast(vs.dtype, x)
+        x = B.cast(vs.dtype, x)
 
         # Compute objective function value and gradient.
         try:
-            with tf.GradientTape() as t:
-                t.watch(x_tf)
-                obj_value = f_vectorised(x_tf)
-                grad = t.gradient(obj_value, x_tf, unconnected_gradients="zero")
+            obj_value, grad = f_value_and_grad(x)
         except Exception as e:
             return exception(x, e)
 

@@ -2,6 +2,8 @@ import logging
 import traceback
 from functools import wraps
 
+from .adam import ADAM
+
 import lab as B
 import numpy as np
 import wbml.out as out
@@ -180,24 +182,12 @@ def make_adam(wrap_f):
             # Perform optimisation routine.
             x = x0
             obj_value = None
-            m = np.zeros_like(x0)
-            v = np.zeros_like(x0)
+            adam = ADAM(rate=rate, beta1=beta1, beta2=beta2, epsilon=epsilon)
 
             for i in range(iters):
                 obj_value, grad = f_wrapped(x)
-
                 callback_(obj_value)
-
-                # Update estimates of moments.
-                m = beta1 * m + (1 - beta1) * grad
-                v = beta2 * v + (1 - beta2) * grad ** 2
-
-                # Correct for bias of initialisation.
-                m_corr = m / (1 - beta1 ** (i + 1))
-                v_corr = v / (1 - beta2 ** (i + 1))
-
-                # Perform update.
-                x = x - rate * m_corr / (v_corr ** 0.5 + epsilon)
+                x = adam.step(x, grad)
 
             return x, obj_value
 

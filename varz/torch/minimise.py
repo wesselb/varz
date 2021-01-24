@@ -28,18 +28,24 @@ def _wrap_f(vs, names, f, jit):
             return f(vs_copy)
 
     if jit:
+        # It appears that PyTorch is not able to JIT through `autograd.grad`, so we
+        # must already JIT here.
         f_vectorised = torch.jit.trace(f_vectorised, vs_copy.get_vector(*names))
 
+    def f_value_and_grad(x):
+        x.requires_grad_(True)
+        obj_value = f_vectorised(x)
+        grad = autograd.grad(obj_value, x)[0]
+        return obj_value, grad
+
     def f_wrapped(x):
-        x_torch = B.cast(vs.dtype, x)
-        x_torch.requires_grad_(True)
+        x = B.cast(vs.dtype, x)
 
         # Compute objective function value and gradient.
         try:
-            obj_value = f_vectorised(x_torch)
-            grad = autograd.grad(obj_value, x_torch)[0]
+            obj_value, grad = f_value_and_grad(x)
         except Exception as e:
-            return exception(x_torch, e)
+            return exception(x, e)
 
         # Convert to NumPy.
         obj_value, grad = B.to_numpy(obj_value, grad)
