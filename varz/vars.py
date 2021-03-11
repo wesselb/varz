@@ -453,6 +453,7 @@ class Vars(Provider):
 
             def transform(x):
                 u, s, v = B.svd(x)
+                # u * v' is the closest orthogonal matrix to x in Frobenius norm.
                 return B.matmul(u, v, tr_b=True)
 
             def inverse_transform(x):
