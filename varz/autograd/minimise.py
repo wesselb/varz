@@ -1,7 +1,6 @@
-import lab.autograd as B
-import numpy as np
 import logging
 
+import lab.autograd as B
 from autograd import value_and_grad
 
 from ..minimise import make_l_bfgs_b, make_adam, exception

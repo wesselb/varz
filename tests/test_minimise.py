@@ -16,17 +16,45 @@ from .util import approx, Value, OutStream
 @pytest.fixture(
     params=[
         (np.float64, varz.autograd.minimise_l_bfgs_b, {}),
-        (np.float64, varz.autograd.minimise_adam, {"rate": 1e-1}),
+        (np.float64, varz.autograd.minimise_adam, {"rate": 1e-1, "local_rates": False}),
+        (np.float64, varz.autograd.minimise_adam, {"rate": 1e-1, "local_rates": True}),
     ]
     + sum(
         [
             [
                 (tf.float64, varz.tensorflow.minimise_l_bfgs_b, {"jit": jit}),
-                (tf.float64, varz.tensorflow.minimise_adam, {"rate": 1e-1, "jit": jit}),
+                (
+                    tf.float64,
+                    varz.tensorflow.minimise_adam,
+                    {"rate": 1e-1, "jit": jit, "local_rates": False},
+                ),
+                (
+                    tf.float64,
+                    varz.tensorflow.minimise_adam,
+                    {"rate": 1e-1, "jit": jit, "local_rates": True},
+                ),
                 (torch.float64, varz.torch.minimise_l_bfgs_b, {"jit": jit}),
-                (torch.float64, varz.torch.minimise_adam, {"rate": 1e-1, "jit": jit}),
+                (
+                    torch.float64,
+                    varz.torch.minimise_adam,
+                    {"rate": 1e-1, "jit": jit, "local_rates": False},
+                ),
+                (
+                    torch.float64,
+                    varz.torch.minimise_adam,
+                    {"rate": 1e-1, "jit": jit, "local_rates": True},
+                ),
                 (jnp.float64, varz.jax.minimise_l_bfgs_b, {"jit": jit}),
-                (jnp.float64, varz.jax.minimise_adam, {"rate": 1e-1, "jit": jit}),
+                (
+                    jnp.float64,
+                    varz.jax.minimise_adam,
+                    {"rate": 1e-1, "jit": jit, "local_rates": False},
+                ),
+                (
+                    jnp.float64,
+                    varz.jax.minimise_adam,
+                    {"rate": 1e-1, "jit": jit, "local_rates": True},
+                ),
             ]
             for jit in [False, True]
         ],
