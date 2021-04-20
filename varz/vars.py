@@ -7,7 +7,7 @@ from operator import mul
 import lab as B
 import numpy as np
 import wbml.out
-from plum import Dispatcher, Self, Referentiable
+from plum import Dispatcher
 
 from .util import Packer, match, lazy_tf as tf, lazy_torch as torch, lazy_jnp as jnp
 
@@ -18,33 +18,35 @@ log = logging.getLogger(__name__)
 _dispatch = Dispatcher()
 
 
-@_dispatch(B.NPNumeric, B.Numeric)
-def _assign(x, value):
+@_dispatch
+def _assign(x: B.NPNumeric, value: B.Numeric):
     np.copyto(x, value)
     return x
 
 
-@_dispatch(B.TFNumeric, B.Numeric)
-def _assign(x, value):
+@_dispatch
+def _assign(x: B.TFNumeric, value: B.Numeric):
     return x.assign(value)
 
 
-@_dispatch(B.TorchNumeric, B.Numeric)
-def _assign(x, value):
+@_dispatch
+def _assign(x: B.TorchNumeric, value: B.Numeric):
     if not isinstance(value, B.TorchNumeric):
         value = torch.tensor(value, dtype=x.dtype)
     x.data.copy_(value)
     return x
 
 
-@_dispatch(B.JAXNumeric, B.Numeric)
-def _assign(x, value):
+@_dispatch
+def _assign(x: B.JAXNumeric, value: B.Numeric):
     return jnp.array(value, dtype=x.dtype)
 
 
-class Provider(metaclass=Referentiable(ABCMeta)):
+class Provider(metaclass=ABCMeta):
     @abstractmethod
-    def unbounded(self, init=None, shape=None, dtype=None, name=None):  # pragma: no cover
+    def unbounded(
+        self, init=None, shape=None, dtype=None, name=None
+    ):  # pragma: no cover
         """Get an unbounded variable.
 
         Args:
@@ -63,7 +65,9 @@ class Provider(metaclass=Referentiable(ABCMeta)):
         return self.unbounded(*args, **kw_args)
 
     @abstractmethod
-    def positive(self, init=None, shape=None, dtype=None, name=None):  # pragma: no cover
+    def positive(
+        self, init=None, shape=None, dtype=None, name=None
+    ):  # pragma: no cover
         """Get a positive variable.
 
         Args:
@@ -181,13 +185,13 @@ class Provider(metaclass=Referentiable(ABCMeta)):
         """
 
 
-@_dispatch(object)
+@_dispatch
 def _check_matrix_shape(shape, square=True):
     raise ValueError(f"Object {shape} is not a shape.")
 
 
-@_dispatch(tuple)
-def _check_matrix_shape(shape, square=True):
+@_dispatch
+def _check_matrix_shape(shape: tuple, square=True):
     if len(shape) != 2:
         raise ValueError(f"Shape {shape} must be the shape of a matrix.")
     if square and shape[0] != shape[1]:
@@ -213,8 +217,6 @@ class Vars(Provider):
         source (tensor, optional): Tensor to source variables from. Defaults to
             not being used.
     """
-
-    _dispatch = Dispatcher(in_class=Self)
 
     def __init__(self, dtype, source=None):
         self.dtype = dtype

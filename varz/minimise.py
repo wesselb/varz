@@ -7,14 +7,12 @@ from .adam import ADAM
 import lab as B
 import numpy as np
 import wbml.out as out
-from plum import Dispatcher, convert
+from plum import convert
 from scipy.optimize import fmin_l_bfgs_b
 
 __all__ = ["minimise_l_bfgs_b", "minimise_adam"]
 
 log = logging.getLogger(__name__)
-
-_dispatch = Dispatcher()
 
 
 def minimise_l_bfgs_b(
@@ -46,6 +44,7 @@ def minimise_adam(
     beta1=0.9,
     beta2=0.999,
     epsilon=1e-8,
+    local_rates=True,
     trace=False,
     names=None,
     jit=False,
@@ -62,6 +61,8 @@ def minimise_adam(
             `0.999`.
         epsilon (float, optional): Small value to prevent division by zero.
             Defaults to `1e-8`.
+        local_rates (bool, optional): Use local learning rates. Set to `False` to
+            use one global learning rate. Defaults to `True`.
         trace (bool, optional): Show trace of optimisation. Defaults to `False`.
         names (list, optional): List of names of variables to optimise.
             Defaults to all variables.
@@ -158,6 +159,7 @@ def make_adam(wrap_f):
         beta1=0.9,
         beta2=0.999,
         epsilon=1e-8,
+        local_rates=True,
         trace=False,
         names=None,
         jit=False,
@@ -182,7 +184,13 @@ def make_adam(wrap_f):
             # Perform optimisation routine.
             x = x0
             obj_value = None
-            adam = ADAM(rate=rate, beta1=beta1, beta2=beta2, epsilon=epsilon)
+            adam = ADAM(
+                rate=rate,
+                beta1=beta1,
+                beta2=beta2,
+                epsilon=epsilon,
+                local_rates=local_rates,
+            )
 
             for i in range(iters):
                 obj_value, grad = f_wrapped(x)

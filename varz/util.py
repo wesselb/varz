@@ -2,11 +2,14 @@ import importlib
 import logging
 import re
 from itertools import product
+from typing import Union
 
 import lab as B
-from plum import Referentiable, Dispatcher, Self
+from plum import Dispatcher
 
 __all__ = ["lazy_tf", "lazy_torch", "lazy_jnp", "Initialiser", "Packer", "match"]
+
+_dispatch = Dispatcher()
 
 log = logging.getLogger(__name__)
 
@@ -72,25 +75,23 @@ def _construct_assigner(vs, names, values):
     return assign
 
 
-class Packer(metaclass=Referentiable):
+class Packer:
     """Pack objects into a vector.
 
     Args:
         *objs (tensor): Objects to pack.
     """
 
-    _dispatch = Dispatcher(in_class=Self)
-
-    @_dispatch([object])
+    @_dispatch
     def __init__(self, *objs):
         self._shapes = [B.shape(obj) for obj in objs]
         self._lengths = [B.length(obj) for obj in objs]
 
-    @_dispatch({tuple, list})
-    def __init__(self, objs):
+    @_dispatch
+    def __init__(self, objs: Union[tuple, list]):
         Packer.__init__(self, *objs)
 
-    @_dispatch([object])
+    @_dispatch
     def pack(self, *objs):
         """Pack objects.
 
@@ -102,8 +103,8 @@ class Packer(metaclass=Referentiable):
         """
         return B.concat(*[B.flatten(obj) for obj in objs], axis=0)
 
-    @_dispatch({tuple, list})
-    def pack(self, objs):
+    @_dispatch
+    def pack(self, objs: Union[tuple, list]):
         return self.pack(*objs)
 
     def unpack(self, package):

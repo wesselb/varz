@@ -96,8 +96,8 @@ def test_minimise(minimise_method):
     val_opt = minimise(f, vs, iters=10000, **kw_args)
 
     # Check for equality up to three digits.
-    approx(val_opt, 9, digits=3)
-    approx(vs["x"], 0, digits=3)
+    approx(val_opt, 9, atol=1e-3)
+    approx(vs["x"], 0, atol=1e-3)
 
 
 def test_minimise_disconnected_gradient(minimise_method):

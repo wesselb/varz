@@ -6,7 +6,7 @@ import lab as B
 
 # noinspection PyUnresolvedReferences
 from .util import (
-    allclose,
+    approx,
     approx,
     KV,
     dtype,
@@ -91,7 +91,7 @@ def test_unbounded(vs_source):
 
 def test_unbounded_init(vs):
     vs.get(1, name="x")
-    allclose(vs["x"], 1)
+    approx(vs["x"], 1)
 
     # Test that explicit data type can be given. This should work the same
     # for all variable getters, so we only test it once.
@@ -101,7 +101,7 @@ def test_unbounded_init(vs):
 def test_unbounded_assignment(vs):
     vs.get(1, name="x")
     vs.assign("x", 2)
-    allclose(vs["x"], 2)
+    approx(vs["x"], 2)
 
 
 def test_positive(vs_source):
@@ -112,13 +112,13 @@ def test_positive(vs_source):
 
 def test_positive_init(vs):
     vs.pos(1, name="x")
-    allclose(vs["x"], 1)
+    approx(vs["x"], 1)
 
 
 def test_positive_assignment(vs):
     vs.pos(1, name="x")
     vs.assign("x", 2)
-    allclose(vs["x"], 2)
+    approx(vs["x"], 2)
 
 
 def test_bounded(vs_source):
@@ -129,13 +129,13 @@ def test_bounded(vs_source):
 
 def test_bounded_init(vs):
     vs.bnd(2, name="x", lower=1, upper=4)
-    allclose(vs["x"], 2)
+    approx(vs["x"], 2)
 
 
 def test_bounded_assignment(vs):
     vs.bnd(2, name="x", lower=1, upper=4)
     vs.assign("x", 3)
-    allclose(vs["x"], 3)
+    approx(vs["x"], 3)
 
 
 def test_bounded_monotonic(vs):
@@ -161,7 +161,7 @@ def test_lower_triangular_init(vs):
     x = vs.tril(shape=(5, 5))
 
     vs.tril(x, name="x")
-    allclose(vs["x"], x)
+    approx(vs["x"], x)
 
 
 @pytest.mark.parametrize("shape", [None, 5, (5,), (5, 6)])
@@ -175,7 +175,7 @@ def test_lower_triangular_assignment(vs):
 
     vs.tril(shape=(5, 5), name="x")
     vs.assign("x", x)
-    allclose(vs["x"], x)
+    approx(vs["x"], x)
 
 
 def test_positive_definite(vs_source):
@@ -189,7 +189,7 @@ def test_positive_definite_init(vs):
     x = vs.pd(shape=(5, 5))
 
     vs.pd(x, name="x")
-    allclose(vs["x"], x)
+    approx(vs["x"], x)
 
 
 @pytest.mark.parametrize("shape", [None, 5, (5,), (5, 6)])
@@ -203,7 +203,7 @@ def test_positive_definite_assignment(vs):
 
     vs.pd(shape=(5, 5), name="x")
     vs.assign("x", x)
-    allclose(vs["x"], x)
+    approx(vs["x"], x)
 
 
 @pytest.mark.parametrize("method", ["svd", "expm", "cayley"])
@@ -224,7 +224,7 @@ def test_orthogonal_init(vs, method):
     x = vs.orth(shape=(5, 5), method=method)
 
     vs.orth(x, name="x", method=method)
-    allclose(vs["x"], x)
+    approx(vs["x"], x)
 
 
 @pytest.mark.parametrize("shape", [(5, 5), (3, 7), (7, 3)])
@@ -232,7 +232,7 @@ def test_orthogonal_init_svd(vs, shape):
     x = vs.orth(shape=shape, method="svd")
 
     vs.orth(x, name="x", method="svd")
-    allclose(vs["x"], x)
+    approx(vs["x"], x)
 
 
 @pytest.mark.parametrize("method", ["expm", "cayley"])
@@ -254,7 +254,7 @@ def test_orthogonal_assignment(vs, method):
 
     vs.orth(shape=(5, 5), name="x", method=method)
     vs.assign("x", x)
-    allclose(vs["x"], x)
+    approx(vs["x"], x)
 
 
 def test_get_set_vector(dtype):
@@ -263,12 +263,12 @@ def test_get_set_vector(dtype):
     # Test stacking a matrix and a vector.
     vs.get(shape=(2,), name="a", init=np.array([1, 2]))
     vs.get(shape=(2, 2), name="b", init=np.array([[3, 4], [5, 6]]))
-    allclose(vs.get_vector("a", "b"), [1, 2, 3, 4, 5, 6])
+    approx(vs.get_vector("a", "b"), [1, 2, 3, 4, 5, 6])
 
     # Test setting elements.
     vs.set_vector(np.array([6, 5, 4, 3, 2, 1]), "a", "b")
-    allclose(vs["a"], np.array([6, 5]))
-    allclose(vs["b"], np.array([[4, 3], [2, 1]]))
+    approx(vs["a"], np.array([6, 5]))
+    approx(vs["b"], np.array([[4, 3], [2, 1]]))
 
     # Test setting elements in a differentiable way. This should allow for
     # any values.

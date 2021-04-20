@@ -4,14 +4,13 @@ import pytest
 import tensorflow as tf
 import torch
 import wbml.out
-from numpy.testing import assert_allclose, assert_array_almost_equal
+from numpy.testing import assert_allclose
 from plum import Dispatcher
-from wbml import out as out
 from varz import Vars
+from wbml import out as out
 
 __all__ = [
     "Value",
-    "allclose",
     "approx",
     # Numerical checks:
     "assert_lower_triangular",
@@ -34,12 +33,8 @@ class Value:
         self.val = val
 
 
-def approx(x, y, digits=7):
-    assert_array_almost_equal(*B.to_numpy(x, y), decimal=digits)
-
-
-def allclose(x, y):
-    assert_allclose(*B.to_numpy(x, y))
+def approx(x, y, atol=1e-12, rtol=1e-8):
+    assert_allclose(*B.to_numpy(x, y), atol=atol, rtol=rtol)
 
 
 # Numerical checks:
@@ -52,7 +47,7 @@ def assert_lower_triangular(x):
 
     # Check that upper part is all zeros.
     upper = x[np.triu_indices(B.shape(x)[0], k=1)]
-    allclose(upper, B.zeros(upper))
+    approx(upper, B.zeros(upper))
 
 
 def assert_positive_definite(x):

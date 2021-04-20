@@ -4,7 +4,7 @@ import lab as B
 import numpy as np
 from varz import Vars, Initialiser, Packer
 
-from .util import allclose, vs
+from .util import approx, vs
 
 
 def test_initialiser(vs):
@@ -23,7 +23,7 @@ def test_initialiser(vs):
     for initialiser, values in zip(inits, product([-3.0, 4.0], [5.0, 6.0])):
         initialiser()
         assert vs["a"] == values[0]
-        allclose(vs["b"], values[1])
+        approx(vs["b"], values[1])
 
 
 def test_packer():
@@ -38,6 +38,6 @@ def test_packer():
 
         # Test unpacking.
         a_, b_, c_ = packer.unpack(packed)
-        allclose(a, a_)
-        allclose(b, b_)
-        allclose(c, c_)
+        approx(a, a_)
+        approx(b, b_)
+        approx(c, c_)
