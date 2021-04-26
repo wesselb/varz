@@ -23,10 +23,10 @@ def _wrap_f(vs, names, f, jit):
         vs_copy.set_vector(x, *names, differentiable=True)
         return f(vs_copy)
 
+    f_value_and_grad = value_and_grad(f_vectorised)
+
     if jit:
-        f_value_and_grad = jax.jit(value_and_grad(f_vectorised))
-    else:
-        f_value_and_grad = value_and_grad(f_vectorised)
+        f_value_and_grad = B.jit(f_value_and_grad)
 
     def f_wrapped(x):
         x = B.cast(vs.dtype, x)

@@ -29,7 +29,7 @@ def _wrap_f(vs, names, f, jit):
         return obj_value, grad
 
     if jit:
-        f_value_and_grad = tf.function(f_value_and_grad, autograph=False)
+        f_value_and_grad = B.jit(f_value_and_grad)
 
     def f_wrapped(x):
         x = B.cast(vs.dtype, x)

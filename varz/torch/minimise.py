@@ -21,16 +21,12 @@ def _wrap_f(vs, names, f, jit):
 
     def f_vectorised(x):
         vs_copy.set_vector(x, *names, differentiable=True)
-        if jit:
-            with B.lazy_shapes:
-                return f(vs_copy)
-        else:
-            return f(vs_copy)
+        return f(vs_copy)
 
     if jit:
         # It appears that PyTorch is not able to JIT through `autograd.grad`, so we
         # must already JIT here.
-        f_vectorised = torch.jit.trace(f_vectorised, vs_copy.get_vector(*names))
+        f_vectorised = B.jit(f_vectorised)
 
     def f_value_and_grad(x):
         x.requires_grad_(True)
