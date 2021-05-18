@@ -12,7 +12,7 @@ __all__ = ["minimise_l_bfgs_b", "minimise_adam"]
 log = logging.getLogger(__name__)
 
 
-def _wrap_f(vs, names, f, jit):
+def _wrap_f(vs, names, f, jit, _convert):
     # Differentiable assignments will overwrite the variables, so make a copy.
     vs_copy = vs.copy()
 
@@ -37,8 +37,8 @@ def _wrap_f(vs, names, f, jit):
         except Exception as e:
             return exception(x, e)
 
-        # Convert to NumPy.
-        obj_value, grad = B.to_numpy(obj_value, grad)
+        # Perform requested conversion.
+        obj_value, grad = _convert(obj_value, grad)
 
         # The gradient may not have the right memory layout, which sometimes cannot
         # be adjusted. We therefore make a copy, which can always be freely manipulated.

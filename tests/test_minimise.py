@@ -12,55 +12,52 @@ import varz.torch
 from varz import Vars
 from .util import approx, Value, OutStream
 
-
-@pytest.fixture(
-    params=[
-        (np.float64, varz.autograd.minimise_l_bfgs_b, {}),
-        (np.float64, varz.autograd.minimise_adam, {"rate": 1e-1, "local_rates": False}),
-        (np.float64, varz.autograd.minimise_adam, {"rate": 1e-1, "local_rates": True}),
-    ]
-    + sum(
+_rate = 5e-2
+_minimise_method_params = []
+for dtype_name in ["float32", "float64"]:
+    _minimise_method_params.extend(
         [
-            [
-                (tf.float64, varz.tensorflow.minimise_l_bfgs_b, {"jit": jit}),
-                (
-                    tf.float64,
-                    varz.tensorflow.minimise_adam,
-                    {"rate": 1e-1, "jit": jit, "local_rates": False},
-                ),
-                (
-                    tf.float64,
-                    varz.tensorflow.minimise_adam,
-                    {"rate": 1e-1, "jit": jit, "local_rates": True},
-                ),
-                (torch.float64, varz.torch.minimise_l_bfgs_b, {"jit": jit}),
-                (
-                    torch.float64,
-                    varz.torch.minimise_adam,
-                    {"rate": 1e-1, "jit": jit, "local_rates": False},
-                ),
-                (
-                    torch.float64,
-                    varz.torch.minimise_adam,
-                    {"rate": 1e-1, "jit": jit, "local_rates": True},
-                ),
-                (jnp.float64, varz.jax.minimise_l_bfgs_b, {"jit": jit}),
-                (
-                    jnp.float64,
-                    varz.jax.minimise_adam,
-                    {"rate": 1e-1, "jit": jit, "local_rates": False},
-                ),
-                (
-                    jnp.float64,
-                    varz.jax.minimise_adam,
-                    {"rate": 1e-1, "jit": jit, "local_rates": True},
-                ),
-            ]
-            for jit in [False, True]
-        ],
-        [],
+            (getattr(np, dtype_name), varz.autograd.minimise_l_bfgs_b, {}),
+            (
+                getattr(np, dtype_name),
+                varz.autograd.minimise_adam,
+                {"rate": _rate, "local_rates": False},
+            ),
+            (
+                getattr(np, dtype_name),
+                varz.autograd.minimise_adam,
+                {"rate": _rate, "local_rates": True},
+            ),
+        ]
     )
-)
+    for backend, varz_import in [
+        (tf, varz.tensorflow),
+        (torch, varz.torch),
+        (jnp, varz.jax),
+    ]:
+        for jit in [False, True]:
+            _minimise_method_params.extend(
+                [
+                    (
+                        getattr(backend, dtype_name),
+                        varz_import.minimise_l_bfgs_b,
+                        {"jit": jit},
+                    ),
+                    (
+                        getattr(backend, dtype_name),
+                        varz_import.minimise_adam,
+                        {"rate": _rate, "jit": jit, "local_rates": False},
+                    ),
+                    (
+                        getattr(backend, dtype_name),
+                        varz_import.minimise_adam,
+                        {"rate": _rate, "jit": jit, "local_rates": True},
+                    ),
+                ]
+            )
+
+
+@pytest.fixture(params=_minimise_method_params)
 def minimise_method(request):
     yield request.param
 
@@ -90,14 +87,14 @@ def test_minimise(minimise_method):
 
     # Define some objective.
     def f(vs_):
-        return (-3 - vs_.pos(name="x", init=5.0)) ** 2
+        return (-3 - vs_.pos(name="x", init=1.0)) ** 2
 
     # Minimise it, until convergence.
-    val_opt = minimise(f, vs, iters=10000, **kw_args)
+    val_opt = minimise(f, vs, iters=2000, **kw_args)
 
-    # Check for equality up to three digits.
-    approx(val_opt, 9, atol=1e-3)
-    approx(vs["x"], 0, atol=1e-3)
+    # Check for equality up to two digits.
+    approx(val_opt, 9, atol=1e-2)
+    approx(vs["x"], 0, atol=1e-2)
 
 
 def test_minimise_disconnected_gradient(minimise_method):

@@ -10,7 +10,7 @@ __all__ = ["minimise_l_bfgs_b", "minimise_adam"]
 log = logging.getLogger(__name__)
 
 
-def _wrap_f(vs, names, f, jit):
+def _wrap_f(vs, names, f, jit, _convert):
     if jit:
         raise ValueError("There is no JIT for AutoGrad.")
 
@@ -32,6 +32,9 @@ def _wrap_f(vs, names, f, jit):
             obj_value, grad = value_and_grad(f_vectorised)(x)
         except Exception as e:
             return exception(x, e)
+
+        # Perform requested conversion.
+        obj_value, grad = _convert(obj_value, grad)
 
         f_evals.append(obj_value)
         return obj_value, grad

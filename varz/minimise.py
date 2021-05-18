@@ -102,8 +102,12 @@ def make_l_bfgs_b(wrap_f):
         # Extract initial value.
         x0 = B.to_numpy(vs.get_vector(*names))
 
+        # The optimiser expects to get `float64`s.
+        def _convert(*xs):
+            return [B.cast(np.float64, B.to_numpy(x)) for x in xs]
+
         # Wrap the function and get the list of function evaluations.
-        f_vals, f_wrapped = wrap_f(vs, names, f, jit)
+        f_vals, f_wrapped = wrap_f(vs, names, f, jit, _convert)
 
         # Perform optimisation routine.
         def perform_minimisation(callback_=lambda _: None):
@@ -178,7 +182,7 @@ def make_adam(wrap_f):
         x0 = B.to_numpy(vs.get_vector(*names))
 
         # Wrap the function.
-        _, f_wrapped = wrap_f(vs, names, f, jit)
+        _, f_wrapped = wrap_f(vs, names, f, jit, B.to_numpy)
 
         def perform_minimisation(callback_=lambda _: None):
             # Perform optimisation routine.
