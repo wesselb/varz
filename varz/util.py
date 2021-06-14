@@ -67,14 +67,8 @@ def unpack(package: B.Numeric, *shapes):
     if B.rank(package) != 1:
         raise ValueError("Package must be a vector.")
 
-    lengths = [reduce(mul, shape, 1) for shape in shapes]
-    if sum(lengths) != B.length(package):
-        raise ValueError(
-            f"Length of package ({B.length(package)}) is unequal to "
-            f"the sum of the lengths of the shapes to unpack ({sum(lengths)})."
-        )
-
     # Unpack package.
+    lengths = [reduce(mul, shape, 1) for shape in shapes]
     i, outs = 0, []
     for length, shape in zip(lengths, shapes):
         outs.append(B.reshape(package[i : i + length], *shape))

@@ -21,8 +21,3 @@ def test_pack_unpack():
     # Check that the package must be a vector.
     with pytest.raises(ValueError):
         unpack(B.randn(2, 2), (2, 2))
-
-    # Check that the package must have the right length
-    unpack(B.randn(2 * 2 + 2 * 3), (2, 2), (2, 3))
-    with pytest.raises(ValueError):
-        unpack(B.randn(2 * 2 + 2 * 3 + 1), (2, 2), (2, 3))
