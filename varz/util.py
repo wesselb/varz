@@ -3,11 +3,13 @@ import logging
 import re
 from itertools import product
 from typing import Union
+from functools import reduce
+from operator import mul
 
 import lab as B
 from plum import Dispatcher
 
-__all__ = ["lazy_tf", "lazy_torch", "lazy_jnp", "Initialiser", "Packer", "match"]
+__all__ = ["lazy_tf", "lazy_torch", "lazy_jnp", "pack", "unpack", "match"]
 
 _dispatch = Dispatcher()
 
@@ -38,89 +40,46 @@ lazy_torch = LazyModule("torch")
 lazy_jnp = LazyModule("jax.numpy")
 
 
-class Initialiser:
-    """Variable initialiser."""
-
-    def __init__(self):
-        self._assignments = {}
-
-    def assign(self, name, values):
-        """Assign values to a particular variable.
-
-        Args:
-            name (str): Name of variables.
-            values (list[tensor]): List of values to assign.
-        """
-        self._assignments[name] = values
-
-    def generate(self, vs):
-        """Generate initialisers.
-
-        Args:
-            vs (:class:`.vars.Vars`): Variable storage.
-
-        Returns:
-            list[function]: List of functions that perform the initialisations.
-        """
-        names, value_sets = zip(*self._assignments.items())
-        return [
-            _construct_assigner(vs, names, values) for values in product(*value_sets)
-        ]
-
-
-def _construct_assigner(vs, names, values):
-    def assign():
-        return [vs.assign(name, val) for name, val in zip(names, values)]
-
-    return assign
-
-
-class Packer:
-    """Pack objects into a vector.
+@_dispatch
+def pack(*objs: B.Numeric):
+    """Pack objects.
 
     Args:
         *objs (tensor): Objects to pack.
+
+    Returns:
+        tensor: Vector representation of the objects.
     """
+    return B.concat(*[B.flatten(obj) for obj in objs], axis=0)
 
-    @_dispatch
-    def __init__(self, *objs):
-        self._shapes = [B.shape(obj) for obj in objs]
-        self._lengths = [B.length(obj) for obj in objs]
 
-    @_dispatch
-    def __init__(self, objs: Union[tuple, list]):
-        Packer.__init__(self, *objs)
+@_dispatch
+def unpack(package: B.Numeric, *shapes):
+    """Unpack vector.
 
-    @_dispatch
-    def pack(self, *objs):
-        """Pack objects.
+    Args:
+        package (tensor): Tensor to unpack.
+        *shapes (shape): Shapes of objects to unpack.
 
-        Args:
-            *objs (tensor): Objects to pack.
+    Returns:
+        list[tensor]: Original objects.
+    """
+    if B.rank(package) != 1:
+        raise ValueError("Package must be a vector.")
 
-        Returns:
-            tensor: Vector representation of the objects.
-        """
-        return B.concat(*[B.flatten(obj) for obj in objs], axis=0)
+    lengths = [reduce(mul, shape, 1) for shape in shapes]
+    if sum(lengths) != B.length(package):
+        raise ValueError(
+            f"Length of package ({B.length(package)}) is unequal to "
+            f"the sum of the lengths of the shapes to unpack ({sum(lengths)})."
+        )
 
-    @_dispatch
-    def pack(self, objs: Union[tuple, list]):
-        return self.pack(*objs)
-
-    def unpack(self, package):
-        """Unpack vector.
-
-        Args:
-            package (tensor): Vector to unpack.
-
-        Returns:
-            list[tensor]: Original objects.
-        """
-        i, outs = 0, []
-        for shape, length in zip(self._shapes, self._lengths):
-            outs.append(B.reshape(package[i : i + length], *shape))
-            i += length
-        return outs
+    # Unpack package.
+    i, outs = 0, []
+    for length, shape in zip(lengths, shapes):
+        outs.append(B.reshape(package[i : i + length], *shape))
+        i += length
+    return outs
 
 
 def match(pattern, target):

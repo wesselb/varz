@@ -9,7 +9,14 @@ import numpy as np
 import wbml.out
 from plum import Dispatcher
 
-from .util import Packer, match, lazy_tf as tf, lazy_torch as torch, lazy_jnp as jnp
+from .util import (
+    pack,
+    unpack,
+    match,
+    lazy_tf as tf,
+    lazy_torch as torch,
+    lazy_jnp as jnp,
+)
 
 __all__ = ["Provider", "Vars"]
 
@@ -233,9 +240,6 @@ class Vars(Provider):
         # Lookup:
         self.name_to_index = OrderedDict()
         self._get_vars_cache = {}
-
-        # Packing:
-        self.vector_packer = None
 
     def _resolve_dtype(self, dtype):
         if dtype is None:
@@ -562,7 +566,6 @@ class Vars(Provider):
         vs.transforms = list(self.transforms)
         vs.inverse_transforms = list(self.inverse_transforms)
         vs.name_to_index = OrderedDict(self.name_to_index)
-        vs.vector_packer = self.vector_packer
         if detach:
             for var in self.vars:
                 vs.vars.append(var.detach())
@@ -647,9 +650,7 @@ class Vars(Provider):
         Returns:
             tensor: Vector consisting of all latent values
         """
-        vars = self.get_vars(*names)
-        self.vector_packer = Packer(*vars)
-        return self.vector_packer.pack(*vars)
+        return pack(*self.get_vars(*names))
 
     def set_vector(self, values, *names, differentiable=False):
         """Set all the latent variables by values from a vector.
@@ -665,7 +666,7 @@ class Vars(Provider):
         Returns:
             list: Assignment results.
         """
-        values = self.vector_packer.unpack(values)
+        values = unpack(values, *map(B.shape, self.get_vars(*names)))
 
         if differentiable:
             # Do a differentiable assignment.

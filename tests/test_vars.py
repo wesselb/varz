@@ -331,7 +331,6 @@ def test_copy_torch():
         assert len(vs_copied.inverse_transforms) > 0
         assert len(vs_copied.vars) > 0
         assert len(vs_copied.name_to_index) > 0
-        assert vs_copied.vector_packer != None
 
 
 def test_requires_grad_detach_vars_torch():
