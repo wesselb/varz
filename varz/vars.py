@@ -33,7 +33,8 @@ def _assign(x: B.NPNumeric, value: B.Numeric):
 
 @_dispatch
 def _assign(x: B.TFNumeric, value: B.Numeric):
-    return x.assign(value)
+    x.assign(value)
+    return x
 
 
 @_dispatch
