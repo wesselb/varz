@@ -33,6 +33,7 @@ def _assign(x: B.NPNumeric, value: B.Numeric):
 
 @_dispatch
 def _assign(x: B.TFNumeric, value: B.Numeric):
+    # `x.assign` tends to behave unpredictably. We therefore just return `x`.
     x.assign(value)
     return x
 
