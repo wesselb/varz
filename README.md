@@ -13,6 +13,10 @@ Painless optimisation of constrained variables in AutoGrad, TensorFlow, PyTorch,
     - [Naming](#naming)
     - [Constrained Variables](#constrained-variables)
     - [Automatic Naming of Variables](#automatic-naming-of-variables)
+        - [Sequential Specification](#sequential-specification)
+        - [Parametrised Specification](#parametrised-specification)
+        - [Namespaces](#namespaces)
+        - [Structlike Specification](#structlike-specification)
     - [Optimisers](#optimisers)
     - [PyTorch Specifics](#pytorch-specifics)
     - [Getting and Setting Latent Representations of Variables as a Vector](#getting-and-setting-latent-representations-of-variables-as-a-vector)
@@ -438,6 +442,64 @@ def objective(vs):
 >>> vs.print()
 test.var0:  5.0
 test.var1:  -0.1873
+```
+
+#### Structlike Specification
+
+For any variable container `vs`, `vs.struct` gives an object which you can treat like
+nested struct, list, or dictionary to automatically generate variable names.
+For example, `vs.struct.model["a"].variance.positive()` would be equivalent to
+`vs.positive(name="model[a].variance")`.
+After variables have been defined in this way, they also be extracted via `vs.struct`:
+`vs.struct.model["a"].variance()` would be equivalent to `vs["model[a].variance"]`.
+
+Example:
+
+```python
+def objective(vs):
+    params = vs.struct
+    
+    x = params.x.unbounded()
+    y = params.y.unbounded()
+    
+    for model_params, model in zip(params.models, [object(), object(), object()]):
+        model_params.specific_parameter1.positive()
+        model_params.specific_parameter2.positive()
+    
+    return x + y
+```
+
+```python
+>>> vs = Vars(np.float64)
+
+>>> objective(vs)
+-0.08322955725015702
+
+>>> vs.names
+['x',
+ 'y',
+ 'models[0].specific_parameter1',
+ 'models[0].specific_parameter2',
+ 'models[1].specific_parameter1',
+ 'models[1].specific_parameter2',
+ 'models[2].specific_parameter1',
+ 'models[2].specific_parameter2']
+
+>>> vs.print()
+x:          -0.8963
+y:          0.8131
+models[0].specific_parameter1: 0.01855
+models[0].specific_parameter2: 0.6644
+models[1].specific_parameter1: 0.3542
+models[1].specific_parameter2: 0.3642
+models[2].specific_parameter1: 0.5807
+models[2].specific_parameter2: 0.5977
+
+>>> vs.struct.models[0].specific_parameter1()
+0.018551827512328086
+
+>>> vs.struct.models[0].specific_parameter2()
+0.6643533007198247
 ```
 
 

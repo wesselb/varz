@@ -202,6 +202,15 @@ class Provider(metaclass=ABCMeta):
             tensor: Variable.
         """
 
+    @property
+    def struct(self):
+        """:class:`.spec.Structlike`: Name variables by indexing into the variable
+        container like a struct."""
+        # We perform the import here to avoid a circular import.
+        from .spec import Struct
+
+        return Struct(self)
+
 
 @_dispatch
 def _check_matrix_shape(shape, square=True):

@@ -54,7 +54,7 @@ def test_sequential(vs, decorator, names):
     assert f(1, vs, 2) == f(1, vs, 2)
     assert vs.names == names
 
-    # Test correctness off variables.
+    # Test correctness of variables.
     assert f(1, vs, 2)[0] == 0
     assert f(1, vs, 2)[2] >= 0
     assert 10 <= f(1, vs, 2)[3] <= 11
@@ -111,24 +111,104 @@ def test_sequential_orthogonal(vs):
 def test_namespace(vs):
     @namespace("test")
     def f(vs_):
-        vs_.ubnd(shape=(2,), name="a")
-        vs_.ubnd(shape=(3,))
-        vs_.ubnd(shape=(4,), name="b")
+        return [
+            vs_.ubnd(name="a"),
+            vs_.ubnd(),
+            vs_.ubnd(name="b"),
+        ]
 
     f(vs)
-    assert vs.names == ["test.a", "test.b"]
+    names = ["test.a", "test.b"]
+
+    # Check that the same variables are retrieved.
+    assert f(vs)[0] == f(vs)[0] and f(vs)[2] == f(vs)[2]
+    assert vs.names == names
+    assert f(vs)[0] == f(vs)[0] and f(vs)[2] == f(vs)[2]
+    assert vs.names == names
 
 
 def test_namespace_sequential(vs):
     @namespace("test")
     @sequential
     def f(vs_):
-        vs_.ubnd(shape=(2,), name="a")
-        vs_.ubnd(shape=(3,))
-        vs_.ubnd(shape=(4,), name="b")
+        vs_.ubnd(name="a")
+        vs_.ubnd()
+        vs_.ubnd(name="b")
 
     f(vs)
-    assert vs.names == ["test.a", "test.var0", "test.b"]
+    names = ["test.a", "test.var0", "test.b"]
+
+    # Check that the same variables are retrieved.
+    assert f(vs) == f(vs)
+    assert vs.names == names
+    assert f(vs) == f(vs)
+    assert vs.names == names
+
+
+def test_struct(vs):
+    def f(vs_):
+        params = vs_.struct
+        res = []
+
+        res.append(params.x1.positive())
+        res.append(params.x1.positive(name="var1"))
+        res.append(params.y1.positive())
+        res.append(params.y1.positive(name="var2"))
+        res.append(params["key1"].positive())
+        res.append(params["key1"].positive(name="var3"))
+
+        for pi, i in zip(params, [4, 5, 6]):
+            res.append(pi.bounded())
+            res.append(pi.bounded(name=f"var{i}"))
+
+        params = params.level
+
+        res.append(params.x2.positive())
+        res.append(params.x2.positive(name="var7"))
+        res.append(params.y2.positive())
+        res.append(params.y2.positive(name="var8"))
+        res.append(params["key2"].positive())
+        res.append(params["key2"].positive(name="var9"))
+
+        for pi, i in zip(params, [10, 11, 12]):
+            res.append(pi.bounded())
+            res.append(pi.bounded(name=f"var{i}"))
+
+        return res
+
+    f(vs)
+    names = [
+        "x1",
+        "x1.var1",
+        "y1",
+        "y1.var2",
+        "[key1]",
+        "[key1].var3",
+        "[0]",
+        "[0].var4",
+        "[1]",
+        "[1].var5",
+        "[2]",
+        "[2].var6",
+        "level.x2",
+        "level.x2.var7",
+        "level.y2",
+        "level.y2.var8",
+        "level[key2]",
+        "level[key2].var9",
+        "level[0]",
+        "level[0].var10",
+        "level[1]",
+        "level[1].var11",
+        "level[2]",
+        "level[2].var12",
+    ]
+
+    # Check that the same variables are retrieved.
+    assert f(vs) == f(vs)
+    assert vs.names == names
+    assert f(vs) == f(vs)
+    assert vs.names == names
 
 
 @pytest.mark.parametrize(
@@ -167,7 +247,7 @@ def test_parametrised(vs, decorator, types, names):
     assert f(1, vs, 2) == f(1, vs, 2)
     assert vs.names == names
 
-    # Test correctness off variables.
+    # Test correctness of variables.
     assert f(1, vs, 2)[0] == 0
     assert f(1, vs, 2)[2] >= 0
     assert 10 <= f(1, vs, 2)[3] <= 11

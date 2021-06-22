@@ -3,12 +3,14 @@ import inspect
 from abc import ABCMeta, abstractmethod
 from functools import wraps
 from inspect import isfunction
+from itertools import repeat
 
 from .vars import Provider
 
 __all__ = [
     "sequential",
     "namespace",
+    "Struct",
     "Unbounded",
     "Positive",
     "Bounded",
@@ -138,8 +140,8 @@ def sequential(prefix="var"):
 
 
 class Namespace(_RedirectedProvided):
-    """A variable provider that wraps a :class:`.vars.Vars` object and
-    automatically prepends a prefix to named variables.
+    """A variable provider that wraps a :class:`.vars.Vars` object and automatically
+    prepends a prefix to named variables.
 
     Args:
         vs (:class:`.vs.Vars`): Variable container to wrap.
@@ -192,6 +194,49 @@ def namespace(prefix):
         return wrapped_f
 
     return decorator
+
+
+class Struct(_RedirectedProvided):
+    """A variable provider that wraps a :class:`.vars.Vars` object and allows variables
+    to be automatically named by getting attributes and indexing.
+
+    Args:
+        vs (:class:`.vs.Vars`): Variable container to wrap.
+        path (str): Path. Default to no path.
+    """
+    def __init__(self, vs, path=""):
+        _RedirectedProvided.__init__(self, vs)
+        self._path = path
+
+    def _get_var(self, getter, args, kw_args):
+        if self._path:
+            if "name" in kw_args:
+                name = f'{self._path}.{kw_args["name"]}'
+            else:
+                name = self._path
+            kw_args["name"] = name
+        return getter(*args, **kw_args)
+
+    def __getattr__(self, item):
+        if self._path:
+            return Struct(self._vs, f"{self._path}.{item}")
+        else:
+            return Struct(self._vs, str(item))
+
+    def __getitem__(self, item):
+        return Struct(self._vs, f"{self._path}[{item}]")
+
+    def __iter__(self):
+        state = {"counter": -1}
+
+        def get_next():
+            state["counter"] += 1
+            return self[state["counter"]]
+
+        return (get_next() for _ in repeat(True))
+
+    def __call__(self):
+        return self._vs[self._path]
 
 
 class VariableType(metaclass=ABCMeta):
