@@ -4,7 +4,7 @@ requirements = [
     "numpy>=1.16",
     "scipy>=1.3",
     "plum-dispatch>=1",
-    "backends>=1.0.2",
+    "backends>=1.2",
     "wbml>=0.3",
 ]
 
