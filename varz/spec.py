@@ -1,3 +1,4 @@
+import abc
 import inspect
 from abc import ABCMeta, abstractmethod
 from functools import wraps
@@ -7,6 +8,7 @@ from .vars import Provider
 
 __all__ = [
     "sequential",
+    "namespace",
     "Unbounded",
     "Positive",
     "Bounded",
@@ -17,10 +19,47 @@ __all__ = [
 ]
 
 
-class Sequential(Provider):
+class _RedirectedProvided(Provider):
+    """Redirect all methods of :class:`.vars.Provider` to a method `_get_var`.
+    automatically prepends a prefix to named variables.
+
+    Args:
+        vs (:class:`.vs.Vars`): Variable container to wrap.
+    """
+
+    def __init__(self, vs):
+        self._vs = vs
+
+    @abc.abstractmethod
+    def _get_var(self, getter, args, kw_args):  # pragma: no cover
+        pass
+
+    def unbounded(self, *args, **kw_args):
+        return self._get_var(self._vs.unbounded, args, kw_args)
+
+    def positive(self, *args, **kw_args):
+        return self._get_var(self._vs.positive, args, kw_args)
+
+    def bounded(self, *args, **kw_args):
+        return self._get_var(self._vs.bounded, args, kw_args)
+
+    def lower_triangular(self, *args, **kw_args):
+        return self._get_var(self._vs.lower_triangular, args, kw_args)
+
+    def positive_definite(self, *args, **kw_args):
+        return self._get_var(self._vs.positive_definite, args, kw_args)
+
+    def orthogonal(self, *args, **kw_args):
+        return self._get_var(self._vs.orthogonal, args, kw_args)
+
+    def __getitem__(self, name):
+        return self._vs[name]
+
+
+class Sequential(_RedirectedProvided):
     """A variable provider that wraps a :class:`.vars.Vars` object and
     automatically names unnamed variables sequentially (0, 1, 2, ...) with a
-    possible prefix.
+    possible prefix which defaults to "var".
 
     Args:
         vs (:class:`.vs.Vars`): Variable container to wrap.
@@ -28,36 +67,15 @@ class Sequential(Provider):
     """
 
     def __init__(self, vs, prefix):
-        self.vs = vs
-        self.prefix = prefix
-        self.count = 0
+        _RedirectedProvided.__init__(self, vs)
+        self._prefix = prefix
+        self._count = 0
 
     def _get_var(self, getter, args, kw_args):
         if "name" not in kw_args:
-            kw_args["name"] = f"{self.prefix}{self.count}"
-            self.count += 1
+            kw_args["name"] = f"{self._prefix}{self._count}"
+            self._count += 1
         return getter(*args, **kw_args)
-
-    def unbounded(self, *args, **kw_args):
-        return self._get_var(self.vs.unbounded, args, kw_args)
-
-    def positive(self, *args, **kw_args):
-        return self._get_var(self.vs.positive, args, kw_args)
-
-    def bounded(self, *args, **kw_args):
-        return self._get_var(self.vs.bounded, args, kw_args)
-
-    def lower_triangular(self, *args, **kw_args):
-        return self._get_var(self.vs.lower_triangular, args, kw_args)
-
-    def positive_definite(self, *args, **kw_args):
-        return self._get_var(self.vs.positive_definite, args, kw_args)
-
-    def orthogonal(self, *args, **kw_args):
-        return self._get_var(self.vs.orthogonal, args, kw_args)
-
-    def __getitem__(self, name):
-        return self.vs[name]
 
 
 def _to_sequential(x, prefix):
@@ -117,6 +135,63 @@ def sequential(prefix="var"):
 
     # Return the decorated function directly if a function was given.
     return decorator if f is None else decorator(f)
+
+
+class Namespace(_RedirectedProvided):
+    """A variable provider that wraps a :class:`.vars.Vars` object and
+    automatically prepends a prefix to named variables.
+
+    Args:
+        vs (:class:`.vs.Vars`): Variable container to wrap.
+        prefix (str): Prefix for names.
+    """
+
+    def __init__(self, vs, prefix):
+        _RedirectedProvided.__init__(self, vs)
+        # Ensure that the prefix ends with a ".".
+        if not prefix.endswith("."):
+            prefix = prefix + "."
+        self._prefix = prefix
+
+    def _get_var(self, getter, args, kw_args):
+        if "name" in kw_args:
+            kw_args["name"] = self._prefix + kw_args["name"]
+        return getter(*args, **kw_args)
+
+
+def _to_namespace(x, prefix):
+    """Convert a variable provider to a namespace, if it is one.
+
+    Args:
+        x (object): Object to convert.
+        prefix (str): Prefix for names.
+
+    Returns:
+        object: `x` converted to a namespace if it is a variable provider,
+            otherwise just `x`.
+    """
+    return Namespace(x, prefix) if isinstance(x, Provider) else x
+
+
+def namespace(prefix):
+    """Decorator that prefixes named variables.
+
+    Args:
+        prefix (str): Prefix to prepend to the name of named variables.
+    """
+
+    def decorator(f_):
+        @wraps(f_)
+        def wrapped_f(*args, **kw_args):
+            # Replace all variable containers with their namespace variants.
+            args = [_to_namespace(x, prefix) for x in args]
+            kw_args = {k: _to_namespace(v, prefix) for k, v in kw_args.items()}
+
+            return f_(*args, **kw_args)
+
+        return wrapped_f
+
+    return decorator
 
 
 class VariableType(metaclass=ABCMeta):

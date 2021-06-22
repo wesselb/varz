@@ -245,7 +245,6 @@ Example:
 ```python
 from varz import sequential
 
-
 @sequential
 def objective(vs):
     x = vs.unbounded(5)  # Initialise to 5.
@@ -277,6 +276,7 @@ Sequential specification still suffers from boilerplate code like
 `x = vs.unbounded(5)` and `y = vs.unbounded()`.
 This is the problem that parametrised specification addresses, which allows 
 you to specify variables as *arguments to your function*.
+Import `from varz.spec import parametrised`.
 To indicate that an argument of the function is a variable, as opposed to a 
 regular argument, the argument's type hint must be set accordingly, as follows:
 
@@ -352,7 +352,6 @@ Example:
 ```python
 from varz import parametrised, Unbounded, Bounded
 
-
 @parametrised
 def objective(vs, x: Unbounded, y: Bounded(lower=1, upper=3) = 2, option=None):
     print("Option:", option)
@@ -381,6 +380,66 @@ ValueError: 1 keyword argument(s) not parsed: x.
 x:          1.025
 y:          2.0
 ```
+
+#### Namespaces
+
+Namespaces can be used to group all variables in a function together.
+
+Example:
+
+```python
+from varz import namespace
+
+@namespace("test")
+def objective(vs):
+    x = vs.unbounded(5, name="x")
+    y = vs.unbounded(name="y")
+    
+    return x + y
+```
+
+```python
+>>> vs = Vars(np.float64)
+
+>>> objective(vs)
+6.12448906632577
+
+>>> vs.names
+['test.x', 'test.y']
+
+>>> vs.print()
+test.x:     5.0
+test.y:     1.124
+```
+
+You can combine namespace with other specification methods:
+
+```python
+from varz import namespace
+
+@namespace("test")
+@sequential
+def objective(vs):
+    x = vs.unbounded(5)
+    y = vs.unbounded()
+    
+    return x + y
+```
+
+```python
+>>> vs = Vars(np.float64)
+
+>>> objective(vs)
+4.812730329303665
+
+>>> vs.names
+['test.var0', 'test.var1']
+
+>>> vs.print()
+test.var0:  5.0
+test.var1:  -0.1873
+```
+
 
 ### Optimisers
 

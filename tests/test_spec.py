@@ -2,6 +2,7 @@ import pytest
 
 from varz import (
     sequential,
+    namespace,
     Unbounded,
     Positive,
     Bounded,
@@ -105,6 +106,29 @@ def test_sequential_orthogonal(vs):
         return vs_.orth(shape=(5, 5))
 
     assert_orthogonal(f(vs))
+
+
+def test_namespace(vs):
+    @namespace("test")
+    def f(vs_):
+        vs_.ubnd(shape=(2,), name="a")
+        vs_.ubnd(shape=(3,))
+        vs_.ubnd(shape=(4,), name="b")
+
+    f(vs)
+    assert vs.names == ["test.a", "test.b"]
+
+
+def test_namespace_sequential(vs):
+    @namespace("test")
+    @sequential
+    def f(vs_):
+        vs_.ubnd(shape=(2,), name="a")
+        vs_.ubnd(shape=(3,))
+        vs_.ubnd(shape=(4,), name="b")
+
+    f(vs)
+    assert vs.names == ["test.a", "test.var0", "test.b"]
 
 
 @pytest.mark.parametrize(
