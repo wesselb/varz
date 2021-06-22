@@ -33,7 +33,8 @@ def _assign(x: B.NPNumeric, value: B.Numeric):
 
 @_dispatch
 def _assign(x: B.TFNumeric, value: B.Numeric):
-    # `x.assign` tends to behave unpredictably. We therefore just return `x`.
+    # The return value of `x.assign` tends to behave unpredictably. We therefore just
+    # return `x`.
     x.assign(value)
     return x
 
@@ -41,14 +42,14 @@ def _assign(x: B.TFNumeric, value: B.Numeric):
 @_dispatch
 def _assign(x: B.TorchNumeric, value: B.Numeric):
     if not isinstance(value, B.TorchNumeric):
-        value = torch.tensor(value, dtype=x.dtype)
+        value = torch.tensor(value, dtype=x.dtype, device=x.device)
     x.data.copy_(value)
     return x
 
 
 @_dispatch
 def _assign(x: B.JAXNumeric, value: B.Numeric):
-    return jnp.array(value, dtype=x.dtype)
+    return B.to_active_device(jnp.array(value, dtype=x.dtype))
 
 
 class Provider(metaclass=ABCMeta):
@@ -285,6 +286,9 @@ class Vars(Provider):
                         f"Shape of initial value {B.shape(init)} is not equal to the "
                         f"desired shape {shape}."
                     )
+
+            # Ensure that the initialisation is on the right device.
+            init = B.to_active_device(init)
 
             # Construct optimisable variable.
             latent = inverse_transform(init)
