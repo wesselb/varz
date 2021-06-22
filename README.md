@@ -515,7 +515,7 @@ varz.{autograd,tensorflow,torch,jax}.minimise_adam     (ADAM)
 The L-BFGS-B algorithm is recommended for deterministic objectives and ADAM
 is recommended for stochastic objectives.
 
-See the examples for an illustration how these optimisers can be used.
+See the examples for an illustration of how these optimisers can be used.
 
 ### PyTorch Specifics
 
