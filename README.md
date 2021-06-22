@@ -15,7 +15,7 @@ Painless optimisation of constrained variables in AutoGrad, TensorFlow, PyTorch,
     - [Automatic Naming of Variables](#automatic-naming-of-variables)
     - [Optimisers](#optimisers)
     - [PyTorch Specifics](#pytorch-specifics)
-    - [Getting and Setting Variables as a Vector](#getting-and-setting-variables-as-a-vector)
+    - [Getting and Setting Latent Representations of Variables as a Vector](#getting-and-setting-latent-representations-of-variables-as-a-vector)
     - [Getting Variables from a Source](#get-variables-from-a-source)
  * [Examples](#examples)
     - [AutoGrad](#autograd)
@@ -54,16 +54,21 @@ Now a variable can be created by requesting it, giving it an initial value and
 a name.
  
 ```python
->>> vs.get(np.random.randn(2, 2), name="x")
+>>> vs.unbounded(np.random.randn(2, 2), name="x")
 array([[ 1.04404354, -1.98478763],
        [ 1.14176728, -3.2915562 ]])
 ```
 
 If the same variable is created again, because a variable with the name `x` 
-already exists, the existing variable will be returned.
+already exists, the existing variable will be returned, even if you again pass it an
+initial value.
 
 ```python
->>> vs.get(name="x")
+>>> vs.unbounded(np.random.randn(2, 2), name="x")
+array([[ 1.04404354, -1.98478763],
+       [ 1.14176728, -3.2915562 ]])
+
+>>> vs.unbounded(name="x")
 array([[ 1.04404354, -1.98478763],
        [ 1.14176728, -3.2915562 ]])
 ```
@@ -90,45 +95,37 @@ array([[ 1.43477728,  0.51006941],
 ```
 
 By default, assignment is non-differentiable and _overwrites_ data.
-For differentiable assignment, which _replaces_ data, set the keyword argument 
-`differentiable=True`.
 
-```python
->>> vs.assign("x", np.random.randn(2, 2), differentiable=True)
-array([[ 0.12500578, -0.21510423],
-       [-0.61336039,  1.23074066]])
-```
-
-The variable container can be copied with `vs.copy()`.
-Note that the copy _shares its variables with the original_.
-This means that non-differentiable assignment will also mutate the original;
-differentiable assignment, however, will not.
+A variable container can be copied with `vs.copy()`.
+Copies are lightweight and _share their variables with the originals_.
+As a consequence, however, assignment in a copy will also mutate the original.
+[Differentiable assignment, however, will not.](#differentiable-assignment)
 
 ### Naming
 
-Variables may be organised by naming them hierarchically using `/`s. 
-For example, `group1/bar`, `group1/foo`, and `group2/bar`.
+Variables may be organised by naming them hierarchically using `.`s. 
+For example, you could name like `group1.bar`, `group1.foo`, and `group2.bar`.
 This is helpful for extracting collections of variables, where wildcards may 
 be used to match names.
-For example, `*/bar` would match `group1/bar` and `group2/bar`, and 
-`group1/*` would match `group1/bar` and `group1/foo`.
+For example, `*.bar` would match `group1.bar` and `group2.bar`, and 
+`group1.*` would match `group1.bar` and `group1.foo`.
+See also [here](#getting-and-setting-latent-representations-of-variables-as-a-vector).
 
 The names of all variables can be obtained with `Vars.names`, and variables can 
 be printed with `Vars.print`.
 
 Example:
 
-
 ```python
 >>> vs = Vars(np.float64)
 
->>> vs.get(1, name="x1")
+>>> vs.unbouned(1, name="x1")
 array(1.)
 
->>> vs.get(2, name="x2")
+>>> vs.unbouned(2, name="x2")
 array(2.)
 
->>> vs.get(3, name="y")
+>>> vs.unbouned(3, name="y")
 array(3.)
 
 >>> vs.names
@@ -141,6 +138,15 @@ y:          3.0
 ```
 
 ### Constrained Variables
+
+* **Unbounded variables:**
+  A variable that is unbounded can be created unsing
+  `Vars.unbounded` or `Vars.ubnd`.
+
+    ```python
+    >>> vs.ubnd(name="normal_variable")
+    0.016925610008314832
+    ```
 
 * **Positive variables:**
     A variable that is constrained to be *positive* can be created using
@@ -195,17 +201,17 @@ y:          3.0
 
 These constrained variables are created by transforming some *latent 
 unconstrained representation* to the desired constrained space.
-The latent variables can be obtained using `Vars.get_vars`.
+The latent variables can be obtained using `Vars.get_latent_vars`.
 
 ```python
->>> vs.get_vars("positive_variable", "bounded_variable")
+>> > vs.get_latent_vars("positive_variable", "bounded_variable")
 [array(-4.07892742), array(-0.604883)]
 ```
 
 To illustrate the use of wildcards, the following is equivalent:
 
 ```python
->>> vs.get_vars("*_variable")
+>> > vs.get_latent_vars("*_variable")
 [array(-4.07892742), array(-0.604883)]
 ```
 
@@ -215,8 +221,8 @@ To parametrise functions, a common pattern is the following:
 
 ```python
 def objective(vs):
-    x = vs.get(5, name="x")
-    y = vs.get(10, name="y")
+    x = vs.unbouned(5, name="x")
+    y = vs.unbouned(10, name="y")
     
     return (x * y - 5) ** 2 + x ** 2
 ```
@@ -242,8 +248,8 @@ from varz import sequential
 
 @sequential
 def objective(vs):
-    x = vs.get(5)  # Initialise to 5.
-    y = vs.get()   # Initialise randomly.
+    x = vs.unbounded(5)  # Initialise to 5.
+    y = vs.unbounded()   # Initialise randomly.
     
     return (x * y - 5) ** 2 + x ** 2
 ```
@@ -258,17 +264,17 @@ def objective(vs):
 68.65047879833773
 
 >>> vs.names
-['0', '1']
+['var0', 'var1']
 
 >>> vs.print()
-0:          5.0      # This is `x`.
-1:          -0.3214  # This is `y`.
+var0:       5.0      # This is `x`.
+var1:       -0.3214  # This is `y`.
 ```
 
 #### Parametrised Specification
 
 Sequential specification still suffers from boilerplate code like
-`x = vs.get(5)` and `y = vs.get()`.
+`x = vs.unbounded(5)` and `y = vs.unbounded()`.
 This is the problem that parametrised specification addresses, which allows 
 you to specify variables as *arguments to your function*.
 To indicate that an argument of the function is a variable, as opposed to a 
@@ -399,29 +405,39 @@ To make a copy of the container with detached versions of the variables, use
 Whether variables require gradients can be configured with `Vars.requires_grad`.
 By default, no variable requires a gradient.
 
-### Getting and Setting Variables as a Vector
+### Getting and Setting Latent Representations of Variables as a Vector
 
 It may be desirable to get the latent representations of a collection of 
 variables as a single vector, e.g. when feeding them to an optimiser.
-This can be achieved with `Vars.get_vector`.
+This can be achieved with `Vars.get_latent_vector`.
 
 ```python
->>> vs.get_vector("x", "*_variable")
-array([ 0.12500578, -0.21510423, -0.61336039,  1.23074066, -4.07892742,
-       -0.604883  ])
+>>> vs.get_latent_vector("x", "*_variable")
+array([0.12500578, -0.21510423, -0.61336039, 1.23074066, -4.07892742,
+       -0.604883])
 ```
 
 Similarly, to update the latent representation of a collection of variables,
-`Vars.set_vector` can be used.
+`Vars.set_latent_vector` can be used.
 
 ```python
->>> vs.set_vector(np.ones(6), "x", "*_variable")
+>>> vs.set_latent_vector(np.ones(6), "x", "*_variable")
 [array([[1., 1.],
         [1., 1.]]), array(1.), array(1.)]
 
->>> vs.get_vector("x", "*_variable")
+>>> vs.get_latent_vector("x", "*_variable")
 array([1., 1., 1., 1., 1., 1.])
 ```
+
+#### Differentiable Assignment
+By default, `Vars.set_latent_vector` will overwrite the variables, just like
+`Vars.assign`.
+This has as an unfortunate consequence that you cannot differentiate with respect to
+the assigned values.
+To be able to differentiable with respect to the assigned values, set the keyword
+`differentiable=True` in the call to `Vars.set_latent_vector`.
+Unlike regular assignment, if the variable container is a copy of some original,
+differentiable assignment will not mutate the variables in the original.
 
 ### Get Variables from a Source
 
@@ -433,10 +449,10 @@ Example:
 ```python
 >>> vs = Vars(np.float32, source=np.array([1, 2, 3, 4, 5]))
 
->>> vs.get()
+>>> vs.unbounded()
 array(1., dtype=float32)
 
->>> vs.get(shape=(3,))
+>>> vs.unbounded(shape=(3,))
 array([2., 3., 4.], dtype=float32)
 
 >>> vs.pos()
@@ -445,6 +461,12 @@ array([2., 3., 4.], dtype=float32)
 >>> np.exp(5).astype(np.float32)
 148.41316
 ```
+
+## GPU Support
+To create and optimise variables on a GPU,
+[set the active device to a GPU](https://github.com/wesselb/lab#devices).
+The easiest way of doing this is to `import lab as B` and
+`B.set_global_device("gpu:0")`.
 
 ## Examples
 The follow examples show how a function can be minimised using the L-BFGS-B

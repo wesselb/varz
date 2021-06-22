@@ -110,7 +110,7 @@ def make_l_bfgs_b(wrap_f):
             return B.to_numpy(val_init)
 
         # Extract initial value.
-        x0 = B.to_numpy(vs.get_vector(*names))
+        x0 = B.to_numpy(vs.get_latent_vector(*names))
 
         # The optimiser expects to get `float64`s.
         def _convert(*xs):
@@ -147,7 +147,7 @@ def make_l_bfgs_b(wrap_f):
             # Don't print progress; simply perform minimisation.
             x_opt, val_opt, info = perform_minimisation()
 
-        vs.set_vector(x_opt, *names)  # Assign optimum.
+        vs.set_latent_vector(x_opt, *names)  # Assign optimum.
 
         return val_opt  # Return optimal value.
 
@@ -189,7 +189,7 @@ def make_adam(wrap_f):
             return B.to_numpy(val_init)
 
         # Extract initial value.
-        x0 = B.to_numpy(vs.get_vector(*names))
+        x0 = B.to_numpy(vs.get_latent_vector(*names))
 
         # Wrap the function.
         _, f_wrapped = wrap_f(vs, names, f, jit, B.to_numpy)
@@ -226,7 +226,7 @@ def make_adam(wrap_f):
         else:
             x_opt, obj_value = perform_minimisation()
 
-        vs.set_vector(x_opt, *names)  # Assign optimum.
+        vs.set_latent_vector(x_opt, *names)  # Assign optimum.
 
         return obj_value  # Return last objective value.
 

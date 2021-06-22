@@ -25,27 +25,27 @@ def test_extract_prefix_and_f():
     def f():
         pass
 
-    assert _extract_prefix_and_f(None) == ("", None)
-    assert _extract_prefix_and_f(f) == ("", f)
-    assert _extract_prefix_and_f("test") == ("test", None)
+    assert _extract_prefix_and_f(f, default="var") == ("var", f)
+    assert _extract_prefix_and_f("", default="var") == ("", None)
+    assert _extract_prefix_and_f("test", default="var") == ("test", None)
 
 
 @pytest.mark.parametrize(
     "decorator, names",
     [
-        (sequential, ["z", "0", "1", "2"]),
-        (sequential(), ["z", "0", "1", "2"]),
+        (sequential, ["z", "var0", "var1", "var2"]),
+        (sequential(), ["z", "var0", "var1", "var2"]),
         (sequential("x"), ["z", "x0", "x1", "x2"]),
     ],
 )
 def test_sequential(vs, decorator, names):
-    vs.get(0, name="z")
+    vs.ubnd(0, name="z")
 
     @decorator
     def f(x, vs_, y):
         assert x == 1
         assert y == 2
-        return vs_["z"], vs_.get(), vs_.pos(), vs_.bnd(lower=10, upper=11)
+        return vs_["z"], vs_.ubnd(), vs_.pos(), vs_.bnd(lower=10, upper=11)
 
     # Test that the same variables are retrieved.
     assert f(1, vs, 2) == f(1, vs, 2)
@@ -62,7 +62,7 @@ def test_sequential(vs, decorator, names):
 def test_sequential_unbounded(vs):
     @sequential
     def f(vs_):
-        return vs_.get(1)
+        return vs_.ubnd(1)
 
     assert f(vs) == 1
 
@@ -128,7 +128,7 @@ def test_sequential_orthogonal(vs):
     ],
 )
 def test_parametrised(vs, decorator, types, names):
-    vs.get(0, name="w")
+    vs.ubnd(0, name="w")
 
     @decorator
     def f(a, x: types[0], vs_, y: types[1], b, z: types[2], c=None):

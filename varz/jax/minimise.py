@@ -20,7 +20,7 @@ def _wrap_f(vs, names, f, jit, _convert):
     f_evals = []
 
     def f_vectorised(x):
-        vs_copy.set_vector(x, *names, differentiable=True)
+        vs_copy.set_latent_vector(x, *names, differentiable=True)
         return f(vs_copy)
 
     f_value_and_grad = value_and_grad(f_vectorised)

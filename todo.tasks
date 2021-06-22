@@ -1,13 +1,19 @@
+TODO:
+    ☐ Test GPU support.
+    ADAM:
+        ☐ Computation in framework rather than NumPy.
+        ☐ In-place updates.
+
 Features:
     ☐ Exclusion mechanism for variables by prefixing with "-".
     ☐ Centralise warning messages.
 
-Refactor:
-    ☐ Refactor tests to use PyTest: remove raises, fixtures, and parametrisation. @high
-
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✓ Rename `get_vars` to `get_latents`: depr warning. @done (21-06-22 14:20) @project(TODO)
+ ✓ Make clear that differentiable assignment sets the _latent_ representation: assign_latent function. @done (21-06-22 14:20) @project(TODO)
+ ✓ Refactor tests to use PyTest: remove raises, fixtures, and parametrisation. @high @done (21-06-22 12:19) @project(Refactor)
  ✓ PSD matrix: parametrise _positive_ factor and embed in structured matrix object @done (20-02-20 13:48) @project(Features / Variables)
  ✓ Orthogonal matrix: do not parametrise diagonal of triangular matrix @done (20-02-20 13:48) @project(Features / Variables)
  ✓ PSD matrix @high @done (20-01-03 13:03) @project(Features / Variables)

@@ -74,37 +74,35 @@ def _to_sequential(x, prefix):
     return Sequential(x, prefix) if isinstance(x, Provider) else x
 
 
-def _extract_prefix_and_f(prefix_or_f):
+def _extract_prefix_and_f(prefix_or_f, default):
     """Extract the prefix and function.
 
     Args:
         prefix_or_f (object): Either a prefix or a function.
+        default (str): Default prefix.
 
     Returns:
         tuple: Tuple containing the predict and the function. If a function
             was given, the prefix defaults to an empty string; and if a prefix
             was given, the function defaults to `None`.
     """
-    if prefix_or_f is None:
-        # Not used as decorator and prefix is left unspecified.
-        return "", None
-    elif isfunction(prefix_or_f):
+    if isfunction(prefix_or_f):
         # Used as a decorator.
-        return "", prefix_or_f
+        return default, prefix_or_f
     else:
         # Not used as decorator and prefix is specified.
         return prefix_or_f, None
 
 
-def sequential(prefix=None):
+def sequential(prefix="var"):
     """Decorator that generates variable names for unnamed variables
     sequentially.
 
     Args:
         prefix (str, optional): Prefix to prepend to the name of generated
-            variables. Defaults to no prefix.
+            variables. Defaults to "var".
     """
-    prefix, f = _extract_prefix_and_f(prefix)
+    prefix, f = _extract_prefix_and_f(prefix, default="var")
 
     def decorator(f_):
         @wraps(f_)
@@ -163,7 +161,7 @@ class Unbounded(VariableType):
     """Type of an unbounded variable."""
 
     def instantiate(self, vs, name, init):
-        return self._get_var(vs.get, name, init)
+        return self._get_var(vs.unbounded, name, init)
 
 
 class Positive(VariableType):
@@ -201,7 +199,7 @@ class Orthogonal(VariableType):
         return self._get_var(vs.orthogonal, name, init)
 
 
-def parametrised(prefix=None):
+def parametrised(prefix=""):
     """Decorator to specify variables with types.
 
     Args:
@@ -209,7 +207,7 @@ def parametrised(prefix=None):
             variables. Defaults to no prefix.
     """
 
-    prefix, f = _extract_prefix_and_f(prefix)
+    prefix, f = _extract_prefix_and_f(prefix, default="")
 
     def decorator(f_):
         @wraps(f_)

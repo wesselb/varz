@@ -3,6 +3,7 @@ from abc import ABCMeta, abstractmethod
 from collections import OrderedDict
 from functools import reduce
 from operator import mul
+import warnings
 
 import lab as B
 import numpy as np
@@ -70,8 +71,15 @@ class Provider(metaclass=ABCMeta):
             tensor: Variable.
         """
 
-    def get(self, *args, **kw_args):
+    def ubnd(self, *args, **kw_args):
         """Alias for :meth:`.vars.Provider.unbounded`."""
+        return self.unbounded(*args, **kw_args)
+
+    def get(self, *args, **kw_args):
+        warnings.warn(
+            "The method `get` is deprecated. Please use `unbounded` or `ubnd` instead.",
+            category=DeprecationWarning,
+        )
         return self.unbounded(*args, **kw_args)
 
     @abstractmethod
@@ -242,7 +250,7 @@ class Vars(Provider):
 
         # Lookup:
         self.name_to_index = OrderedDict()
-        self._get_vars_cache = {}
+        self._get_latent_vars_cache = {}
 
     def _resolve_dtype(self, dtype):
         if dtype is None:
@@ -268,7 +276,7 @@ class Vars(Provider):
             pass
 
         # A new variable will be added. Clear lookup cache.
-        self._get_vars_cache.clear()
+        self._get_latent_vars_cache.clear()
 
         # Resolve data type.
         dtype = self._resolve_dtype(dtype)
@@ -533,30 +541,22 @@ class Vars(Provider):
         index = self.name_to_index[name]
         return self.transforms[index](self.vars[index])
 
-    def assign(self, name, value, differentiable=False):
+    def assign(self, name, value):
         """Assign a value to a variable.
 
         Args:
             name (hashable): Name of variable to assign value to.
             value (tensor): Value to assign.
-            differentiable (bool, optional): Do a differentiable assignment.
 
         Returns:
             tensor: Assignment result.
         """
         index = self.name_to_index[name]
-        if differentiable:
-            # Do a differentiable assignment, but ensure that the data type is
-            # right.
-            dtype = B.dtype(self.vars[index])
-            self.vars[index] = B.cast(dtype, value)
-            return value
-        else:
-            # Overwrite data.
-            self.vars[index] = _assign(
-                self.vars[index], self.inverse_transforms[index](value)
-            )
-            return self.vars[index]
+        # Overwrite data.
+        self.vars[index] = _assign(
+            self.vars[index], self.inverse_transforms[index](value)
+        )
+        return self.vars[index]
 
     def copy(self, detach=False):
         """Create a copy of the variable manager that shares the variables.
@@ -572,11 +572,9 @@ class Vars(Provider):
         vs.transforms = list(self.transforms)
         vs.inverse_transforms = list(self.inverse_transforms)
         vs.name_to_index = OrderedDict(self.name_to_index)
+        vs.vars = list(self.vars)
         if detach:
-            for var in self.vars:
-                vs.vars.append(var.detach())
-        else:
-            vs.vars = list(self.vars)
+            vs.detach()
         return vs
 
     def detach(self):
@@ -590,10 +588,10 @@ class Vars(Provider):
             value (bool): Require a gradient.
             *names (hashable): Specify variables by name.
         """
-        for var in self.get_vars(*names):
+        for var in self.get_latent_vars(*names):
             var.requires_grad_(value)
 
-    def get_vars(self, *names, return_indices=False):
+    def get_latent_vars(self, *names, return_indices=False):
         """Get latent variables.
 
         If no arguments are supplied, then all latent variables are retrieved.
@@ -618,7 +616,7 @@ class Vars(Provider):
 
         # Attempt to use cache.
         try:
-            indices = self._get_vars_cache[names]
+            indices = self._get_latent_vars_cache[names]
         except KeyError:
             # Collect indices of matches.
             indices = set()
@@ -637,7 +635,7 @@ class Vars(Provider):
             indices = sorted(indices)
 
             # Store in cache before proceeding.
-            self._get_vars_cache[names] = indices
+            self._get_latent_vars_cache[names] = indices
 
         # Return indices if asked for. Otherwise, return variables.
         if return_indices:
@@ -645,7 +643,15 @@ class Vars(Provider):
         else:
             return [self.vars[i] for i in indices]
 
-    def get_vector(self, *names):
+    def get_vars(self, *args, **kw_args):  # pragma: no cover
+        warnings.warn(
+            "The method `get_vars` is deprecated. Please use `get_latent_vars` "
+            "instead.",
+            category=DeprecationWarning,
+        )
+        return self.get_latent_vars(*args, **kw_args)
+
+    def get_latent_vector(self, *names):
         """Get all the latent variables stacked in a vector.
 
         If no arguments are supplied, then all latent variables are retrieved.
@@ -656,9 +662,17 @@ class Vars(Provider):
         Returns:
             tensor: Vector consisting of all latent values
         """
-        return pack(*self.get_vars(*names))
+        return pack(*self.get_latent_vars(*names))
 
-    def set_vector(self, values, *names, differentiable=False):
+    def get_vector(self, *args, **kw_args):  # pragma: no cover
+        warnings.warn(
+            "The method `get_vector` is deprecated. Please use `get_latent_vector` "
+            "instead.",
+            category=DeprecationWarning,
+        )
+        return self.get_latent_vector(*args, **kw_args)
+
+    def set_latent_vector(self, values, *names, differentiable=False):
         """Set all the latent variables by values from a vector.
 
         If no arguments are supplied, then all latent variables are retrieved.
@@ -672,20 +686,32 @@ class Vars(Provider):
         Returns:
             list: Assignment results.
         """
-        values = unpack(values, *map(B.shape, self.get_vars(*names)))
+        values = unpack(values, *map(B.shape, self.get_latent_vars(*names)))
 
         if differentiable:
             # Do a differentiable assignment.
-            for index, value in zip(self.get_vars(*names, return_indices=True), values):
+            for index, value in zip(
+                self.get_latent_vars(*names, return_indices=True), values
+            ):
                 self.vars[index] = value
             return values
         else:
             # Overwrite data.
             assignments = []
-            for index, value in zip(self.get_vars(*names, return_indices=True), values):
+            for index, value in zip(
+                self.get_latent_vars(*names, return_indices=True), values
+            ):
                 self.vars[index] = _assign(self.vars[index], value)
                 assignments.append(self.vars[index])
             return assignments
+
+    def set_vector(self, *args, **kw_args):  # pragma: no cover
+        warnings.warn(
+            "The method `set_vector` is deprecated. Please use `set_latent_vector` "
+            "instead.",
+            category=DeprecationWarning,
+        )
+        return self.get_latent_vector(*args, **kw_args)
 
     @property
     def names(self):
