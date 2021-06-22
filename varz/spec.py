@@ -204,6 +204,7 @@ class Struct(_RedirectedProvided):
         vs (:class:`.vs.Vars`): Variable container to wrap.
         path (str): Path. Default to no path.
     """
+
     def __init__(self, vs, path=""):
         _RedirectedProvided.__init__(self, vs)
         self._path = path

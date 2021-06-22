@@ -210,6 +210,9 @@ def test_struct(vs):
     assert f(vs) == f(vs)
     assert vs.names == names
 
+    # Check extraction by calling.
+    assert vs.struct.x1.positive() == vs.struct.x1()
+
 
 @pytest.mark.parametrize(
     "decorator, types, names",

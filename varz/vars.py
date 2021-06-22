@@ -75,7 +75,7 @@ class Provider(metaclass=ABCMeta):
         """Alias for :meth:`.vars.Provider.unbounded`."""
         return self.unbounded(*args, **kw_args)
 
-    def get(self, *args, **kw_args):
+    def get(self, *args, **kw_args):  # pragma: no cover
         warnings.warn(
             "The method `get` is deprecated. Please use `unbounded` or `ubnd` instead.",
             category=DeprecationWarning,
