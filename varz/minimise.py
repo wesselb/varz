@@ -7,12 +7,22 @@ from .adam import ADAM
 import lab as B
 import numpy as np
 import wbml.out as out
-from plum import convert
+from plum import convert, List
 from scipy.optimize import fmin_l_bfgs_b
 
 __all__ = ["minimise_l_bfgs_b", "minimise_adam"]
 
 log = logging.getLogger(__name__)
+
+
+def _convert_and_validate_names(names):
+    if names is None:
+        names = []
+    if isinstance(names, str):
+        names = [names]
+    if not isinstance(names, List[str]):
+        raise ValueError("Keyword `names` must be a list of strings.")
+    return names
 
 
 def minimise_l_bfgs_b(
@@ -88,7 +98,7 @@ def make_l_bfgs_b(wrap_f):
     def _minimise_l_bfgs_b(
         f, vs, f_calls=10000, iters=1000, trace=False, names=None, jit=False
     ):
-        names = [] if names is None else names
+        names = _convert_and_validate_names(names)
 
         # Run function once to ensure that all variables are initialised and
         # available.
@@ -168,7 +178,7 @@ def make_adam(wrap_f):
         names=None,
         jit=False,
     ):
-        names = [] if names is None else names
+        names = _convert_and_validate_names(names)
 
         # Run function once to ensure that all variables are initialised and
         # available.

@@ -4,12 +4,13 @@ import numpy as np
 import pytest
 import tensorflow as tf
 import torch
-
 import varz.autograd
 import varz.jax
 import varz.tensorflow
 import varz.torch
 from varz import Vars
+from varz.minimise import _convert_and_validate_names
+
 from .util import approx, Value, OutStream
 
 _rate = 5e-2
@@ -60,6 +61,17 @@ for dtype_name in ["float32", "float64"]:
 @pytest.fixture(params=_minimise_method_params)
 def minimise_method(request):
     yield request.param
+
+
+def test_convert_and_validate_names():
+    assert _convert_and_validate_names(None) == []
+    assert _convert_and_validate_names([]) == []
+    assert _convert_and_validate_names("test") == ["test"]
+    assert _convert_and_validate_names(["a", "b"]) == ["a", "b"]
+    with pytest.raises(ValueError):
+        _convert_and_validate_names(["a", ["b"]])
+    with pytest.raises(ValueError):
+        _convert_and_validate_names([1, "a"])
 
 
 def test_docstring(minimise_method):
