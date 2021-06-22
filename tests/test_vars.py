@@ -150,11 +150,6 @@ def test_bounded_monotonic(vs):
     assert vs.vars[0] < vs.vars[1] < vs.vars[2]
 
 
-def test_shape_init_ambiguity(vs):
-    with pytest.raises(ValueError):
-        vs.ubnd(np.ones(1), shape=())
-
-
 def test_lower_triangular(vs_source):
     for _ in range(10):
         assert B.shape(vs_source.tril(shape=(5, 5))) == (5, 5)
@@ -260,6 +255,16 @@ def test_orthogonal_assignment(vs, method):
     vs.orth(shape=(5, 5), name="x", method=method)
     vs.assign("x", x)
     approx(vs["x"], x)
+
+
+def test_init_shape_ambiguity(vs):
+    with pytest.raises(ValueError):
+        vs.ubnd(np.ones(1), shape=())
+
+
+def test_init_broadcasting(vs):
+    vs.ubnd(2, shape=(2,), name="x")
+    approx(vs["x"], 2 * B.ones(2))
 
 
 def test_get_set_latent_vector(dtype):

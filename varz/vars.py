@@ -284,19 +284,25 @@ class Vars(Provider):
         # If no source is provided, get the latent from from the provided
         # initialiser.
         if self.source is None:
-            # Resolve initialisation and inverse transform.
+            # Resolve initialisation.
             if init is None:
                 init = generate_init(shape=shape, dtype=dtype)
             else:
                 init = B.cast(dtype, init)
-                if shape is not None and shape != B.shape(init):
-                    raise ValueError(
-                        f"Shape of initial value {B.shape(init)} is not equal to the "
-                        f"desired shape {shape}."
-                    )
 
             # Ensure that the initialisation is on the right device.
             init = B.to_active_device(init)
+
+            # Allow broadcasting in the initialisation.
+            if shape is not None:
+                init = init * B.ones(B.dtype(init), *shape)
+
+            # Double check the shape of the initialisation.
+            if shape is not None and shape != B.shape(init):
+                raise ValueError(
+                    f"Shape of initial value {B.shape(init)} is not equal to the "
+                    f"desired shape {shape}."
+                )
 
             # Construct optimisable variable.
             latent = inverse_transform(init)
