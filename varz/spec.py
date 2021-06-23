@@ -202,12 +202,18 @@ class Struct(_RedirectedProvided):
 
     Args:
         vs (:class:`.vs.Vars`): Variable container to wrap.
-        path (str): Path. Default to no path.
+        path (str, optional): Path. Defaults to no path.
     """
 
-    def __init__(self, vs, path=""):
+    def __init__(self, vs, path=None):
         _RedirectedProvided.__init__(self, vs)
         self._path = path
+
+    def _resolve_path(self, key, separator=""):
+        if self._path:
+            return f"{self._path}{separator}{key}"
+        else:
+            return str(key)
 
     def _get_var(self, getter, args, kw_args):
         if self._path:
@@ -219,13 +225,12 @@ class Struct(_RedirectedProvided):
         return getter(*args, **kw_args)
 
     def __getattr__(self, item):
-        if self._path:
-            return Struct(self._vs, f"{self._path}.{item}")
-        else:
-            return Struct(self._vs, str(item))
+        path = self._resolve_path(item, separator=".")
+        return Struct(self._vs, path)
 
     def __getitem__(self, item):
-        return Struct(self._vs, f"{self._path}[{item}]")
+        path = self._resolve_path(f"[{item}]")
+        return Struct(self._vs, path)
 
     def __iter__(self):
         state = {"counter": -1}
