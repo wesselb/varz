@@ -123,13 +123,13 @@ Example:
 ```python
 >>> vs = Vars(np.float64)
 
->>> vs.unbouned(1, name="x1")
+>>> vs.unbounded(1, name="x1")
 array(1.)
 
->>> vs.unbouned(2, name="x2")
+>>> vs.unbounded(2, name="x2")
 array(2.)
 
->>> vs.unbouned(3, name="y")
+>>> vs.unbounded(3, name="y")
 array(3.)
 
 >>> vs.names
@@ -225,8 +225,8 @@ To parametrise functions, a common pattern is the following:
 
 ```python
 def objective(vs):
-    x = vs.unbouned(5, name="x")
-    y = vs.unbouned(10, name="y")
+    x = vs.unbounded(5, name="x")
+    y = vs.unbounded(10, name="y")
     
     return (x * y - 5) ** 2 + x ** 2
 ```
