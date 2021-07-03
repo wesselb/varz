@@ -18,40 +18,36 @@ _minimise_method_params = []
 for dtype_name in ["float32", "float64"]:
     _minimise_method_params.extend(
         [
-            (getattr(np, dtype_name), varz.autograd.minimise_l_bfgs_b, {}),
+            (getattr(np, dtype_name), varz.minimise_l_bfgs_b, {}),
             (
                 getattr(np, dtype_name),
-                varz.autograd.minimise_adam,
+                varz.minimise_adam,
                 {"rate": _rate, "local_rates": False},
             ),
             (
                 getattr(np, dtype_name),
-                varz.autograd.minimise_adam,
+                varz.minimise_adam,
                 {"rate": _rate, "local_rates": True},
             ),
         ]
     )
-    for backend, varz_import in [
-        (tf, varz.tensorflow),
-        (torch, varz.torch),
-        (jnp, varz.jax),
-    ]:
+    for backend in [tf, torch, jnp]:
         for jit in [False, True]:
             _minimise_method_params.extend(
                 [
                     (
                         getattr(backend, dtype_name),
-                        varz_import.minimise_l_bfgs_b,
+                        varz.minimise_l_bfgs_b,
                         {"jit": jit},
                     ),
                     (
                         getattr(backend, dtype_name),
-                        varz_import.minimise_adam,
+                        varz.minimise_adam,
                         {"rate": _rate, "jit": jit, "local_rates": False},
                     ),
                     (
                         getattr(backend, dtype_name),
-                        varz_import.minimise_adam,
+                        varz.minimise_adam,
                         {"rate": _rate, "jit": jit, "local_rates": True},
                     ),
                 ]

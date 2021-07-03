@@ -1,18 +1,43 @@
-import logging
 import traceback
 from functools import wraps
+import importlib
 
 from .adam import ADAM
 
 import lab as B
 import numpy as np
 import wbml.out as out
+from plum import Dispatcher
 from plum import convert, List
 from scipy.optimize import fmin_l_bfgs_b
 
 __all__ = ["minimise_l_bfgs_b", "minimise_adam"]
 
-log = logging.getLogger(__name__)
+_dispatch = Dispatcher()
+
+
+@_dispatch
+def _get_minimise_f(dtype: B.NPDType, name: str):
+    mod = importlib.import_module("varz.autograd.minimise")
+    return getattr(mod, name)
+
+
+@_dispatch
+def _get_minimise_f(dtype: B.TFDType, name: str):
+    mod = importlib.import_module("varz.tensorflow.minimise")
+    return getattr(mod, name)
+
+
+@_dispatch
+def _get_minimise_f(dtype: B.TorchDType, name: str):
+    mod = importlib.import_module("varz.torch.minimise")
+    return getattr(mod, name)
+
+
+@_dispatch
+def _get_minimise_f(dtype: B.JAXDType, name: str):
+    mod = importlib.import_module("varz.jax.minimise")
+    return getattr(mod, name)
 
 
 def _convert_and_validate_names(names):
@@ -43,7 +68,16 @@ def minimise_l_bfgs_b(
     Returns:
         float: Final objective function value.
     """
-    raise RuntimeError("Call a backend-specific optimiser instead.")
+    minimise_f = _get_minimise_f(vs.dtype, "minimise_l_bfgs_b")
+    return minimise_f(
+        f=f,
+        vs=vs,
+        f_calls=f_calls,
+        iters=iters,
+        trace=trace,
+        names=names,
+        jit=jit,
+    )
 
 
 def minimise_adam(
@@ -81,7 +115,20 @@ def minimise_adam(
     Returns:
         float: Final objective function value.
     """
-    raise RuntimeError("Call a backend-specific optimiser instead.")
+    minimise_f = _get_minimise_f(vs.dtype, "minimise_adam")
+    return minimise_f(
+        f=f,
+        vs=vs,
+        iters=iters,
+        rate=rate,
+        beta1=beta1,
+        beta2=beta2,
+        epsilon=epsilon,
+        local_rates=local_rates,
+        trace=trace,
+        names=names,
+        jit=jit,
+    )
 
 
 def make_l_bfgs_b(wrap_f):

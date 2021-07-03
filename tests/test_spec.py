@@ -213,6 +213,9 @@ def test_struct(vs):
     # Check extraction by calling.
     assert vs.struct.x1.positive() == vs.struct.x1()
 
+    # Test getting a regex to match everything in a path.
+    assert vs.struct.level[0].all() == "level[0].*"
+
 
 @pytest.mark.parametrize(
     "decorator, types, names",

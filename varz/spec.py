@@ -244,6 +244,10 @@ class Struct(_RedirectedProvided):
     def __call__(self):
         return self._vs[self._path]
 
+    def all(self):
+        """Get a regex that matches everything in the current path."""
+        return self._resolve_path("*", separator=".")
+
 
 class VariableType(metaclass=ABCMeta):
     """A type of a variable. Any arguments are passed to the appropriate method
