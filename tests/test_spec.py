@@ -216,6 +216,10 @@ def test_struct(vs):
     # Test getting a regex to match everything in a path.
     assert vs.struct.level[0].all() == "level[0].*"
 
+    # Test length.
+    assert len(vs.struct.level) == 2
+    assert len(vs.struct.level_does_not_exist) == 0
+
 
 @pytest.mark.parametrize(
     "decorator, types, names",

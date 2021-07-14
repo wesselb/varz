@@ -248,6 +248,12 @@ class Struct(_RedirectedProvided):
         """Get a regex that matches everything in the current path."""
         return self._resolve_path("*", separator=".")
 
+    def __len__(self):
+        i = 0
+        while self._resolve_path(f"[{i}]") in self._vs.names:
+            i += 1
+        return i
+
 
 class VariableType(metaclass=ABCMeta):
     """A type of a variable. Any arguments are passed to the appropriate method
