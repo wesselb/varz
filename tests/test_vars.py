@@ -267,6 +267,11 @@ def test_init_broadcasting(vs):
     approx(vs["x"], 2 * B.ones(2))
 
 
+def test_init_shape_checking(vs):
+    vs.ubnd(np.array([1]), shape=(1,), name="x")
+    vs.ubnd(np.array([1]), shape=[1], name="y")
+
+
 def test_get_set_latent_vector(dtype):
     vs = Vars(dtype=dtype)
 

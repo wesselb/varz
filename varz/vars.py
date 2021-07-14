@@ -1,13 +1,14 @@
 import logging
+import warnings
 from abc import ABCMeta, abstractmethod
 from collections import OrderedDict
 from functools import reduce
 from operator import mul
-import warnings
 
 import lab as B
 import numpy as np
 import wbml.out
+from lab.shape import Shape
 from plum import Dispatcher
 
 from .util import (
@@ -307,7 +308,7 @@ class Vars(Provider):
                 init = init * B.ones(B.dtype(init), *shape)
 
             # Double check the shape of the initialisation.
-            if shape is not None and shape != B.shape(init):
+            if shape is not None and Shape(*shape) != Shape(*B.shape(init)):
                 raise ValueError(
                     f"Shape of initial value {B.shape(init)} is not equal to the "
                     f"desired shape {shape}."
