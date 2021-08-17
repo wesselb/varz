@@ -144,7 +144,7 @@ y:          3.0
 ### Constrained Variables
 
 * **Unbounded variables:**
-  A variable that is unbounded can be created unsing
+  A variable that is unbounded can be created using
   `Vars.unbounded` or `Vars.ubnd`.
 
     ```python
@@ -171,7 +171,7 @@ y:          3.0
     ```
   
 * **Lower-triangular matrix:**
-    A matrix variable that is contrained to be *lower triangular* can be
+    A matrix variable that is constrained to be *lower triangular* can be
     created using `Vars.lower_triangular` or `Vars.tril`. Either an
     initialisation or a shape of square matrix must be given.
     
@@ -193,7 +193,7 @@ y:          3.0
     ```
   
 * **Orthogonal matrix:**
-    A matrix variable that is contrained to be *orthogonal* can be created using
+    A matrix variable that is constrained to be *orthogonal* can be created using
     `Vars.orthogonal` or `Vars.orth`. Either an initialisation or a
     shape of square matrix must be given.
     
