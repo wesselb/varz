@@ -23,7 +23,6 @@ __all__ = [
 
 class _RedirectedProvided(Provider):
     """Redirect all methods of :class:`.vars.Provider` to a method `_get_var`.
-    automatically prepends a prefix to named variables.
 
     Args:
         vs (:class:`.vs.Vars`): Variable container to wrap.
@@ -245,14 +244,40 @@ class Struct(_RedirectedProvided):
         return self._vs[self._path]
 
     def all(self):
-        """Get a regex that matches everything in the current path."""
+        """Get a regex that matches everything in the current path.
+
+        Returns:
+            str: Regex.
+        """
         return self._resolve_path("*", separator=".")
 
     def __len__(self):
         i = 0
-        while self._resolve_path(f"[{i}]") in self._vs.names:
+        while any(
+            name.startswith(self._resolve_path(f"[{i}]")) for name in self._vs.names
+        ):
             i += 1
         return i
+
+    def __next__(self):
+        return self[len(self)]
+
+    def up(self, level=None):
+        """Go up one level.
+
+        Args:
+            level (str, optional): Assert that the name of the level to go up is equal
+                to `level`. Does not perform this assertion if `level` is not given.
+
+        Returns:
+            :class:`.spec.Struct`: Struct.
+        """
+        parts = self._path.split(".")
+        if level is not None and parts[-1] != level:
+            raise AssertionError(
+                f'Cannot go up level "{level}" because the current path is "{self._path}".'
+            )
+        return Struct(self._vs, ".".join(parts[:-1]))
 
 
 class VariableType(metaclass=ABCMeta):

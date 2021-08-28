@@ -216,9 +216,24 @@ def test_struct(vs):
     # Test getting a regex to match everything in a path.
     assert vs.struct.level[0].all() == "level[0].*"
 
+    # Test getting the next one in a numbered array.
+    assert next(vs.struct.level)._path == "level[3]"
+    # Check that `level[3]` does not have to be a variable itself for `level[3]` to
+    # be detected.
+    vs.struct.level[3].some_variable.positive()
+    assert "level[3]" not in vs.names
+    assert next(vs.struct.level)._path == "level[4]"
+
     # Test length.
-    assert len(vs.struct.level) == 3
+    assert len(vs.struct.level) == 4
     assert len(vs.struct.level_does_not_exist) == 0
+
+    # Test going up one level.
+    assert vs.struct.a.b.c.up()._path == "a.b"
+    assert vs.struct.a.b.c.up("c")._path == "a.b"
+    with pytest.raises(AssertionError):
+        vs.struct.a.b.c.up("d")
+
 
 
 @pytest.mark.parametrize(
