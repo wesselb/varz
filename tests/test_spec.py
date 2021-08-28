@@ -218,7 +218,7 @@ def test_struct(vs):
 
     # Test negative indices.
     assert vs.struct.level[-1]._path == "level[2]"
-    assert vs.struct.level[-2]._path == "level[2]"
+    assert vs.struct.level[-2]._path == "level[1]"
 
     # Test getting the next one in a numbered array.
     assert next(vs.struct.level)._path == "level[3]"

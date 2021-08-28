@@ -340,7 +340,7 @@ def test_copy_f():
     vs_copy = vs.copy(f=lambda x: 0 * x)
 
     assert vs["a"] == 1
-    assert vs["b"] == 1
+    assert vs["b"] == 2
     assert vs_copy["a"] == 0
     assert vs_copy["b"] == 0
 
