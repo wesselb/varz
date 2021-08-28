@@ -1,9 +1,9 @@
 import logging
 
-import jax
 import lab.jax as B
 import numpy as np
 from jax import value_and_grad
+from plum import convert
 
 from ..minimise import make_l_bfgs_b, make_adam, exception
 
@@ -19,23 +19,24 @@ def _wrap_f(vs, names, f, jit, _convert):
     # Keep track of function evaluations.
     f_evals = []
 
-    def f_vectorised(x):
+    def f_vectorised(x, *args):
         vs_copy.set_latent_vector(x, *names, differentiable=True)
-        return f(vs_copy)
+        out = convert(f(vs_copy, *args), tuple)
+        return out[0], out[1:]
 
-    f_value_and_grad = value_and_grad(f_vectorised)
+    f_value_and_grad = value_and_grad(f_vectorised, has_aux=True)
 
     if jit:
         f_value_and_grad = B.jit(f_value_and_grad)
 
-    def f_wrapped(x):
+    def f_wrapped(x, *args):
         x = B.cast(vs.dtype, x)
 
         # Compute objective function value and gradient.
         try:
-            obj_value, grad = f_value_and_grad(x)
+            (obj_value, args), grad = f_value_and_grad(x, *args)
         except Exception as e:
-            return exception(x, e)
+            return exception(x, args, e)
 
         # Perform requested conversion.
         obj_value, grad = _convert(obj_value, grad)
@@ -45,7 +46,7 @@ def _wrap_f(vs, names, f, jit, _convert):
         grad = np.array(grad)
 
         f_evals.append(obj_value)
-        return obj_value, grad
+        return (obj_value, args), grad
 
     return f_evals, f_wrapped
 

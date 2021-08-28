@@ -68,7 +68,7 @@ def minimise_l_bfgs_b(
     Returns:
         float: Final objective function value.
     """
-    minimise_f = _get_minimise_f(vs.dtype, "minimise_l_bfgs_b")
+    minimise_f = _get_minimise_f(convert(vs, tuple)[0].dtype, "minimise_l_bfgs_b")
     return minimise_f(
         f=f,
         vs=vs,
@@ -115,7 +115,7 @@ def minimise_adam(
     Returns:
         float: Final objective function value.
     """
-    minimise_f = _get_minimise_f(vs.dtype, "minimise_adam")
+    minimise_f = _get_minimise_f(convert(vs, tuple)[0].dtype, "minimise_adam")
     return minimise_f(
         f=f,
         vs=vs,
@@ -147,14 +147,19 @@ def make_l_bfgs_b(wrap_f):
     ):
         names = _convert_and_validate_names(names)
 
+        # Extract variable container and auxilary arguments from argument specification.
+        vs = convert(vs, tuple)
+        vs, args = vs[0], vs[1:]
+
         # Run function once to ensure that all variables are initialised and
         # available.
-        val_init = f(vs)
+        res = convert(f(vs, *args), tuple)
+        val_init, args = res[0], res[1:]
 
         # SciPy doesn't perform zero iterations, so handle that edge case
         # manually.
         if iters == 0 or f_calls == 0:
-            return B.to_numpy(val_init)
+            return B.squeeze((B.to_numpy(val_init),) + args)
 
         # Extract initial value.
         x0 = B.to_numpy(vs.get_latent_vector(*names))
@@ -166,10 +171,20 @@ def make_l_bfgs_b(wrap_f):
         # Wrap the function and get the list of function evaluations.
         f_vals, f_wrapped = wrap_f(vs, names, f, jit, _convert)
 
+        # Maintain a state for the auxilary arguments.
+        state = {"args": args}
+
+        # Wrap `f_wrapped` to take the auxilary from the global state and then update
+        # the global state.
+
+        def f_wrapped_self_passing(x):
+            (obj_value, state["args"]), grad = f_wrapped(x, *state["args"])
+            return obj_value, grad
+
         # Perform optimisation routine.
         def perform_minimisation(callback_=lambda _: None):
             return fmin_l_bfgs_b(
-                func=f_wrapped,
+                func=f_wrapped_self_passing,
                 x0=x0,
                 maxiter=iters,
                 maxfun=f_calls,
@@ -195,8 +210,9 @@ def make_l_bfgs_b(wrap_f):
             x_opt, val_opt, info = perform_minimisation()
 
         vs.set_latent_vector(x_opt, *names)  # Assign optimum.
+        args = state["args"]  # Get auxilary arguments at final state.
 
-        return val_opt  # Return optimal value.
+        return B.squeeze((val_opt,) + args)  # Return optimal value.
 
     return _minimise_l_bfgs_b
 
@@ -227,19 +243,27 @@ def make_adam(wrap_f):
     ):
         names = _convert_and_validate_names(names)
 
+        # Extract variable container and auxilary arguments from argument specification.
+        vs = convert(vs, tuple)
+        vs, args = vs[0], vs[1:]
+
         # Run function once to ensure that all variables are initialised and
         # available.
-        val_init = f(vs)
+        res = convert(f(vs, *args), tuple)
+        val_init, args = res[0], res[1:]
 
         # Handle the edge case of zero iterations.
         if iters == 0:
-            return B.to_numpy(val_init)
+            return B.squeeze((B.to_numpy(val_init),) + args)
 
         # Extract initial value.
         x0 = B.to_numpy(vs.get_latent_vector(*names))
 
         # Wrap the function.
         _, f_wrapped = wrap_f(vs, names, f, jit, B.to_numpy)
+
+        # Maintain a state for the auxilary arguments.
+        state = {"args": args}
 
         def perform_minimisation(callback_=lambda _: None):
             # Perform optimisation routine.
@@ -254,7 +278,7 @@ def make_adam(wrap_f):
             )
 
             for i in range(iters):
-                obj_value, grad = f_wrapped(x)
+                (obj_value, state["args"]), grad = f_wrapped(x, *state["args"])
                 callback_(obj_value)
                 x = adam.step(x, grad)
 
@@ -274,25 +298,28 @@ def make_adam(wrap_f):
             x_opt, obj_value = perform_minimisation()
 
         vs.set_latent_vector(x_opt, *names)  # Assign optimum.
+        args = state["args"]  # Get auxilary arguments at final state.
 
-        return obj_value  # Return last objective value.
+        return B.squeeze((obj_value,) + args)  # Return last objective value.
 
     return _minimise_adam
 
 
-def exception(x, e):
+def exception(x, args, e):
     """In the case that an exception is raised during function evaluation,
     print a warning and return NaN for the function value and gradient.
 
     Args:
         x (tensor): Current input.
+        args (tuple): Current auxilary arguments.
         e (:class:`Exception`): Caught exception.
 
     Returns:
-        tuple: Tuple containing NaN and NaNs for the gradient.
+        tuple: Return value containing NaN for the objective value and NaNs for the
+            gradient.
     """
     with out.Section("Caught exception during function evaluation"):
         out.out(traceback.format_exc().strip())
     grad_nan = np.empty(x.shape)
     grad_nan[:] = np.nan
-    return np.nan, grad_nan
+    return (np.nan, args), grad_nan

@@ -2,6 +2,7 @@ import logging
 
 import lab.tensorflow as B
 import tensorflow as tf
+from plum import convert
 
 from ..minimise import make_l_bfgs_b, make_adam, exception
 
@@ -17,34 +18,35 @@ def _wrap_f(vs, names, f, jit, _convert):
     # Keep track of function evaluations.
     f_evals = []
 
-    def f_vectorised(x):
+    def f_vectorised(x, *args):
         vs_copy.set_latent_vector(x, *names, differentiable=True)
-        return f(vs_copy)
+        out = convert(f(vs_copy, *args), tuple)
+        return out[0], out[1:]
 
-    def f_value_and_grad(x):
+    def f_value_and_grad(x, *args):
         with tf.GradientTape() as t:
             t.watch(x)
-            obj_value = f_vectorised(x)
+            obj_value, args = f_vectorised(x, *args)
             grad = t.gradient(obj_value, x, unconnected_gradients="zero")
-        return obj_value, grad
+        return (obj_value, args), grad
 
     if jit:
         f_value_and_grad = B.jit(f_value_and_grad)
 
-    def f_wrapped(x):
+    def f_wrapped(x, *args):
         x = B.cast(vs.dtype, x)
 
         # Compute objective function value and gradient.
         try:
-            obj_value, grad = f_value_and_grad(x)
+            (obj_value, args), grad = f_value_and_grad(x, *args)
         except Exception as e:
-            return exception(x, e)
+            return exception(x, args, e)
 
         # Perform requested conversion.
         obj_value, grad = _convert(obj_value, grad)
 
         f_evals.append(obj_value)
-        return obj_value, grad
+        return (obj_value, args), grad
 
     return f_evals, f_wrapped
 

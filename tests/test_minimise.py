@@ -32,26 +32,25 @@ for dtype_name in ["float32", "float64"]:
         ]
     )
     for backend in [tf, torch, jnp]:
-        for jit in [False, True]:
-            _minimise_method_params.extend(
-                [
-                    (
-                        getattr(backend, dtype_name),
-                        varz.minimise_l_bfgs_b,
-                        {"jit": jit},
-                    ),
-                    (
-                        getattr(backend, dtype_name),
-                        varz.minimise_adam,
-                        {"rate": _rate, "jit": jit, "local_rates": False},
-                    ),
-                    (
-                        getattr(backend, dtype_name),
-                        varz.minimise_adam,
-                        {"rate": _rate, "jit": jit, "local_rates": True},
-                    ),
-                ]
-            )
+        _minimise_method_params.extend(
+            [
+                (
+                    getattr(backend, dtype_name),
+                    varz.minimise_l_bfgs_b,
+                    {"jit": True},
+                ),
+                (
+                    getattr(backend, dtype_name),
+                    varz.minimise_adam,
+                    {"rate": _rate, "jit": True, "local_rates": False},
+                ),
+                (
+                    getattr(backend, dtype_name),
+                    varz.minimise_adam,
+                    {"rate": _rate, "jit": True, "local_rates": True},
+                ),
+            ]
+        )
 
 
 @pytest.fixture(params=_minimise_method_params)
@@ -103,6 +102,29 @@ def test_minimise(minimise_method):
     # Check for equality up to two digits.
     approx(val_opt, 9, atol=1e-2)
     approx(vs["x"], 0, atol=1e-2)
+
+
+def test_minimise_auxilary_argument(minimise_method):
+    # Perform the above test, but also pass an auxilary argument around.
+    dtype, minimise, kw_args = minimise_method
+    vs = Vars(dtype=dtype)
+
+    # Again, initialise a variable that is not used.
+    vs.ubnd(name="other")
+
+    # Again, define some objective.
+    def f(vs_, state):
+        return (-3 - vs_.pos(name="x", init=1.0)) ** 2, state + 1
+
+    # Minimise it, until convergence, but now also get the final state.
+    val_opt, final_state = minimise(f, (vs, B.cast(dtype, 1)), iters=2000, **kw_args)
+
+    # Check for equality up to two digits.
+    approx(val_opt, 9, atol=1e-2)
+    approx(vs["x"], 0, atol=1e-2)
+
+    # Check that the internal state was passed around.
+    assert final_state > 5
 
 
 def test_minimise_disconnected_gradient(minimise_method):
