@@ -235,7 +235,6 @@ def test_struct(vs):
         vs.struct.a.b.c.up("d")
 
 
-
 @pytest.mark.parametrize(
     "decorator, types, names",
     [
