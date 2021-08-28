@@ -140,9 +140,10 @@ def test_minimise_exception(minimise_method):
     dtype, minimise, kw_args = minimise_method
     vs = Vars(dtype=dtype)
 
-    # Skip this tests when the JIT is used, because tracing may then fail.
-    if "jit" in kw_args and kw_args["jit"]:
-        return
+    # Don't use the JIT in this test, because the tracing will fail due to the
+    # randomness.
+    kw_args["jit"] = False
+    kw_args["iters"] = 100
 
     first_call = Value(True)
 
