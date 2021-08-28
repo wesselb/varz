@@ -142,6 +142,7 @@ def test_minimise_exception(minimise_method):
 
     # Don't use the JIT in this test, because the tracing will fail due to the
     # randomness.
+    kw_args = dict(kw_args)  # Copy to prevent mutation.
     kw_args["jit"] = False
     kw_args["iters"] = 100
 
