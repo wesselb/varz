@@ -183,12 +183,12 @@ def test_minimise_trace(minimise_method):
     def f(vs_):
         return vs_.ubnd(name="x") ** 2
 
-    # Test that `trace=False` prints nothing.
+    # Test that `trace = False` prints nothing.
     with OutStream() as stream:
         minimise(f, Vars(dtype=dtype), trace=False, **kw_args)
         assert stream.output == ""
 
-    # Test that `trace=False` prints something.
+    # Test that `trace = False` prints something.
     with OutStream() as stream:
         minimise(f, Vars(dtype=dtype), trace=True, **kw_args)
         assert stream.output != ""
