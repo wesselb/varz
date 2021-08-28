@@ -331,6 +331,20 @@ def test_copy_torch():
         assert len(vs_copied.name_to_index) > 0
 
 
+def test_copy_f():
+    vs = Vars(np.float64)
+    vs.unbounded(1, name="a")
+    vs.unbounded(2, name="b")
+
+    # Make a copy and apply a function that sets everything to zero.
+    vs_copy = vs.copy(f=lambda x: 0 * x)
+
+    assert vs["a"] == 1
+    assert vs["b"] == 1
+    assert vs_copy["a"] == 0
+    assert vs_copy["b"] == 0
+
+
 def test_requires_grad_detach_vars_torch():
     vs = Vars(torch.float64)
     vs.pos(1, name="a")

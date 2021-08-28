@@ -216,6 +216,10 @@ def test_struct(vs):
     # Test getting a regex to match everything in a path.
     assert vs.struct.level[0].all() == "level[0].*"
 
+    # Test negative indices.
+    assert vs.struct.level[-1]._path == "level[2]"
+    assert vs.struct.level[-2]._path == "level[2]"
+
     # Test getting the next one in a numbered array.
     assert next(vs.struct.level)._path == "level[3]"
     # Check that `level[3]` does not have to be a variable itself for `level[3]` to

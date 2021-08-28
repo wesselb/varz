@@ -574,12 +574,13 @@ class Vars(Provider):
         )
         return self.vars[index]
 
-    def copy(self, detach=False):
+    def copy(self, detach=False, f=lambda x: x):
         """Create a copy of the variable manager that shares the variables.
 
         Args:
             detach (bool, optional): Detach the variables in PyTorch. Defaults
                 to `False`.
+            f (function, optional): Apply this function to every latent variable.
 
         Returns:
             :class:`.vars.Vars`: Copy.
@@ -588,7 +589,7 @@ class Vars(Provider):
         vs.transforms = list(self.transforms)
         vs.inverse_transforms = list(self.inverse_transforms)
         vs.name_to_index = OrderedDict(self.name_to_index)
-        vs.vars = list(self.vars)
+        vs.vars = [f(x) for x in self.vars]
         if detach:
             vs.detach()
         return vs

@@ -228,6 +228,8 @@ class Struct(_RedirectedProvided):
         return Struct(self._vs, path)
 
     def __getitem__(self, item):
+        if isinstance(item, int) and item < 0:
+            item += len(self)
         path = self._resolve_path(f"[{item}]")
         return Struct(self._vs, path)
 
@@ -278,6 +280,14 @@ class Struct(_RedirectedProvided):
                 f'Cannot go up level "{level}" because the current path is "{self._path}".'
             )
         return Struct(self._vs, ".".join(parts[:-1]))
+
+    def assign(self, value):
+        """Assign a value.
+
+        Args:
+            value (tensor): Value to assign.
+        """
+        self._vs.assign(self._path, value)
 
 
 class VariableType(metaclass=ABCMeta):
