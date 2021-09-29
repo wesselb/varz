@@ -536,7 +536,7 @@ In the following, let `params = vs.struct`.
     If you want to be sure about which directory you are going up, you can pass
     the name of the directory you want to go up as an argument:
     `params.a.b.c.up("c")` will give the intended result, but
-    `params.a.b.c.up("b")` will result in an asserting error.
+    `params.a.b.c.up("b")` will result in an assertion error.
 * _Get all variables in a path_:
     `params.a.all()` gives the regex `a.*`.
 * _Check if a variable exists_:
