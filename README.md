@@ -99,11 +99,30 @@ array([[ 1.43477728,  0.51006941],
 ```
 
 By default, assignment is non-differentiable and _overwrites_ data.
+The variable can be deleted by passing its name to `vs.delete`:
 
-A variable container can be copied with `vs.copy()`.
+```python
+>>> vs.delete("x")
+
+>>> vs["x"]
+KeyError: 'x'
+```
+
+When a variable is first created, you can set the keyword argument `visible`
+to `False` if you want to make the variable invisible to the
+variable-aggregating operations [`vs.get_latent_vars`](#constrained-variables)
+and
+[`vs.get_latent_vector`](#getting-and-setting-latent-representations-of-variables-as-a-vector).
+These variable-aggregating operations are used in optimisers to get the intended
+collection of variable to optimise.
+Therefore, setting `visible` to `False` will prevent a variable from being
+optimised.
+
+Finally, a variable container can be copied with `vs.copy()`.
 Copies are lightweight and _share their variables with the originals_.
 As a consequence, however, assignment in a copy will also mutate the original.
 [Differentiable assignment, however, will not.](#differentiable-assignment)
+
 
 ### Naming
 
@@ -208,15 +227,22 @@ unconstrained representation* to the desired constrained space.
 The latent variables can be obtained using `Vars.get_latent_vars`.
 
 ```python
->> > vs.get_latent_vars("positive_variable", "bounded_variable")
+>>> vs.get_latent_vars("positive_variable", "bounded_variable")
 [array(-4.07892742), array(-0.604883)]
 ```
 
 To illustrate the use of wildcards, the following is equivalent:
 
 ```python
->> > vs.get_latent_vars("*_variable")
+>>> vs.get_latent_vars("*_variable")
 [array(-4.07892742), array(-0.604883)]
+```
+
+Variables can be excluded by prepending a dash:
+
+```python
+>>> vs.get_latent_vars("*_variable", "-bounded_*")
+[array(-4.07892742)]
 ```
 
 ### Automatic Naming of Variables
@@ -501,6 +527,25 @@ models[2].specific_parameter2: 0.5977
 >>> vs.struct.models[0].specific_parameter2()
 0.6643533007198247
 ```
+
+There are a few methods available for convenient manipulation of the variable struct.
+In the following, let `params = vs.struct`.
+
+* _Go up a directory_:
+    `params.a.b.c.up()` goes up one directory and gives `params.a.b`.
+    If you want to be sure about which directory you are going up, you can pass
+    the name of the directory you want to go up as an argument:
+    `params.a.b.c.up("c")` will give the intended result, but
+    `params.a.b.c.up("b")` will result in an asserting error.
+* _Get all variables in a path_:
+    `params.a.all()` gives the regex `a.*`.
+* _Check if a variable exists_:
+    `bool(params.a)` gives `True` if `a` is a defined variable and `False`
+    otherwise.
+* _Assign a value to a variable_:
+    `params.a.assign(1)` assigns `1` to `a`.
+* _Delete a variable_:
+    `params.a.delete()` deletes `a`.
 
 
 ### Optimisers

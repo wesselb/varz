@@ -70,12 +70,8 @@ def test_get_latent_vars():
     assert vs.get_latent_vars("*/b", "1/*", return_indices=True) == [1]
     assert vs.get_latent_vars("a", "2/*", return_indices=True) == [0, 2, 3]
     assert vs.get_latent_vars("a", "2/d", "2/*", return_indices=True) == [0, 2, 3]
-    assert vs.get_latent_vars("2/d", "2/c", "a", "1/*", return_indices=True) == [
-        0,
-        1,
-        2,
-        3,
-    ]
+    inds = vs.get_latent_vars("2/d", "2/c", "a", "1/*", return_indices=True)
+    assert inds == [0, 1, 2, 3]
     assert vs.get_latent_vars("1/*", return_indices=True) == [1]
     assert vs.get_latent_vars("2/*", return_indices=True) == [2, 3]
     assert vs.get_latent_vars("1/*", "2/*", return_indices=True) == [1, 2, 3]
@@ -86,6 +82,87 @@ def test_get_latent_vars_cache_clearing(vs):
     assert vs.get_latent_vars("var_*", return_indices=True) == [0]
     vs.ubnd(name="var_b")
     assert vs.get_latent_vars("var_*", return_indices=True) == [0, 1]
+    vs.delete("var_b")
+    assert vs.get_latent_vars("var_*", return_indices=True) == [0]
+
+
+def test_get_latent_vars_visible(vs):
+    vs.ubnd(1, name="x1")
+    vs.ubnd(2, name="x2", visible=False)
+    vs.ubnd(3, name="x3")
+
+    assert vs.get_latent_vars() == [1, 3]
+    assert vs.get_latent_vars(return_indices=True) == [0, 2]
+    assert vs.get_latent_vars("x*") == [1, 3]
+    assert vs.get_latent_vars("x*", return_indices=True) == [0, 2]
+
+
+def test_get_latent_vars_exclusion(vs):
+    vs.ubnd(1, name="x1")
+    vs.ubnd(2, name="x2")
+    vs.ubnd(3, name="y1")
+    vs.ubnd(4, name="y2")
+
+    assert vs.get_latent_vars() == [1, 2, 3, 4]
+    assert vs.get_latent_vars("-y") == [1, 2, 3, 4]
+    assert vs.get_latent_vars("-y1") == [1, 2, 4]
+    assert vs.get_latent_vars("-y2") == [1, 2, 3]
+    assert vs.get_latent_vars("-y*") == [1, 2]
+    assert vs.get_latent_vars("*2") == [2, 4]
+    assert vs.get_latent_vars("*2", "-y") == [2, 4]
+    assert vs.get_latent_vars("*2", "-y1") == [2, 4]
+    assert vs.get_latent_vars("*2", "-y2") == [2]
+    assert vs.get_latent_vars("*2", "-y*") == [2]
+
+
+def test_contains(vs):
+    vs.ubnd(1, name="a")
+    vs.ubnd(2, name="b")
+
+    assert "a" in vs
+    assert "b" in vs
+    assert "c" not in vs
+
+
+def test_delete(vs):
+    vs.ubnd(1, name="a")
+    vs.ubnd(2, name="b")
+    vs.ubnd(3, name="c")
+
+    assert "b" in vs.name_to_index
+    assert len(vs.vars) == 3
+    assert len(vs.transforms) == 3
+    assert len(vs.inverse_transforms) == 3
+    # Cache clearing is tested in :func:`test_get_latent_vars_cache_clearing`.
+
+    vs.delete("b")
+
+    assert vs["a"] == 1
+    assert vs["c"] == 3
+
+    assert "b" not in vs.name_to_index
+    assert len(vs.vars) == 2
+    assert len(vs.transforms) == 2
+    assert len(vs.inverse_transforms) == 2
+
+    vs.delete("a")
+
+    assert vs["c"] == 3
+
+    assert "a" not in vs.name_to_index
+    assert len(vs.vars) == 1
+    assert len(vs.transforms) == 1
+    assert len(vs.inverse_transforms) == 1
+
+    vs.ubnd(1, name="a")
+
+    assert vs["a"] == 1
+    assert vs["c"] == 3
+
+    assert "a" in vs.name_to_index
+    assert len(vs.vars) == 2
+    assert len(vs.transforms) == 2
+    assert len(vs.inverse_transforms) == 2
 
 
 def test_unbounded(vs_source):
@@ -109,6 +186,18 @@ def test_unbounded_assignment(vs):
     approx(vs["x"], 2)
 
 
+def check_visible(vs, method):
+    method(name="w", visible=True)
+    method(name="x", visible=False)
+    method(name="y", visible=True)
+    method(name="z", visible=False)
+    assert vs.get_latent_vars(return_indices=True) == [0, 2]
+
+
+def test_unbounded_visible(vs):
+    check_visible(vs, vs.ubnd)
+
+
 def test_positive(vs_source):
     for _ in range(10):
         assert vs_source.pos() >= 0
@@ -124,6 +213,10 @@ def test_positive_assignment(vs):
     vs.pos(1, name="x")
     vs.assign("x", 2)
     approx(vs["x"], 2)
+
+
+def test_positive_visible(vs):
+    check_visible(vs, vs.pos)
 
 
 def test_bounded(vs_source):
@@ -150,6 +243,10 @@ def test_bounded_monotonic(vs):
     assert vs.vars[0] < vs.vars[1] < vs.vars[2]
 
 
+def test_bounded_visible(vs):
+    check_visible(vs, vs.bnd)
+
+
 def test_lower_triangular(vs_source):
     for _ in range(10):
         assert B.shape(vs_source.tril(shape=(5, 5))) == (5, 5)
@@ -164,7 +261,7 @@ def test_lower_triangular_init(vs):
     approx(vs["x"], x)
 
 
-@pytest.mark.parametrize("shape", [None, 5, (5,), (5, 6)])
+@pytest.mark.parametrize("shape", [None, (5,), (5, 6)])
 def test_lower_triangular_shape(vs, shape):
     with pytest.raises(ValueError):
         vs.tril(shape=shape)
@@ -176,6 +273,10 @@ def test_lower_triangular_assignment(vs):
     vs.tril(shape=(5, 5), name="x")
     vs.assign("x", x)
     approx(vs["x"], x)
+
+
+def test_lower_triangular_visible(vs):
+    check_visible(vs, lambda **kw_args: vs.tril(shape=(5, 5), **kw_args))
 
 
 def test_positive_definite(vs_source):
@@ -192,7 +293,7 @@ def test_positive_definite_init(vs):
     approx(vs["x"], x)
 
 
-@pytest.mark.parametrize("shape", [None, 5, (5,), (5, 6)])
+@pytest.mark.parametrize("shape", [None, (5,), (5, 6)])
 def test_positive_definite_shape(vs, shape):
     with pytest.raises(ValueError):
         vs.pd(shape=shape)
@@ -204,6 +305,10 @@ def test_positive_definite_assignment(vs):
     vs.pd(shape=(5, 5), name="x")
     vs.assign("x", x)
     approx(vs["x"], x)
+
+
+def test_positive_definite_visible(vs):
+    check_visible(vs, lambda **kw_args: vs.pd(shape=(5, 5), **kw_args))
 
 
 @pytest.mark.parametrize("method", ["svd", "expm", "cayley"])
@@ -236,13 +341,13 @@ def test_orthogonal_init_svd(vs, shape):
 
 
 @pytest.mark.parametrize("method", ["expm", "cayley"])
-@pytest.mark.parametrize("shape", [None, 5, (5,), (5, 6)])
+@pytest.mark.parametrize("shape", [None, (5,), (5, 6)])
 def test_orthogonal_shape(vs, shape, method):
     with pytest.raises(ValueError):
         vs.orth(shape=shape, method=method)
 
 
-@pytest.mark.parametrize("shape", [None, 5, (5,)])
+@pytest.mark.parametrize("shape", [None, (5,)])
 def test_orthogonal_shape_svd(vs, shape):
     with pytest.raises(ValueError):
         vs.orth(shape=shape, method="svd")
@@ -255,6 +360,10 @@ def test_orthogonal_assignment(vs, method):
     vs.orth(shape=(5, 5), name="x", method=method)
     vs.assign("x", x)
     approx(vs["x"], x)
+
+
+def test_orthogonal_visible(vs):
+    check_visible(vs, lambda **kw_args: vs.orth(shape=(5, 5), **kw_args))
 
 
 def test_init_shape_ambiguity(vs):

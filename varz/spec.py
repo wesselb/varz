@@ -223,6 +223,8 @@ class Struct(_RedirectedProvided):
             kw_args["name"] = name
         return getter(*args, **kw_args)
 
+    # Methods for browsing:
+
     def __getattr__(self, item):
         path = self._resolve_path(item, separator=".")
         return Struct(self._vs, path)
@@ -232,37 +234,6 @@ class Struct(_RedirectedProvided):
             item += len(self)
         path = self._resolve_path(f"[{item}]")
         return Struct(self._vs, path)
-
-    def __iter__(self):
-        state = {"counter": -1}
-
-        def get_next():
-            state["counter"] += 1
-            return self[state["counter"]]
-
-        return (get_next() for _ in repeat(True))
-
-    def __call__(self):
-        return self._vs[self._path]
-
-    def all(self):
-        """Get a regex that matches everything in the current path.
-
-        Returns:
-            str: Regex.
-        """
-        return self._resolve_path("*", separator=".")
-
-    def __len__(self):
-        i = 0
-        while any(
-            name.startswith(self._resolve_path(f"[{i}]")) for name in self._vs.names
-        ):
-            i += 1
-        return i
-
-    def __next__(self):
-        return self[len(self)]
 
     def up(self, level=None):
         """Go up one level.
@@ -281,6 +252,22 @@ class Struct(_RedirectedProvided):
             )
         return Struct(self._vs, ".".join(parts[:-1]))
 
+    def __call__(self):
+        return self._vs[self._path]
+
+    def all(self):
+        """Get a regex that matches everything in the current path.
+
+        Returns:
+            str: Regex.
+        """
+        return self._resolve_path("*", separator=".")
+
+    # Methods for variable checking and variable manipulation:
+
+    def __bool__(self):
+        return self._path in self._vs
+
     def assign(self, value):
         """Assign a value.
 
@@ -288,6 +275,32 @@ class Struct(_RedirectedProvided):
             value (tensor): Value to assign.
         """
         self._vs.assign(self._path, value)
+
+    def delete(self):
+        """Delete the variable."""
+        self._vs.delete(self._path)
+
+    # Methods for container-like behaviour:
+
+    def __len__(self):
+        i = 0
+        while any(
+            name.startswith(self._resolve_path(f"[{i}]")) for name in self._vs.names
+        ):
+            i += 1
+        return i
+
+    def __next__(self):
+        return self[len(self)]
+
+    def __iter__(self):
+        state = {"counter": -1}
+
+        def get_next():
+            state["counter"] += 1
+            return self[state["counter"]]
+
+        return (get_next() for _ in repeat(True))
 
 
 class VariableType(metaclass=ABCMeta):

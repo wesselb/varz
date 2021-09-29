@@ -210,33 +210,99 @@ def test_struct(vs):
     assert f(vs) == f(vs)
     assert vs.names == names
 
-    # Check extraction by calling.
-    assert vs.struct.x1.positive() == vs.struct.x1()
 
-    # Test getting a regex to match everything in a path.
-    assert vs.struct.level[0].all() == "level[0].*"
+def test_struct_browsing(vs):
+    assert vs.struct.level._path == "level"
+    assert vs.struct[0]._path == "[0]"
+    assert vs.struct.level[0]._path == "level[0]"
+    assert vs.struct.level[0].sublevel._path == "level[0].sublevel"
+    assert vs.struct.level[0].sublevel.var._path == "level[0].sublevel.var"
+    assert vs.struct.level[0].sublevel[1]._path == "level[0].sublevel[1]"
+    assert vs.struct.level[0].sublevel[1].var._path == "level[0].sublevel[1].var"
 
     # Test negative indices.
+    vs.struct.level[0].unbounded()
+    vs.struct.level[1].unbounded()
+    vs.struct.level[2].unbounded()
     assert vs.struct.level[-1]._path == "level[2]"
     assert vs.struct.level[-2]._path == "level[1]"
 
+
+def test_struct_up(vs):
+    # Test going up one level.
+    assert vs.struct.a.b.c.up()._path == "a.b"
+    assert vs.struct.a.b.c.up("c")._path == "a.b"
+    with pytest.raises(AssertionError):
+        vs.struct.a.b.c.up("d")
+
+
+def test_struct_call(vs):
+    # Check extraction by calling.
+    vs.struct.x1.positive(2)
+    assert vs.struct.x1.positive() == 2
+
+
+def test_struct_all(vs):
+    # Test getting a regex to match everything in a path.
+    assert vs.struct.level[0].all() == "level[0].*"
+
+
+def test_struct_bool(vs):
+    assert not vs.struct.var
+    vs.struct.var.unbounded()
+    assert vs.struct.var
+
+
+def test_struct_assign(vs):
+    vs.struct.var.unbounded(0)
+    assert vs.struct.var() == 0
+    vs.struct.var.assign(1)
+    assert vs.struct.var() == 1
+
+
+def test_struct_delete(vs):
+    vs.struct.var.unbounded()
+    assert vs.struct.var
+    vs.struct.var.delete()
+    assert not vs.struct.var
+
+
+def test_struct_len(vs):
+    # Test length.
+    vs.struct.level[0].unbounded()
+    vs.struct.level[1].unbounded()
+    vs.struct.level[2].unbounded()
+    vs.struct.level[3].unbounded()
+    assert len(vs.struct.level) == 4
+    assert len(vs.struct.level_does_not_exist) == 0
+
+    # Dictionary-like entries should not affect the length.
+    vs.struct.level["bla"].unbounded()
+    assert len(vs.struct.level) == 4
+    vs.struct.level[5].unbounded()  # Out of order!
+    assert len(vs.struct.level) == 4
+
+
+def test_struct_next(vs):
     # Test getting the next one in a numbered array.
-    assert next(vs.struct.level)._path == "level[3]"
+    assert next(vs.struct.level)._path == "level[0]"
+    vs.struct.level[0].positive()
+    assert next(vs.struct.level)._path == "level[1]"
+    vs.struct.level[1].positive()
+    assert next(vs.struct.level)._path == "level[2]"
+    vs.struct.level[2].positive()
+
     # Check that `level[3]` does not have to be a variable itself for `level[3]` to
     # be detected.
     vs.struct.level[3].some_variable.positive()
     assert "level[3]" not in vs.names
     assert next(vs.struct.level)._path == "level[4]"
 
-    # Test length.
-    assert len(vs.struct.level) == 4
-    assert len(vs.struct.level_does_not_exist) == 0
 
-    # Test going up one level.
-    assert vs.struct.a.b.c.up()._path == "a.b"
-    assert vs.struct.a.b.c.up("c")._path == "a.b"
-    with pytest.raises(AssertionError):
-        vs.struct.a.b.c.up("d")
+def test_struct_iter(vs):
+    it = iter(vs.struct.level)
+    assert next(it)._path == "level[0]"
+    assert next(it)._path == "level[1]"
 
 
 @pytest.mark.parametrize(

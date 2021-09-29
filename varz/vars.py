@@ -11,14 +11,10 @@ import wbml.out
 from lab.shape import Shape
 from plum import Dispatcher
 
-from .util import (
-    pack,
-    unpack,
-    match,
-    lazy_tf as tf,
-    lazy_torch as torch,
-    lazy_jnp as jnp,
-)
+from .util import lazy_jnp as jnp
+from .util import lazy_tf as tf
+from .util import lazy_torch as torch
+from .util import match, pack, unpack
 
 __all__ = ["Provider", "Vars"]
 
@@ -57,7 +53,12 @@ def _assign(x: B.JAXNumeric, value: B.Numeric):
 class Provider(metaclass=ABCMeta):
     @abstractmethod
     def unbounded(
-        self, init=None, shape=None, dtype=None, name=None
+        self,
+        init=None,
+        shape=None,
+        dtype=None,
+        name=None,
+        visible=True,
     ):  # pragma: no cover
         """Get an unbounded variable.
 
@@ -67,6 +68,8 @@ class Provider(metaclass=ABCMeta):
             dtype (data type, optional): Data type of the variable. Defaults to that
                 of the storage.
             name (str, optional): Name of the variable.
+            visible (bool, optional): Make the variable visible to variable-aggregating
+                operations. Defautls to `True`.
 
         Returns:
             tensor: Variable.
@@ -85,7 +88,12 @@ class Provider(metaclass=ABCMeta):
 
     @abstractmethod
     def positive(
-        self, init=None, shape=None, dtype=None, name=None
+        self,
+        init=None,
+        shape=None,
+        dtype=None,
+        name=None,
+        visible=True,
     ):  # pragma: no cover
         """Get a positive variable.
 
@@ -95,6 +103,8 @@ class Provider(metaclass=ABCMeta):
             dtype (data type, optional): Data type of the variable. Defaults to that
                 of the storage.
             name (str, optional): Name of the variable.
+            visible (bool, optional): Make the variable visible to variable-aggregating
+                operations. Defautls to `True`.
 
         Returns:
             tensor: Variable.
@@ -106,7 +116,14 @@ class Provider(metaclass=ABCMeta):
 
     @abstractmethod
     def bounded(
-        self, init=None, lower=1e-4, upper=1e4, shape=None, dtype=None, name=None
+        self,
+        init=None,
+        lower=1e-4,
+        upper=1e4,
+        shape=None,
+        dtype=None,
+        name=None,
+        visible=True,
     ):  # pragma: no cover
         """Get a bounded variable.
 
@@ -118,6 +135,8 @@ class Provider(metaclass=ABCMeta):
             dtype (data type, optional): Data type of the variable. Defaults to that
                 of the storage.
             name (hashable, optional): Name of the variable.
+            visible (bool, optional): Make the variable visible to variable-aggregating
+                operations. Defautls to `True`.
 
         Returns:
             tensor: Variable.
@@ -129,7 +148,12 @@ class Provider(metaclass=ABCMeta):
 
     @abstractmethod
     def lower_triangular(
-        self, init=None, shape=None, dtype=None, name=None
+        self,
+        init=None,
+        shape=None,
+        dtype=None,
+        name=None,
+        visible=True,
     ):  # pragma: no cover
         """Get a lower-triangular matrix.
 
@@ -139,6 +163,8 @@ class Provider(metaclass=ABCMeta):
             dtype (data type, optional): Data type of the variable. Defaults to
                 that of the storage.
             name (hashable, optional): Name of the variable.
+            visible (bool, optional): Make the variable visible to variable-aggregating
+                operations. Defautls to `True`.
 
         Returns:
             tensor: Variable.
@@ -150,7 +176,12 @@ class Provider(metaclass=ABCMeta):
 
     @abstractmethod
     def positive_definite(
-        self, init=None, shape=None, dtype=None, name=None
+        self,
+        init=None,
+        shape=None,
+        dtype=None,
+        name=None,
+        visible=True,
     ):  # pragma: no cover
         """Get a positive-definite matrix.
 
@@ -160,6 +191,8 @@ class Provider(metaclass=ABCMeta):
             dtype (data type, optional): Data type of the variable. Defaults to
                 that of the storage.
             name (hashable, optional): Name of the variable.
+            visible (bool, optional): Make the variable visible to variable-aggregating
+                operations. Defautls to `True`.
 
         Returns:
             tensor: Variable.
@@ -171,7 +204,13 @@ class Provider(metaclass=ABCMeta):
 
     @abstractmethod
     def orthogonal(
-        self, init=None, shape=None, dtype=None, name=None, method="svd"
+        self,
+        init=None,
+        shape=None,
+        dtype=None,
+        name=None,
+        visible=True,
+        method="svd",
     ):  # pragma: no cover
         """Get an orthogonal matrix.
 
@@ -181,6 +220,8 @@ class Provider(metaclass=ABCMeta):
             dtype (data type, optional): Data type of the variable. Defaults to
                 that of the storage.
             name (hashable, optional): Name of the variable.
+            visible (bool, optional): Make the variable visible to variable-aggregating
+                operations. Defautls to `True`.
             method ('svd', 'expm' or 'cayley'): Parametrisation. Method of
                 parametrisation. Defaults to 'svd'.
 
@@ -213,13 +254,7 @@ class Provider(metaclass=ABCMeta):
         return Struct(self)
 
 
-@_dispatch
 def _check_matrix_shape(shape, square=True):
-    raise ValueError(f"Object {shape} is not a shape.")
-
-
-@_dispatch
-def _check_matrix_shape(shape: tuple, square=True):
     if len(shape) != 2:
         raise ValueError(f"Shape {shape} must be the shape of a matrix.")
     if square and shape[0] != shape[1]:
@@ -257,6 +292,7 @@ class Vars(Provider):
         self.vars = []
         self.transforms = []
         self.inverse_transforms = []
+        self.visible = []
 
         # Lookup:
         self.name_to_index = OrderedDict()
@@ -278,6 +314,7 @@ class Vars(Provider):
         shape_latent,
         dtype,
         name,
+        visible,
     ):
         # If the name already exists, return that variable.
         try:
@@ -340,6 +377,9 @@ class Vars(Provider):
         self.transforms.append(transform)
         self.inverse_transforms.append(inverse_transform)
 
+        # Store whether the variable is trainable.
+        self.visible.append(visible)
+
         # Get index of the variable.
         index = len(self.vars) - 1
 
@@ -350,7 +390,7 @@ class Vars(Provider):
         # Generate the variable and return.
         return transform(latent)
 
-    def unbounded(self, init=None, shape=None, dtype=None, name=None):
+    def unbounded(self, init=None, shape=None, dtype=None, name=None, visible=True):
         # If nothing is specific, generate a scalar.
         if init is None and shape is None:
             shape = ()
@@ -367,9 +407,10 @@ class Vars(Provider):
             shape_latent=shape,
             dtype=dtype,
             name=name,
+            visible=visible,
         )
 
-    def positive(self, init=None, shape=None, dtype=None, name=None):
+    def positive(self, init=None, shape=None, dtype=None, name=None, visible=True):
         # If nothing is specific, generate a scalar.
         if init is None and shape is None:
             shape = ()
@@ -386,10 +427,18 @@ class Vars(Provider):
             shape_latent=shape,
             dtype=dtype,
             name=name,
+            visible=visible,
         )
 
     def bounded(
-        self, init=None, lower=1e-4, upper=1e4, shape=None, dtype=None, name=None
+        self,
+        init=None,
+        lower=1e-4,
+        upper=1e4,
+        shape=None,
+        dtype=None,
+        name=None,
+        visible=True,
     ):
         # If nothing is specific, generate a scalar.
         if init is None and shape is None:
@@ -413,9 +462,17 @@ class Vars(Provider):
             shape_latent=shape,
             dtype=dtype,
             name=name,
+            visible=visible,
         )
 
-    def lower_triangular(self, init=None, shape=None, dtype=None, name=None):
+    def lower_triangular(
+        self,
+        init=None,
+        shape=None,
+        dtype=None,
+        name=None,
+        visible=True,
+    ):
         init, shape = _check_init_shape(init, shape)
         _check_matrix_shape(shape)
 
@@ -442,9 +499,17 @@ class Vars(Provider):
             shape_latent=shape_latent,
             dtype=dtype,
             name=name,
+            visible=visible,
         )
 
-    def positive_definite(self, init=None, shape=None, dtype=None, name=None):
+    def positive_definite(
+        self,
+        init=None,
+        shape=None,
+        dtype=None,
+        name=None,
+        visible=True,
+    ):
         init, shape = _check_init_shape(init, shape)
         _check_matrix_shape(shape)
 
@@ -474,9 +539,18 @@ class Vars(Provider):
             shape_latent=shape_latent,
             dtype=dtype,
             name=name,
+            visible=visible,
         )
 
-    def orthogonal(self, init=None, shape=None, dtype=None, name=None, method="svd"):
+    def orthogonal(
+        self,
+        init=None,
+        shape=None,
+        dtype=None,
+        name=None,
+        visible=True,
+        method="svd",
+    ):
         init, shape = _check_init_shape(init, shape)
 
         if method == "svd":
@@ -551,11 +625,20 @@ class Vars(Provider):
             shape_latent=shape_latent,
             dtype=dtype,
             name=name,
+            visible=visible,
         )
 
     def __getitem__(self, name):
         index = self.name_to_index[name]
         return self.transforms[index](self.vars[index])
+
+    def __contains__(self, name):
+        """Check if a variable exists.
+
+        Args:
+            name (str): Name of the variable.
+        """
+        return name in self.name_to_index
 
     def assign(self, name, value):
         """Assign a value to a variable.
@@ -574,6 +657,32 @@ class Vars(Provider):
         )
         return self.vars[index]
 
+    def delete(self, name):
+        """Delete a variable.
+
+        Args:
+            name (str): Name of the variable.
+        """
+        if name in self:
+            i = self.name_to_index[name]
+            names_to_index = {}
+            for name, name_i in self.name_to_index.items():
+                # Exclude the case where `name_i == i`, because that's the variable
+                # that we want to delete.
+                if name_i < i:
+                    # One before is deleted: that's fine.
+                    names_to_index[name] = name_i
+                elif name_i > i:
+                    # One before is deleted: decrement index.
+                    names_to_index[name] = name_i - 1
+            self.name_to_index = names_to_index
+            del self.vars[i]
+            del self.transforms[i]
+            del self.inverse_transforms[i]
+            # We've modified the underlying lists, so it's very important to clear the
+            # cache.
+            self._get_latent_vars_cache.clear()
+
     def copy(self, detach=False, f=lambda x: x):
         """Create a copy of the variable manager that shares the variables.
 
@@ -589,6 +698,7 @@ class Vars(Provider):
         vs.transforms = list(self.transforms)
         vs.inverse_transforms = list(self.inverse_transforms)
         vs.name_to_index = OrderedDict(self.name_to_index)
+        vs.visible = list(self.visible)
         vs.vars = [f(x) for x in self.vars]
         if detach:
             vs.detach()
@@ -609,9 +719,9 @@ class Vars(Provider):
             var.requires_grad_(value)
 
     def get_latent_vars(self, *names, return_indices=False):
-        """Get latent variables.
+        """Get visible latent variables.
 
-        If no arguments are supplied, then all latent variables are retrieved.
+        If no arguments are supplied, then all visible latent variables are retrieved.
         Furthermore, the same collection of variables is guaranteed to be
         returned in the same order.
 
@@ -627,20 +737,34 @@ class Vars(Provider):
         # If nothing is specified, return all latent variables.
         if len(names) == 0:
             if return_indices:
-                return list(range(len(self.vars)))
+                return [i for i, t in enumerate(self.visible) if t]
             else:
-                return self.vars
+                return [var for var, t in zip(self.vars, self.visible) if t]
 
         # Attempt to use cache.
         try:
             indices = self._get_latent_vars_cache[names]
         except KeyError:
+            # Divide names into includes and excludes.
+            includes, excludes = [], []
+            for name in names:
+                if name.startswith("-"):
+                    excludes.append(name[1:])
+                else:
+                    includes.append(name)
+
+            # If no name to include was specified, include all.
+            if len(includes) == 0:
+                includes = ["*"]
+
             # Collect indices of matches.
             indices = set()
-            for name in names:
+            for name in includes:
                 a_match = False
                 for k, v in self.name_to_index.items():
-                    if match(name, k):
+                    included = match(name, k)
+                    excluded = any(match(n, k) for n in excludes)
+                    if included and not excluded:
                         indices |= {v}
                         a_match = True
 
@@ -656,9 +780,9 @@ class Vars(Provider):
 
         # Return indices if asked for. Otherwise, return variables.
         if return_indices:
-            return indices
+            return [i for i in indices if self.visible[i]]
         else:
-            return [self.vars[i] for i in indices]
+            return [self.vars[i] for i in indices if self.visible[i]]
 
     def get_vars(self, *args, **kw_args):  # pragma: no cover
         warnings.warn(
@@ -669,9 +793,9 @@ class Vars(Provider):
         return self.get_latent_vars(*args, **kw_args)
 
     def get_latent_vector(self, *names):
-        """Get all the latent variables stacked in a vector.
+        """Get visible latent variables stacked in a vector.
 
-        If no arguments are supplied, then all latent variables are retrieved.
+        If no arguments are supplied, then all visible latent variables are retrieved.
 
         Args:
             *names (hashable): Get variables by name.
