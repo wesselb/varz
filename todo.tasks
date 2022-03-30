@@ -1,16 +1,19 @@
 TODO:
-    ☐ Test GPU support.
+    ☐ Test GPU support
     ADAM:
-        ☐ Computation in framework rather than NumPy.
-        ☐ In-place updates.
+        ☐ Computation in framework rather than NumPy
+        ☐ In-place updates
 
 Features:
-    ☐ Exclusion mechanism for variables by prefixing with "-".
-    ☐ Centralise warning messages.
+    ☐ Centralise warning messages
+    ☐ Batched variables
+    ☐ Save and load variable container @high
+    ☐ Ability to print variables during optimisation
 
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✓ Exclusion mechanism for variables by prefixing with "-". @done (22-03-30 18:28) @project(Features)
  ✓ Rename `get_vars` to `get_latents`: depr warning. @done (21-06-22 14:20) @project(TODO)
  ✓ Make clear that differentiable assignment sets the _latent_ representation: assign_latent function. @done (21-06-22 14:20) @project(TODO)
  ✓ Refactor tests to use PyTest: remove raises, fixtures, and parametrisation. @high @done (21-06-22 12:19) @project(Refactor)
