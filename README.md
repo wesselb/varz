@@ -22,10 +22,11 @@ Painless optimisation of constrained variables in AutoGrad, TensorFlow, PyTorch,
     - [Getting and Setting Latent Representations of Variables as a Vector](#getting-and-setting-latent-representations-of-variables-as-a-vector)
     - [Getting Variables from a Source](#get-variables-from-a-source)
  * [Examples](#examples)
-    - [AutoGrad](#autograd)
-    - [TensorFlow](#tensorflow)
-    - [PyTorch](#pytorch)
-    - [JAX](#jax)
+    - [Minimise a Function Using L-BFGS-B in AutoGrad](#minimise-a-function-using-l-bfgs-b-in-autograd)
+    - [Minimise a Function Using L-BFGS-B in TensorFlow](#minimise-a-function-using-l-bfgs-b-in-tensorflow)
+    - [Minimise a Function Using L-BFGS-B in PyTorch](#minimise-a-function-using-l-bfgs-b-in-pytorch)
+    - [Minimise a Function Using L-BFGS-B in JAX](#minimise-a-function-using-l-bfgs-b-in-jax)
+    - [Tracking the Learning Curve in JAX](#tracking-the-learning-curve-in-jax)
     
 ## Requirements and Installation
 
@@ -560,7 +561,18 @@ varz.{autograd,tensorflow,torch,jax}.minimise_adam     (ADAM)
 The L-BFGS-B algorithm is recommended for deterministic objectives and ADAM
 is recommended for stochastic objectives.
 
-See the examples for an illustration of how these optimisers can be used.
+See the examples for an illustration of how these optimisers can
+be used.
+Some commonly used keyword arguments are as follows:
+
+| Keyword Argument | Description |
+| - | - |
+| `iters` | Number of iterations |
+| `trace` | Show progress |
+| `jit` | Use a JIT to compile the gradient |
+
+See the API for a detailed description of the keyword arguments that these
+optimisers accept.
 
 ### PyTorch Specifics
 
@@ -635,10 +647,8 @@ The easiest way of doing this is to `import lab as B` and
 `B.set_global_device("gpu:0")`.
 
 ## Examples
-The follow examples show how a function can be minimised using the L-BFGS-B
-algorithm.
 
-### AutoGrad
+### Minimise a Function Using L-BFGS-B in AutoGrad
 
 ```python
 import autograd.numpy as np
@@ -663,7 +673,7 @@ def objective(vs):
 -5.637250666268301e-09
 ```
 
-### TensorFlow
+### Minimise a Function Using L-BFGS-B in TensorFlow
 
 ```python
 import tensorflow as tf
@@ -693,7 +703,7 @@ def objective(vs):
 3.17785950743424e-19
 ```
 
-### PyTorch
+### Minimise a Function Using L-BFGS-B in PyTorch
 
 ```python
 import torch
@@ -723,7 +733,7 @@ tensor(-5.6373e-09, dtype=torch.float64)
 array(3.17785951e-19)
 ```
 
-### JAX
+### Minimise a Function Using L-BFGS-B in JAX
 
 ```python
 import jax.numpy as jnp
@@ -753,4 +763,72 @@ array(3.17785951e-19)  # Final objective function value.
 array(3.17785951e-19)
 ```
 
+### Tracking the Learning Curve in JAX
+```python
+import jax.numpy as jnp
+from varz.jax import Vars, minimise_l_bfgs_b
+
+target = 5.0
+
+
+def objective(vs, prev_x):
+    # Get a variable named "x", which must be positive, initialised to 10.
+    x = vs.pos(10.0, name="x")
+    # In addition to the objective function value, also return `x` so that  
+    # we can log it.
+    return (x ** 0.5 - target) ** 2, x  
+
+
+objs = []
+xs = []
+
+
+def callback(obj, x):
+    objs.append(obj)
+    xs.append(x)
+    # Return a dictionary of extra information to show in the progress display.
+    return {"x": x}
+```
+
+```python
+>>> vs = Vars(jnp.float64)
+
+>>> minimise_l_bfgs_b(objective, (vs, 0), trace=True, callback=callback)
+Minimisation of "objective":
+    Iteration 1/1000:
+        Time elapsed: 0.0 s
+        Time left:  19.0 s
+        Objective value: 0.04567
+        x:          27.18
+    Iteration 6/1000:
+        Time elapsed: 0.1 s
+        Time left:  7.4 s
+        Objective value: 4.520e-04
+        x:          24.99
+    Done!
+Termination message:
+    CONVERGENCE: NORM_OF_PROJECTED_GRADIENT_<=_PGTOL
+(array(3.17785951e-19), DeviceArray(24.99999999, dtype=float64))
+
+>>> vs["x"] - target ** 2
+DeviceArray(-5.63725067e-09, dtype=float64)
+
+>>> objs
+[array(3.3772234),
+ array(0.04567386),
+ array(0.03582296),
+ array(0.00014534),
+ array(5.18203996e-07),
+ array(6.81622668e-12),
+ array(3.17785951e-19)]
+
+>>> xs
+[DeviceArray(10., dtype=float64),
+ DeviceArray(27.18281828, dtype=float64),
+ DeviceArray(23.14312757, dtype=float64),
+ DeviceArray(24.87958747, dtype=float64),
+ DeviceArray(25.00719916, dtype=float64),
+ DeviceArray(24.99997389, dtype=float64),
+ DeviceArray(24.99999999, dtype=float64)]
+```
 

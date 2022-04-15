@@ -51,7 +51,14 @@ def _convert_and_validate_names(names):
 
 
 def minimise_l_bfgs_b(
-    f, vs, f_calls=10000, iters=1000, trace=False, names=None, jit=False
+    f,
+    vs,
+    f_calls=10000,
+    iters=1000,
+    trace=False,
+    names=None,
+    jit=False,
+    callback=lambda *args: None,
 ):  # pragma: no cover
     """Minimise a function with L-BFGS-B.
 
@@ -64,6 +71,12 @@ def minimise_l_bfgs_b(
         names (list, optional): List of names of variables to optimise.
             Defaults to all variables.
         jit (bool, optional): Use a JIT if one is available. Defaults to `False`.
+        callback (function, optional): After every evaluation of the objective,
+            `callback` is called with the objective function value as the first
+            argument and any additionally returned values in `objective` as the
+            remaining arguments. `callback` must either return `None` or a dictionary.
+            If it returns a dictionary, these values will be shown in the progress
+            display.
 
     Returns:
         float: Final objective function value.
@@ -77,6 +90,7 @@ def minimise_l_bfgs_b(
         trace=trace,
         names=names,
         jit=jit,
+        callback=callback,
     )
 
 
@@ -92,6 +106,7 @@ def minimise_adam(
     trace=False,
     names=None,
     jit=False,
+    callback=lambda *args: None,
 ):  # pragma: no cover
     """Minimise a function with Adam.
 
@@ -111,6 +126,12 @@ def minimise_adam(
         names (list, optional): List of names of variables to optimise.
             Defaults to all variables.
         jit (bool, optional): Use a JIT if one is available. Defaults to `False`.
+        callback (function, optional): After every evaluation of the objective,
+            `callback` is called with the objective function value as the first
+            argument and any additionally returned values in `objective` as the
+            remaining arguments. `callback` must either return `None` or a dictionary.
+            If it returns a dictionary, these values will be shown in the progress
+            display.
 
     Returns:
         float: Final objective function value.
@@ -128,6 +149,7 @@ def minimise_adam(
         trace=trace,
         names=names,
         jit=jit,
+        callback=callback,
     )
 
 
@@ -143,7 +165,14 @@ def make_l_bfgs_b(wrap_f):
 
     @wraps(minimise_l_bfgs_b)
     def _minimise_l_bfgs_b(
-        f, vs, f_calls=10000, iters=1000, trace=False, names=None, jit=False
+        f,
+        vs,
+        f_calls=10000,
+        iters=1000,
+        trace=False,
+        names=None,
+        jit=False,
+        callback=lambda *args: None,
     ):
         names = _convert_and_validate_names(names)
 
@@ -179,6 +208,7 @@ def make_l_bfgs_b(wrap_f):
 
         def f_wrapped_self_passing(x):
             (obj_value, state["args"]), grad = f_wrapped(x, *state["args"])
+            state["log"] = convert(callback(obj_value, *state["args"]) or {}, dict)
             return obj_value, grad
 
         # Perform optimisation routine.
@@ -198,10 +228,12 @@ def make_l_bfgs_b(wrap_f):
                 name='Minimisation of "{}"'.format(f.__name__), total=iters
             ) as progress:
 
-                def callback(_):
-                    progress({"Objective value": np.min(f_vals)})
+                def fmin_l_bfgs_b_callback(obj_value, *args):
+                    log = state["log"]
+                    log["Objective value"] = np.min(f_vals)
+                    progress(log)
 
-                x_opt, val_opt, info = perform_minimisation(callback)
+                x_opt, val_opt, info = perform_minimisation(fmin_l_bfgs_b_callback)
 
             with out.Section("Termination message"):
                 out.out(convert(info["task"], str))
@@ -240,6 +272,7 @@ def make_adam(wrap_f):
         trace=False,
         names=None,
         jit=False,
+        callback=lambda *args: None,
     ):
         names = _convert_and_validate_names(names)
 
@@ -265,7 +298,7 @@ def make_adam(wrap_f):
         # Maintain a state for the auxilary arguments.
         state = {"args": args}
 
-        def perform_minimisation(callback_=lambda _: None):
+        def perform_minimisation(progress=None, callback_=lambda _: None):
             # Perform optimisation routine.
             x = x0
             obj_value = None
@@ -279,7 +312,11 @@ def make_adam(wrap_f):
 
             for i in range(iters):
                 (obj_value, state["args"]), grad = f_wrapped(x, *state["args"])
-                callback_(obj_value)
+                log = convert(callback_(obj_value, *state["args"]) or {}, dict)
+                if progress:
+                    # Show progress.
+                    log["Objective value"] = obj_value
+                    progress(log)
                 x = adam.step(x, grad)
 
             return x, obj_value
@@ -289,13 +326,9 @@ def make_adam(wrap_f):
             with out.Progress(
                 name='Minimisation of "{}"'.format(f.__name__), total=iters
             ) as progress:
-
-                def callback(obj_value):
-                    progress({"Objective value": obj_value})
-
-                x_opt, obj_value = perform_minimisation(callback)
+                x_opt, obj_value = perform_minimisation(progress, callback)
         else:
-            x_opt, obj_value = perform_minimisation()
+            x_opt, obj_value = perform_minimisation(None, callback)
 
         vs.set_latent_vector(x_opt, *names)  # Assign optimum.
         args = state["args"]  # Get auxilary arguments at final state.

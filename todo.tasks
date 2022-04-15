@@ -1,4 +1,7 @@
 TODO:
+    ☐ Fully focus on struct, remove other methods?
+    ☐ If loss NaN, return zeros instead of the gradient! @high
+
     ☐ Test GPU support
     ADAM:
         ☐ Computation in framework rather than NumPy
@@ -8,11 +11,11 @@ Features:
     ☐ Centralise warning messages
     ☐ Batched variables
     ☐ Save and load variable container @high
-    ☐ Ability to print variables during optimisation
-
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✓ `trace=True` @done (22-04-15 14:04) @project(README)
+ ✓ Ability to print variables during optimisation @done (22-04-15 14:04) @project(Features)
  ✓ Exclusion mechanism for variables by prefixing with "-". @done (22-03-30 18:28) @project(Features)
  ✓ Rename `get_vars` to `get_latents`: depr warning. @done (21-06-22 14:20) @project(TODO)
  ✓ Make clear that differentiable assignment sets the _latent_ representation: assign_latent function. @done (21-06-22 14:20) @project(TODO)

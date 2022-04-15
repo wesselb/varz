@@ -4,13 +4,14 @@ import numpy as np
 import pytest
 import tensorflow as tf
 import torch
+import wbml.out as out
+
 import varz.autograd
 import varz.jax
 import varz.tensorflow
 import varz.torch
 from varz import Vars
 from varz.minimise import _convert_and_validate_names
-
 from .util import approx, Value, OutStream
 
 _rate = 5e-2
@@ -125,6 +126,85 @@ def test_minimise_auxilary_argument(minimise_method):
 
     # Check that the internal state was passed around.
     assert final_state > 5
+
+
+class _CaptureOut:
+    def __init__(self):
+        self._output = ""
+
+    def __enter__(self):
+        out.streams.append(self)
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        assert out.streams[-1] is self
+        del out.streams[-1]
+
+    def write(self, x):
+        self._output += x
+
+    def __contains__(self, x):
+        return x in self._output
+
+
+@pytest.mark.parametrize("trace", [True, False])
+def test_minimise_callback(minimise_method, trace):
+    dtype, minimise, kw_args = minimise_method
+    kw_args["trace"] = trace
+    vs = Vars(dtype=dtype)
+
+    # Skip the methods which use the JIT.
+    if "jit" in kw_args and kw_args["jit"]:
+        return
+
+    # Initialise a variable that is not used.
+    vs.ubnd(name="other")
+
+    # Tracking lists:
+    objs = []
+    objs_manual = []
+    xs = []
+    xs_manual = []
+
+    # Define some objective.
+    def f(vs_, prev_x):
+        x = vs_.pos(name="x", init=1.0)
+        obj = (-3 - x) ** 2
+        # Track manually:
+        objs_manual.append(obj)
+        xs_manual.append(x)
+        return obj, x
+
+    # Define callback.
+    def callback(obj, x):
+        # Track in the way one should:
+        objs.append(obj)
+        xs.append(x)
+        # Report additional information:
+        return {"additional entry": xs[-1]}
+
+    # Minimise it a bit.
+    with _CaptureOut() as output:
+        val_opt = minimise(f, (vs, 0), iters=20, callback=callback, **kw_args)
+
+    # Every value except for the first one must be tracked: the first one is an initial
+    # evaluation of the function. If we used AutoGrad, due to the extra forward pass,
+    # every value is tracked twice... Make sure that everything is comparable by
+    # converting to NumPy.
+    objs_manual = [B.to_numpy(x) for x in objs_manual[1:]]
+    xs_manual = [B.to_numpy(x) for x in xs_manual[1:]]
+    if isinstance(dtype, B.NPDType):
+        objs_manual = objs_manual[::2]
+        xs_manual = xs_manual[::2]
+    assert objs == objs_manual
+    assert xs == xs_manual
+
+    if trace:
+        # Check that the additional information was also printed.
+        assert "additional entry" in output
+    else:
+        # No additinal information should have been printed.
+        assert "additional entry" not in output
 
 
 def test_minimise_disconnected_gradient(minimise_method):
