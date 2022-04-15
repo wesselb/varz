@@ -150,8 +150,10 @@ class _CaptureOut:
 @pytest.mark.parametrize("trace", [True, False])
 def test_minimise_callback(minimise_method, trace):
     dtype, minimise, kw_args = minimise_method
-    kw_args["trace"] = trace
     vs = Vars(dtype=dtype)
+
+    kw_args = dict(kw_args)  # Copy to prevent mutation.
+    kw_args["trace"] = trace
 
     # Skip the methods which use the JIT.
     if "jit" in kw_args and kw_args["jit"]:
@@ -184,7 +186,7 @@ def test_minimise_callback(minimise_method, trace):
         return {"additional entry": xs[-1]}
 
     # Minimise it a bit.
-    with _CaptureOut() as output:
+    with OutStream() as stream:
         val_opt = minimise(f, (vs, 0), iters=20, callback=callback, **kw_args)
 
     # Every value except for the first one must be tracked: the first one is an initial
@@ -201,10 +203,10 @@ def test_minimise_callback(minimise_method, trace):
 
     if trace:
         # Check that the additional information was also printed.
-        assert "additional entry" in output
+        assert "additional entry" in stream.output
     else:
         # No additinal information should have been printed.
-        assert "additional entry" not in output
+        assert "additional entry" not in stream.output
 
 
 def test_minimise_disconnected_gradient(minimise_method):
