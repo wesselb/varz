@@ -793,7 +793,7 @@ def callback(obj, x):
 ```python
 >>> vs = Vars(jnp.float64)
 
->>> minimise_l_bfgs_b(objective, (vs, 0), trace=True, callback=callback)
+>>> minimise_l_bfgs_b(objective, (vs, 0), trace=True, jit=True, callback=callback)
 Minimisation of "objective":
     Iteration 1/1000:
         Time elapsed: 0.0 s
