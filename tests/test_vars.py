@@ -1,25 +1,24 @@
+import lab as B
 import numpy as np
 import pytest
 import torch
 from varz import Vars
-import lab as B
 
 # noinspection PyUnresolvedReferences
 from .util import (
-    approx,
-    approx,
     KV,
+    approx,
+    assert_lower_triangular,
+    assert_orthogonal,
+    assert_positive_definite,
     dtype,
     vs,
     vs_source,
-    assert_lower_triangular,
-    assert_positive_definite,
-    assert_orthogonal,
 )
 
 
 def test_get_latent_vars():
-    vs = Vars(np.int)
+    vs = Vars(int)
 
     # This test also tests that `Vars.get_vars` always returns the collection
     # of variables in the right order. This is important for optimisation.
