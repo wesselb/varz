@@ -45,8 +45,7 @@ def _convert_and_validate_names(names):
         names = []
     if isinstance(names, str):
         names = [names]
-    # Convert to a tuple to ensure that `beartype` always checks every element.
-    if not isinstance(tuple(names), Tuple[str, ...]):
+    if not (isinstance(names, list) and all(isinstance(n, str) for n in names)):
         raise ValueError("Keyword `names` must be a list of strings.")
     return names
 
