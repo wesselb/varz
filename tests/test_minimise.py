@@ -4,15 +4,16 @@ import numpy as np
 import pytest
 import tensorflow as tf
 import torch
-import wbml.out as out
-
 import varz.autograd
 import varz.jax
 import varz.tensorflow
 import varz.torch
+import wbml.out as out
+from plum import isinstance
 from varz import Vars
 from varz.minimise import _convert_and_validate_names
-from .util import approx, Value, OutStream
+
+from .util import OutStream, Value, approx
 
 _rate = 5e-2
 _minimise_method_params = []

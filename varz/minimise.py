@@ -1,15 +1,15 @@
+import importlib
 import traceback
 from functools import wraps
-import importlib
-
-from .adam import ADAM
+from typing import Tuple
 
 import lab as B
 import numpy as np
 import wbml.out as out
-from plum import Dispatcher
-from plum import convert, List
+from plum import Dispatcher, convert, isinstance
 from scipy.optimize import fmin_l_bfgs_b
+
+from .adam import ADAM
 
 __all__ = ["minimise_l_bfgs_b", "minimise_adam"]
 
@@ -45,7 +45,8 @@ def _convert_and_validate_names(names):
         names = []
     if isinstance(names, str):
         names = [names]
-    if not isinstance(names, List[str]):
+    # Convert to a tuple to ensure that `beartype` always checks every element.
+    if not isinstance(tuple(names), Tuple[str, ...]):
         raise ValueError("Keyword `names` must be a list of strings.")
     return names
 

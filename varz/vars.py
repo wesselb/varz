@@ -9,7 +9,7 @@ import lab as B
 import numpy as np
 import wbml.out
 from lab.shape import Shape
-from plum import Dispatcher
+from plum import Dispatcher, isinstance
 
 from .util import lazy_jnp as jnp
 from .util import lazy_tf as tf
